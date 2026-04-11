@@ -205,9 +205,9 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9860, lng: -76.9468,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/anne-arundel-hall-card.png?itok=T78Xc6sx"],
     tags: [{ t: 'Honors Humanities LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
-    reviewList: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/anne-arundel-hall-card.png?itok=T78Xc6sx"]
+    reviewList: []
   },
   {
     id: 'caroline', name: 'Caroline Hall', campus: 'on', area: 'south', built: '1967',
@@ -445,7 +445,7 @@ let galleryDorm = 'all';
 function dormCardHTML(d) {
   return `
     <div class="dorm-card" onclick="showDetail('${d.id}')">
-      <div class="dorm-card-img" style="background-image:url('${d.imgs[0]}')">
+      <div class="dorm-card-img" style="${d.imgs[0] ? `background-image:url('${d.imgs[0]}')` : ''}">
         <div class="badge">${d.rating.toFixed(1)} ★</div>
       </div>
       <div class="dorm-card-body">
