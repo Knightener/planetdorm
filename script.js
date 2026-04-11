@@ -1,128 +1,16 @@
 // ─── DORM DATA ──────────────────────────────────────────────
 const dorms = [
   {
-    id: 'ellicott', name: 'Ellicott Hall', area: 'north', built: '1966',
+    id: 'test', name: 'TEMPLATE', area: 'north', built: '1966',
     rating: 3.2, reviews: 48, type: 'Traditional', roomTypes: 'Doubles, Triples',
-    ac: false, dining: 'Ellicott Dining Hall',
+    ac: false, dining: 'TEMPLATE',
     lat: 38.9932, lng: -76.9490,
     imgs: [
-      'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600',
-      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600',
-      'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600'
+   
     ],
     tags: [{ t: 'Large community', c: 'good' }, { t: 'No A/C', c: 'bad' }, { t: 'Close to dining', c: 'good' }],
     reviewList: [
-      { name: 'TerpFan22', date: 'Mar 2025', rating: 3, text: 'Rooms are small but the community vibe is unmatched. Floor events every week. No AC is rough in September though.', tags: ['Community', 'No A/C'] },
-      { name: 'CS_Major', date: 'Jan 2025', rating: 4, text: 'Loved being on North Campus. Ellicott dining is right there. Bathrooms could be cleaner but overall solid experience.', tags: ['Location', 'Dining'] },
-    ]
-  },
-  {
-    id: 'cambridge', name: 'Cambridge Community', area: 'commons', built: '2002',
-    rating: 4.1, reviews: 67, type: 'Suite-style', roomTypes: 'Singles, Doubles',
-    ac: true, dining: 'South Campus Dining',
-    lat: 38.9855, lng: -76.9400,
-    imgs: [
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600',
-      'https://images.unsplash.com/photo-1630699144867-37acec97df5a?w=600',
-      'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600'
-    ],
-    tags: [{ t: 'Suite-style', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Pricey', c: 'mid' }],
-    reviewList: [
-      { name: 'SeniorTerp', date: 'Feb 2025', rating: 5, text: 'Best dorm on campus hands down. Suite style gives you privacy. A/C is a lifesaver. Worth every penny.', tags: ['Suite', 'A/C', 'Worth it'] },
-      { name: 'FreshmanVibes', date: 'Dec 2024', rating: 3, text: 'Nice rooms but felt isolated. Hard to meet people compared to traditional halls.', tags: ['Quiet', 'Isolated'] },
-    ]
-  },
-  {
-    id: 'denton', name: 'Denton Community', area: 'commons', built: '2004',
-    rating: 3.8, reviews: 52, type: 'Suite-style', roomTypes: 'Singles, Doubles',
-    ac: true, dining: 'South Campus Dining',
-    lat: 38.9851, lng: -76.9410,
-    imgs: [
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600',
-      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600',
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'
-    ],
-    tags: [{ t: 'Suite-style', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Far from classes', c: 'mid' }],
-    reviewList: [
-      { name: 'Bio_Major', date: 'Jan 2025', rating: 4, text: 'Suites are great for studying. Kitchen area is a nice bonus. A bit far from STEM buildings.', tags: ['Suites', 'Kitchen'] },
-    ]
-  },
-  {
-    id: 'hagerstown', name: 'Hagerstown Hall', area: 'north', built: '1963',
-    rating: 2.8, reviews: 34, type: 'Traditional', roomTypes: 'Doubles',
-    ac: false, dining: 'Ellicott Dining Hall',
-    lat: 38.9940, lng: -76.9478,
-    imgs: [
-      'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600',
-      'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600',
-      'https://images.unsplash.com/photo-1630699144867-37acec97df5a?w=600'
-    ],
-    tags: [{ t: 'Cheap', c: 'good' }, { t: 'No A/C', c: 'bad' }, { t: 'Older building', c: 'bad' }],
-    reviewList: [
-      { name: 'Anon', date: 'Nov 2024', rating: 2, text: "You get what you pay for. Walls are thin, no AC, and the elevators break constantly. But it's cheap.", tags: ['Budget', 'Old'] },
-      { name: 'MathTerp', date: 'Oct 2024', rating: 3, text: 'Not glamorous but I made lifelong friends here. That counts for something.', tags: ['Community'] },
-    ]
-  },
-  {
-    id: 'elkton', name: 'Elkton Hall', area: 'south', built: '1964',
-    rating: 3.5, reviews: 41, type: 'Traditional', roomTypes: 'Doubles, Triples',
-    ac: false, dining: 'South Campus Dining',
-    lat: 38.9870, lng: -76.9445,
-    imgs: [
-      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600',
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600',
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'
-    ],
-    tags: [{ t: 'South campus', c: 'mid' }, { t: 'Social', c: 'good' }, { t: 'No A/C', c: 'bad' }],
-    reviewList: [
-      { name: 'PoliSciTerp', date: 'Jan 2025', rating: 4, text: 'Great location near McKeldin and the mall. Easy walk to most classes. Floor was super social.', tags: ['Location', 'Social'] },
-    ]
-  },
-  {
-    id: 'centreville', name: 'Centreville Hall', area: 'south', built: '1965',
-    rating: 3.3, reviews: 29, type: 'Traditional', roomTypes: 'Doubles',
-    ac: false, dining: 'South Campus Dining',
-    lat: 38.9865, lng: -76.9455,
-    imgs: [
-      'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600',
-      'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600',
-      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600'
-    ],
-    tags: [{ t: 'Central location', c: 'good' }, { t: 'Small rooms', c: 'bad' }, { t: 'Affordable', c: 'good' }],
-    reviewList: [
-      { name: 'EngTerp', date: 'Dec 2024', rating: 3, text: 'Nothing fancy but location is prime. Right next to everything. Rooms are tiny though.', tags: ['Location', 'Small'] },
-    ]
-  },
-  {
-    id: 'oakland', name: 'Oakland Hall', area: 'north', built: '2015',
-    rating: 4.4, reviews: 78, type: 'Suite-style', roomTypes: 'Singles, Doubles',
-    ac: true, dining: '251 North',
-    lat: 38.9945, lng: -76.9500,
-    imgs: [
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600',
-      'https://images.unsplash.com/photo-1630699144867-37acec97df5a?w=600',
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600'
-    ],
-    tags: [{ t: 'Modern', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Honors', c: 'mid' }],
-    reviewList: [
-      { name: 'HonorsTerp', date: 'Mar 2025', rating: 5, text: 'Newest dorm on North Campus. Everything is modern, clean, and well-maintained. A/C works perfectly. Laundry in building.', tags: ['Modern', 'Clean', 'A/C'] },
-      { name: 'Freshman23', date: 'Feb 2025', rating: 4, text: "Beautiful building. Only downside is it fills up fast since it's an Honors hall. Get your housing app in early!", tags: ['Popular', 'Honors'] },
-    ]
-  },
-  {
-    id: 'prince_frederick', name: 'Prince Frederick Hall', area: 'south', built: '2021',
-    rating: 4.6, reviews: 55, type: 'Apartment-style', roomTypes: 'Singles, Doubles',
-    ac: true, dining: 'Near 251 North',
-    lat: 38.9862, lng: -76.9438,
-    imgs: [
-      'https://images.unsplash.com/photo-1630699144867-37acec97df5a?w=600',
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600',
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600'
-    ],
-    tags: [{ t: 'Brand new', c: 'good' }, { t: 'Apartment-style', c: 'good' }, { t: 'Expensive', c: 'mid' }],
-    reviewList: [
-      { name: 'GradTerp', date: 'Mar 2025', rating: 5, text: 'Feels like a real apartment. Full kitchen, private bathroom, modern furnishings. Best housing option at UMD by far.', tags: ['Apartment', 'Kitchen', 'Modern'] },
-      { name: 'JuniorTerp', date: 'Jan 2025', rating: 4, text: 'Amazing rooms but the price tag is steep. Worth it if you can afford it.', tags: ['Nice', 'Pricey'] },
+      { name: 'test', date: 'Mar 2025', rating: 3, text: 'test', tags: ['Community', 'No A/C'] },
     ]
   },
 ];
