@@ -1,12 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanetDorm</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TerpCribs — UMD Dorm Reviews</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>hi</h1>
-    <h1>hello</h1>
+ 
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="showSection('home')">Terp<span>Cribs</span></div>
+    <div class="nav-links">
+      <button class="active" onclick="showSection('home')" data-section="home">Dorms</button>
+      <button onclick="showSection('map')" data-section="map">Map</button>
+      <button onclick="showSection('gallery')" data-section="gallery">Gallery</button>
+    </div>
+  </div>
+</nav>
+ 
+<div class="hero" id="heroSection">
+  <h1>Rate Your <em>Terp</em> Crib</h1>
+  <p>Honest dorm reviews from UMD students. Find your perfect residence hall before move-in day.</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search dorms..." oninput="filterDorms()">
+    <button>Search</button>
+  </div>
+</div>
+ 
+<div class="section active" id="section-home">
+  <div class="filter-bar" id="filterBar">
+    <button class="active" onclick="setFilter('all',this)">All</button>
+    <button onclick="setFilter('north',this)">North Campus</button>
+    <button onclick="setFilter('south',this)">South Campus</button>
+    <button onclick="setFilter('commons',this)">The Commons</button>
+  </div>
+  <div class="dorm-grid" id="dormGrid"></div>
+</div>
+ 
+<div class="section detail-view" id="section-detail">
+  <button class="detail-back" onclick="backToList()">&#8592; Back to all dorms</button>
+  <div id="detailContent"></div>
+</div>
+ 
+<div class="section" id="section-map">
+  <h2 class="section-title">Residence Hall Map</h2>
+  <div class="map-container">
+    <iframe id="mapFrame" src="" loading="lazy"></iframe>
+    <div class="map-legend" id="mapLegend"></div>
+  </div>
+</div>
+ 
+<div class="section" id="section-gallery">
+  <h2 class="section-title">Dorm Gallery</h2>
+  <div class="filter-bar" id="galleryFilter"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</div>
+ 
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal">
+    <h3>Write a Review</h3>
+    <label>Your Name</label>
+    <input type="text" id="reviewName" placeholder="Anonymous Terp">
+    <label>Rating</label>
+    <div class="star-input" id="starInput">
+      <span onclick="setRating(1)">&#9733;</span>
+      <span onclick="setRating(2)">&#9733;</span>
+      <span onclick="setRating(3)">&#9733;</span>
+      <span onclick="setRating(4)">&#9733;</span>
+      <span onclick="setRating(5)">&#9733;</span>
+    </div>
+    <label>Year Lived There</label>
+    <select id="reviewYear">
+      <option>2025-2026</option>
+      <option>2024-2025</option>
+      <option>2023-2024</option>
+      <option>2022-2023</option>
+    </select>
+    <label>Your Review</label>
+    <textarea id="reviewText" placeholder="What was your experience like?"></textarea>
+    <div class="btn-row">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="submit-btn" onclick="submitReview()">Submit Review</button>
+    </div>
+  </div>
+</div>
+ 
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <button class="lightbox-nav prev" onclick="event.stopPropagation();navLightbox(-1)">&#8249;</button>
+  <img id="lightboxImg" src="">
+  <button class="lightbox-nav next" onclick="event.stopPropagation();navLightbox(1)">&#8250;</button>
+</div>
+ 
+<script src="app.js"></script>
 </body>
 </html>
+ 
