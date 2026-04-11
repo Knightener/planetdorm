@@ -1,31 +1,64 @@
-// ─── FIREBASE SETUP ─────────────────────────────────────────
-// Import Firebase from CDN
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
- 
+// ─── SUPABASE SETUP ─────────────────────────────────────────
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDy8c1y7mosrAYXhxy8lzjplh96H78vnb8",
-  authDomain: "planetdorm.firebaseapp.com",
-  projectId: "planetdorm",
-  storageBucket: "planetdorm.firebasestorage.app",
-  messagingSenderId: "29409141772",
-  appId: "1:29409141772:web:4930929c019ed4d3183a29",
-  measurementId: "G-9ZK8L1N5XE"
-};
- 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const supabaseUrl = 'https://YOUR-PROJECT-REF.supabase.co';     // ← CHANGE THIS to your real Supabase URL
+const supabaseAnonKey = 'YOUR_ANON_PUBLIC_KEY_HERE';           // ← CHANGE THIS to your real anon key
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// ─── LOAD REVIEWS FROM SUPABASE ─────────────────────────────
+async function loadAllReviews() {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error loading reviews:', error);
+    return;
+  }
+
+  dorms.forEach(d => {
+    d.reviewList = [];
+    d.reviews = 0;
+    d.rating = 0;
+  });
+
+  data.forEach(r => {
+    const dorm = dorms.find(d => d.id === r.dormId);
+    if (dorm) {
+      dorm.reviewList.push({
+        name: r.name || 'Anonymous Terp',
+        date: r.year || 'Unknown',
+        rating: r.rating,
+        text: r.text,
+        tags: []
+      });
+    }
+  });
+
+  dorms.forEach(d => {
+    if (d.reviewList.length > 0) {
+      d.reviews = d.reviewList.length;
+      d.rating = d.reviewList.reduce((sum, rev) => sum + rev.rating, 0) / d.reviews;
+    }
+  });
+
+  if (currentSection === 'home') renderDorms();
+  if (currentSection === 'offcampus') renderOffCampusDorms();
+  if (currentDorm) showDetail(currentDorm.id);
+}
+
+// ─── REAL-TIME UPDATES ──────────────────────────────────────
+function setupReviewsListener() {
+  supabase
+    .channel('reviews')
+    .on('postgres_changes', 
+      { event: '*', schema: 'public', table: 'reviews' }, 
+      loadAllReviews
+    )
+    .subscribe();
+}
 
 // ─── DORM DATA ──────────────────────────────────────────────
 const dorms = [
@@ -614,24 +647,40 @@ function updateStars() {
   document.querySelectorAll('#starInput span').forEach((s, i) => s.classList.toggle('filled', i < selectedRating));
 }
 
-function submitReview() {
-  const name = document.getElementById('reviewName').value || 'Anonymous Terp';
-  const text = document.getElementById('reviewText').value;
+async function submitReview() {
+  const name = document.getElementById('reviewName').value.trim() || 'Anonymous Terp';
+  const text = document.getElementById('reviewText').value.trim();
   const year = document.getElementById('reviewYear').value;
-  if (!text || !selectedRating) { alert('Please add a rating and review text.'); return; }
-  if (currentDorm) {
-    currentDorm.reviewList.unshift({ name, date: year, rating: selectedRating, text, tags: [] });
-    currentDorm.reviews++;
-    currentDorm.rating = currentDorm.reviewList.reduce((sum, r) => sum + r.rating, 0) / currentDorm.reviewList.length;
-    showDetail(currentDorm.id);
-    renderDorms();
-    renderOffCampusDorms();
+
+  if (!text || selectedRating === 0) {
+    alert('Please add a rating and review text.');
+    return;
   }
-  closeModal();
-  document.getElementById('reviewName').value = '';
-  document.getElementById('reviewText').value = '';
-  selectedRating = 0;
+  if (!currentDorm) return;
+
+  const { error } = await supabase
+    .from('reviews')
+    .insert({
+      dormId: currentDorm.id,
+      name: name,
+      rating: selectedRating,
+      text: text,
+      year: year
+    });
+
+  if (error) {
+    console.error(error);
+    alert('Failed to submit review.');
+  } else {
+    closeModal();
+    document.getElementById('reviewName').value = '';
+    document.getElementById('reviewText').value = '';
+    selectedRating = 0;
+    alert('Review submitted successfully!');
+  }
 }
 
 // ─── INIT ───────────────────────────────────────────────────
 renderDorms();
+loadAllReviews();
+setupReviewsListener();
