@@ -5,11 +5,10 @@
     --red-dark: #B01228;
     --gold: #FFD520;
     --gold-dim: #E5BF1A;
-    --bg: #0C0C0E;
     --surface: #161619;
     --surface2: #1E1E22;
     --surface3: #28282E;
-    --text: #F0EDE8;
+    --text: #161619;
     --text-dim: #9A978F;
     --border: #2A2A30;
     --green: #34D399;
@@ -26,8 +25,11 @@
 }
 
 body {
-    background: var(--bg);
+    background-image: url("umdImagejpg.jpg");
     min-height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 }
 
 /* NAV */
