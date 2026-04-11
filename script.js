@@ -457,14 +457,21 @@ function dormCardHTML(d) {
   `;
 }
 
+function matchesSearch(d, q) {
+  if (!q) return true;
+  return d.name.toLowerCase().includes(q) ||
+    d.area.toLowerCase().includes(q) ||
+    (d.type && d.type.toLowerCase().includes(q)) ||
+    (d.tags && d.tags.some(t => t.t.toLowerCase().includes(q)));
+}
+
 function renderDorms() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   const grid = document.getElementById('dormGrid');
   const filtered = dorms.filter(d => {
     const matchCampus = d.campus === 'on';
     const matchArea = currentFilter === 'all' || d.area === currentFilter;
-    const matchSearch = d.name.toLowerCase().includes(q);
-    return matchCampus && matchArea && matchSearch;
+    return matchCampus && matchArea && matchesSearch(d, q);
   });
   grid.innerHTML = filtered.map(dormCardHTML).join('');
 }
@@ -475,8 +482,7 @@ function renderOffCampusDorms() {
   const filtered = dorms.filter(d => {
     const matchCampus = d.campus === 'off';
     const matchArea = offCampusFilter === 'all' || d.area === offCampusFilter;
-    const matchSearch = d.name.toLowerCase().includes(q);
-    return matchCampus && matchArea && matchSearch;
+    return matchCampus && matchArea && matchesSearch(d, q);
   });
   grid.innerHTML = filtered.map(dormCardHTML).join('');
 }
