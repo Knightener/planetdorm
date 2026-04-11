@@ -145,7 +145,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9935, lng: -76.9458,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-03/ellicott-hall-exterior-front.jpg?itok=9acqLDOU"],
     tags: [{ t: 'Gemstone LLP', c: 'good' }, { t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }],
     reviewList: []
   },
@@ -154,7 +154,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9930, lng: -76.9455,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/hagerstown-hall-card.jpg?itok=8xPwXiCJ"],
     tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
     reviewList: []
   },
@@ -163,7 +163,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9927, lng: -76.9452,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/la-plata-hall-card.jpg?itok=Vakttxhe"],
     tags: [{ t: 'Integrated Life Sciences LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -174,7 +174,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9945, lng: -76.9514,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/johnson-whittle-hall-card.jpg?itok=SwfKvXcR"],
     tags: [{ t: 'University Honors', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
     reviewList: []
   },
@@ -183,7 +183,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9947, lng: -76.9518,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/pyon-chen-hall-card.png?itok=9uJ3p-6_"],
     tags: [{ t: 'University Honors', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
     reviewList: []
   },
@@ -194,7 +194,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Semi-Suite', roomTypes: 'Doubles (Semi-Suite)',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9933, lng: -76.9530,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/oakland-hall-card.jpeg?itok=cDAAL9M_"],
     tags: [{ t: 'Semi-Suite', c: 'good' }, { t: 'A/C', c: 'good' }, { t: '24-Hr Service Desk', c: 'good' }],
     reviewList: []
   },
@@ -207,14 +207,14 @@ const dorms = [
     lat: 38.9845, lng: -76.9382,
     imgs: [],
     tags: [{ t: 'Honors Humanities LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
-    reviewList: []
+    reviewList: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/anne-arundel-hall-card.png?itok=T78Xc6sx"]
   },
   {
     id: 'caroline', name: 'Caroline Hall', campus: 'on', area: 'south', built: '1967',
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: '251 North Dining Hall',
     lat: 38.9843, lng: -76.9378,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/caroline-hall-card.jpg?itok=mWFlrDhm"],
     tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -223,7 +223,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: '251 North Dining Hall',
     lat: 38.9841, lng: -76.9384,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/carroll-hall-card.jpeg?itok=NjuXo0ro"],
     tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -232,7 +232,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9847, lng: -76.9388,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/dorchester-hall-card.jpeg?itok=paBcSgGl"],
     tags: [{ t: 'Honors Global Challenges LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -241,7 +241,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Semi-Suite/Suite', roomTypes: 'Doubles, Singles',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9850, lng: -76.9392,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/prince-frederick-card.jpg?itok=LG0ao1ZG"],
     tags: [{ t: 'Multiple LLPs', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Semi-Suite/Suite', c: 'good' }],
     reviewList: []
   },
@@ -250,7 +250,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9840, lng: -76.9376,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/queen-annes-hall-card.jpg?itok=HeUF1d8C"],
     tags: [{ t: "Writers' House LLP", c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -259,7 +259,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9836, lng: -76.9380,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/somerset-hall-card.jpeg?itok=vsNNUw0J"],
     tags: [{ t: 'BioFIRE LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -268,7 +268,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite', roomTypes: 'Doubles, Singles (Suite)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9852, lng: -76.9395,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/st-marys-hall-card.jpeg?itok=_USWcu1l"],
     tags: [{ t: 'Language House LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Suite-style', c: 'good' }],
     reviewList: []
   },
@@ -277,7 +277,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: '251 North Dining Hall',
     lat: 38.9838, lng: -76.9373,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/wicomico-hall-card.jpeg?itok=Tm4B-zm8"],
     tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -286,7 +286,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: '251 North Dining Hall',
     lat: 38.9835, lng: -76.9370,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/worcester-hall-card.jpeg?itok=HTJZu44N"],
     tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -297,7 +297,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9810, lng: -76.9415,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/leonardtown-community-card.jpg?itok=U-Z1R5bm"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
     reviewList: []
   },
@@ -308,7 +308,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9858, lng: -76.9418,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/allegany-hall-card.jpeg?itok=xg44k9l3"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -317,7 +317,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9861, lng: -76.9422,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/baltimore-hall-card.jpg?itok=JGqCIswL"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -326,7 +326,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9864, lng: -76.9426,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/calvert-hall-card.jpg?itok=S1vhEiIO"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -335,7 +335,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: '251 North Dining Hall',
     lat: 38.9855, lng: -76.9410,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/cecil-hall-card.jpg?itok=ftRx5CmQ"],
     tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -344,7 +344,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9860, lng: -76.9430,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/charles-hall-card.jpeg?itok=PNCCpJHb"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -353,7 +353,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9868, lng: -76.9412,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/frederick-hall-card.jpg?itok=2Cb9kJw4"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -362,7 +362,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9865, lng: -76.9416,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/garrett-hall-card.jpeg?itok=inFNbyCh"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -371,7 +371,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9870, lng: -76.9405,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/harford-hall-card.png?itok=KvigkEND"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
     reviewList: []
   },
@@ -380,7 +380,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9863, lng: -76.9409,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/howard-hall-card.jpeg?itok=qSoYzx1Y"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -389,7 +389,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9856, lng: -76.9414,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/kent-hall-card.jpg?itok=7oQLUoCR"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -398,7 +398,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9872, lng: -76.9420,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/montgomery-hall-card.png?itok=U1yscOCI"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -407,7 +407,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9875, lng: -76.9416,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/prince-georges-hall-card.jpeg?itok=g34wbb0Q"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
@@ -425,7 +425,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9867, lng: -76.9408,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/washington-hall-card.jpeg?itok=8dqumw97"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
