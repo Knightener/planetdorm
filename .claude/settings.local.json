@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:www.openstreetmap.org)",
-      "WebFetch(domain:www.campus-maps.com)"
-    ]
-  }
-}
