@@ -383,7 +383,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9878, lng: -76.9412,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/talbot-hall-card.jpg?itok=3JYb2JS7"],
     tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
     reviewList: []
   },
