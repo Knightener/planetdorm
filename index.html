@@ -12,12 +12,16 @@
   <div class="nav-inner">
     <div class="logo" onclick="showSection('home')">PlanetDorm</div>
     <div class="nav-links">
-      <button class="active" onclick="showSection('home')" data-section="home">Dorms</button>
+      <button class="active" onclick="showSection('home')" data-section="home">On-campus</button>
+      <button onclick="showSection('offcampus')" data-section="offcampus">Off-campus</button>
       <button onclick="showSection('map')" data-section="map">Map</button>
     </div>
   </div>
 </nav>
+
  
+
+
 <div class="hero" id="heroSection">
   <h1>Rate Your Dorm</h1>
   <p></p>
@@ -36,6 +40,17 @@
   </div>
   <div class="dorm-grid" id="dormGrid"></div>
 </div>
+
+<div class="section" id="section-offcampus">
+  <div class="filter-bar" id="offCampusFilterBar">
+    <button class="active" onclick="setOffCampusFilter('all',this)">All</button>
+    <button onclick="setOffCampusFilter('colpark',this)">College Park</button>
+    <button onclick="setOffCampusFilter('hyattsville',this)">Hyattsville</button>
+    <button onclick="setOffCampusFilter('greenbelt',this)">Greenbelt</button>
+    <button onclick="setOffCampusFilter('riverdale',this)">Riverdale Park</button>
+  </div>
+  <div class="dorm-grid" id="offCampusDormGrid"></div>
+</div>
  
 <div class="section detail-view" id="section-detail">
   <button class="detail-back" onclick="backToList()">&#8592; Back to all dorms</button>
@@ -48,6 +63,12 @@
     <iframe id="mapFrame" src="" loading="lazy"></iframe>
     <div class="map-legend" id="mapLegend"></div>
   </div>
+</div>
+ 
+<div class="section" id="section-gallery">
+  <h2 class="section-title">Dorm Gallery</h2>
+  <div class="filter-bar" id="galleryFilter"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
 </div>
  
 <div class="modal-overlay" id="reviewModal">

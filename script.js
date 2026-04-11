@@ -1,7 +1,7 @@
 // ─── DORM DATA ──────────────────────────────────────────────
 const dorms = [
   {
-    id: 'test', name: 'TEMPLATE', area: 'north', built: '1966',
+    id: 'test', name: 'TEMPLATE', campus: 'on', area: 'north', built: '1966',
     rating: 3.2, reviews: 48, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: false, dining: 'TEMPLATE',
     lat: 38.9932, lng: -76.9490,
@@ -17,6 +17,8 @@ const dorms = [
 
 // ─── STATE ──────────────────────────────────────────────────
 let currentFilter = 'all';
+let offCampusFilter = 'all';
+let currentSection = 'home';
 let currentDorm = null;
 let selectedRating = 0;
 let lightboxImages = [];
@@ -24,15 +26,8 @@ let lightboxIndex = 0;
 let galleryDorm = 'all';
 
 // ─── RENDER DORM GRID ──────────────────────────────────────
-function renderDorms() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const grid = document.getElementById('dormGrid');
-  const filtered = dorms.filter(d => {
-    const matchArea = currentFilter === 'all' || d.area === currentFilter;
-    const matchSearch = d.name.toLowerCase().includes(q);
-    return matchArea && matchSearch;
-  });
-  grid.innerHTML = filtered.map(d => `
+function dormCardHTML(d) {
+  return `
     <div class="dorm-card" onclick="showDetail('${d.id}')">
       <div class="dorm-card-img" style="background-image:url('${d.imgs[0]}')">
         <div class="badge">${d.rating.toFixed(1)} ★</div>
@@ -43,10 +38,37 @@ function renderDorms() {
         <div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>
       </div>
     </div>
-  `).join('');
+  `;
 }
 
-function filterDorms() { renderDorms(); }
+function renderDorms() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const grid = document.getElementById('dormGrid');
+  const filtered = dorms.filter(d => {
+    const matchCampus = d.campus === 'on';
+    const matchArea = currentFilter === 'all' || d.area === currentFilter;
+    const matchSearch = d.name.toLowerCase().includes(q);
+    return matchCampus && matchArea && matchSearch;
+  });
+  grid.innerHTML = filtered.map(dormCardHTML).join('');
+}
+
+function renderOffCampusDorms() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const grid = document.getElementById('offCampusDormGrid');
+  const filtered = dorms.filter(d => {
+    const matchCampus = d.campus === 'off';
+    const matchArea = offCampusFilter === 'all' || d.area === offCampusFilter;
+    const matchSearch = d.name.toLowerCase().includes(q);
+    return matchCampus && matchArea && matchSearch;
+  });
+  grid.innerHTML = filtered.map(dormCardHTML).join('');
+}
+
+function filterDorms() {
+  if (currentSection === 'offcampus') renderOffCampusDorms();
+  else renderDorms();
+}
 
 function setFilter(f, btn) {
   currentFilter = f;
@@ -55,13 +77,20 @@ function setFilter(f, btn) {
   renderDorms();
 }
 
+function setOffCampusFilter(f, btn) {
+  offCampusFilter = f;
+  document.querySelectorAll('#offCampusFilterBar button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOffCampusDorms();
+}
+
 // ─── DETAIL VIEW ────────────────────────────────────────────
 function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
   currentDorm = d;
   document.getElementById('heroSection').style.display = 'none';
-  document.getElementById('section-home').classList.remove('active');
+  document.getElementById('section-' + currentSection).classList.remove('active');
   const sec = document.getElementById('section-detail');
   sec.classList.add('active');
   sec.style.display = 'block';
@@ -106,7 +135,7 @@ function backToList() {
   document.getElementById('section-detail').classList.remove('active');
   document.getElementById('section-detail').style.display = 'none';
   document.getElementById('heroSection').style.display = '';
-  document.getElementById('section-home').classList.add('active');
+  document.getElementById('section-' + currentSection).classList.add('active');
   currentDorm = null;
 }
 
@@ -117,9 +146,11 @@ function showSection(name) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('section-detail').style.display = 'none';
 
-  if (name === 'home') {
+  if (name === 'home' || name === 'offcampus') {
     document.getElementById('heroSection').style.display = '';
-    document.getElementById('section-home').classList.add('active');
+    document.getElementById('section-' + name).classList.add('active');
+    currentSection = name;
+    if (name === 'offcampus') renderOffCampusDorms();
   } else {
     document.getElementById('heroSection').style.display = 'none';
     document.getElementById('section-' + name).classList.add('active');
