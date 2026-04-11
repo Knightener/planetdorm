@@ -25,7 +25,7 @@ async function loadAllReviews() {
   });
 
   data.forEach(r => {
-    const dorm = dorms.find(d => d.id === r.dormid);
+    const dorm = dorms.find(d => d.id === r.dormId);
     if (dorm) {
       dorm.reviewList.push({
         name: r.name || 'Anonymous Terp',
@@ -640,7 +640,7 @@ async function submitReview() {
   const { error } = await supabase
     .from('reviews')
     .insert({
-      dormid: currentDorm.id,
+      dormId: currentDorm.id,
       name: name,
       rating: selectedRating,
       text: text,
