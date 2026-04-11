@@ -25,7 +25,7 @@ async function loadAllReviews() {
   });
 
   data.forEach(r => {
-    const dorm = dorms.find(d => d.id === r.dormId);
+    const dorm = dorms.find(d => d.id === r.dormid);
     if (dorm) {
       dorm.reviewList.push({
         name: r.name || 'Anonymous Terp',
@@ -640,7 +640,7 @@ async function submitReview() {
   const { error } = await supabase
     .from('reviews')
     .insert({
-      dormId: currentDorm.id,
+      dormid: currentDorm.id,
       name: name,
       rating: selectedRating,
       text: text,
@@ -649,13 +649,13 @@ async function submitReview() {
 
   if (error) {
     console.error(error);
-    alert('Failed to submit review.');
+    alert('Failed to submit review. Please try again later.');
   } else {
     closeModal();
     document.getElementById('reviewName').value = '';
     document.getElementById('reviewText').value = '';
     selectedRating = 0;
-    alert('Review submitted successfully!');
+    alert('Review submitted successfully! Thanks for contributing.');
   }
 }
 
