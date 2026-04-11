@@ -588,27 +588,6 @@ function initMap() {
   `).join('');
 }
 
-// ─── GALLERY ────────────────────────────────────────────────
-function renderGallery() {
-  const filterDiv = document.getElementById('galleryFilter');
-  filterDiv.innerHTML = `<button class="${galleryDorm === 'all' ? 'active' : ''}" onclick="galleryDorm='all';renderGallery()">All</button>` +
-    dorms.map(d => `<button class="${galleryDorm === d.id ? 'active' : ''}" onclick="galleryDorm='${d.id}';renderGallery()">${d.name}</button>`).join('');
-
-  const grid = document.getElementById('galleryGrid');
-  let photos = [];
-  dorms.forEach(d => {
-    if (galleryDorm === 'all' || galleryDorm === d.id) {
-      d.imgs.forEach((img) => photos.push({ src: img, label: d.name, dormId: d.id }));
-    }
-  });
-  const photosJson = JSON.stringify(photos.map(x => x.src)).replace(/"/g, '&quot;');
-  grid.innerHTML = photos.map((p, i) => `
-    <div class="gallery-thumb" onclick="openLightbox(${photosJson}, ${i})">
-      <img src="${p.src}" alt="${p.label}" loading="lazy">
-      <div class="gallery-label">${p.label}</div>
-    </div>
-  `).join('');
-}
 
 // ─── LIGHTBOX ───────────────────────────────────────────────
 function openLightbox(imgs, idx) {
