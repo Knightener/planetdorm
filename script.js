@@ -69,7 +69,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9952, lng: -76.9492,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/bel-air-hall-card.jpeg?itok=hx8ZfWf3"],
     tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
     reviewList: []
   },
@@ -78,7 +78,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9948, lng: -76.9495,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/cambridge-hall-card.png?itok=_bvaXVai"],
     tags: [{ t: 'College Park Scholars', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
     reviewList: []
   },
@@ -87,7 +87,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9944, lng: -76.9493,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/centreville-hall-card.jpg?itok=gGF2b-Ll"],
     tags: [{ t: 'College Park Scholars', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
     reviewList: []
   },
@@ -96,7 +96,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9946, lng: -76.9498,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/chestertown-hall-card.jpeg?itok=BxD6eYgF"],
     tags: [{ t: 'College Park Scholars', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
     reviewList: []
   },
@@ -105,7 +105,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9940, lng: -76.9500,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/cumberland-hall-card.jpeg?itok=c6Cv1E96"],
     tags: [{ t: 'College Park Scholars', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
     reviewList: []
   },
@@ -116,7 +116,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9965, lng: -76.9460,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/denton-hall-card.jpg?itok=H0_AIP2Z"],
     tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
     reviewList: []
   },
@@ -125,7 +125,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9968, lng: -76.9455,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/easton-hall-card.jpg?itok=248BxYbk"],
     tags: [{ t: 'Multiple LLPs', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
     reviewList: []
   },
@@ -134,7 +134,7 @@ const dorms = [
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9963, lng: -76.9452,
-    imgs: [],
+    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/elkton-hall-card.jpg?itok=5Ff0OlkT"],
     tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
     reviewList: []
   },
