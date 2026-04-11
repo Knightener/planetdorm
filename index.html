@@ -107,7 +107,34 @@
   <button class="lightbox-nav next" onclick="event.stopPropagation();navLightbox(1)">&#8250;</button>
 </div>
  
-<script src="script.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase Setup</title>
+</head>
+<body>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "planetdorm.firebaseapp.com",
+    projectId: "planetdorm",
+    storageBucket: "planetdorm.firebasestorage.app",
+    messagingSenderId: "29409141772",
+    appId: "1:29409141772:web:4930929c019ed4d3183a29",
+    measurementId: "G-9ZK8L1N5XE"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
+</body>
+</html>
+
 </body>
 </html>
  

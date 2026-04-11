@@ -1,3 +1,32 @@
+// ─── FIREBASE SETUP ─────────────────────────────────────────
+// Import Firebase from CDN
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ 
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDy8c1y7mosrAYXhxy8lzjplh96H78vnb8",
+  authDomain: "planetdorm.firebaseapp.com",
+  projectId: "planetdorm",
+  storageBucket: "planetdorm.firebasestorage.app",
+  messagingSenderId: "29409141772",
+  appId: "1:29409141772:web:4930929c019ed4d3183a29",
+  measurementId: "G-9ZK8L1N5XE"
+};
+ 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 // ─── DORM DATA ──────────────────────────────────────────────
 const dorms = [
 
