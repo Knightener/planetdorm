@@ -126,7 +126,7 @@ const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9930, lng: -76.9502,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/easton-hall-card.jpg?itok=248BxYbk"],
-    tags: [{ t: 'Multiple LLPs', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
+    tags: [{ t: 'Multiple LLPs', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
 
   },
   {
@@ -146,7 +146,7 @@ const dorms = [
     ac: false, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9918, lng: -76.9467,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-03/ellicott-hall-exterior-front.jpg?itok=9acqLDOU"],
-    tags: [{ t: 'Gemstone LLP', c: 'good' }, { t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }],
+    tags: [{ t: 'Gemstone LLP', c: 'honors' }, { t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }],
 
   },
   {
@@ -164,7 +164,7 @@ const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9924, lng: -76.9459,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/la-plata-hall-card.jpg?itok=Vakttxhe"],
-    tags: [{ t: 'Integrated Life Sciences LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Integrated Life Sciences LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
 
   },
 
@@ -175,7 +175,7 @@ const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9909, lng: -76.9452,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/johnson-whittle-hall-card.jpg?itok=SwfKvXcR"],
-    tags: [{ t: 'University Honors', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
+    tags: [{ t: 'University Honors', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
 
   },
   {
@@ -184,7 +184,7 @@ const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9919, lng: -76.9450,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/pyon-chen-hall-card.png?itok=9uJ3p-6_"],
-    tags: [{ t: 'University Honors', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
+    tags: [{ t: 'University Honors', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
 
   },
 
@@ -206,7 +206,7 @@ const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9860, lng: -76.9468,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/anne-arundel-hall-card.png?itok=T78Xc6sx"],
-    tags: [{ t: 'Honors Humanities LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Honors Humanities LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
 
   },
   {
@@ -233,7 +233,7 @@ const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9867, lng: -76.9460,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/dorchester-hall-card.jpeg?itok=paBcSgGl"],
-    tags: [{ t: 'Honors Global Challenges LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Honors Global Challenges LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
 
   },
   {
@@ -242,7 +242,7 @@ const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9831, lng: -76.9457,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/prince-frederick-card.jpg?itok=LG0ao1ZG"],
-    tags: [{ t: 'Multiple LLPs', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Semi-Suite/Suite', c: 'good' }],
+    tags: [{ t: 'Multiple LLPs', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Semi-Suite/Suite', c: 'good' }],
 
   },
   {
@@ -251,7 +251,7 @@ const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9853, lng: -76.9461,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/queen-annes-hall-card.jpg?itok=HeUF1d8C"],
-    tags: [{ t: "Writers' House LLP", c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: "Writers' House LLP", c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
 
   },
   {
@@ -260,7 +260,7 @@ const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9851, lng: -76.9456,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/somerset-hall-card.jpeg?itok=vsNNUw0J"],
-    tags: [{ t: 'BioFIRE LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'BioFIRE LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
 
   },
   {
@@ -269,7 +269,7 @@ const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9869, lng: -76.9456,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/st-marys-hall-card.jpeg?itok=_USWcu1l"],
-    tags: [{ t: 'Language House LLP', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Suite-style', c: 'good' }],
+    tags: [{ t: 'Language House LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Suite-style', c: 'good' }],
 
   },
   {
@@ -531,14 +531,15 @@ function showDetail(id) {
         <div class="meta">${d.type} · Built ${d.built} · ${d.area.charAt(0).toUpperCase() + d.area.slice(1)} Campus</div>
         <div class="stat-grid">
           <div class="stat-box"><div class="label">Rating</div><div class="val" style="color:var(--gold)">${d.rating.toFixed(1)} <span style="font-size:.9rem">/ 5</span></div></div>
-          <div class="stat-box"><div class="label">Reviews</div><div class="val">${d.reviews}</div></div>
+          <div class="stat-box"><div class="label">${d.reviews === 1 ? 'Review' : 'Reviews'}</div><div class="val">${d.reviews}</div></div>
           <div class="stat-box"><div class="label">Room Types</div><div class="val" style="font-size:1rem">${d.roomTypes}</div></div>
-          <div class="stat-box"><div class="label">A/C</div><div class="val" style="color:${d.ac ? 'var(--green)' : 'var(--red)'}">${d.ac ? 'Yes' : 'No'}</div></div>
+
         </div>
         ${d.tags && d.tags.length ? `<div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>` : ''}
         <button class="write-review-btn" onclick="openModal()">Write a Review</button>
       </div>
     </div>
+    ${d.lat && d.lng ? `<div class="detail-map-wrap"><div id="detailMapFrame"></div></div>` : ''}
     <h3 class="section-title">Reviews</h3>
     <div class="reviews-list" id="reviewsList">
       ${allReviews.map(r => `
@@ -554,9 +555,22 @@ function showDetail(id) {
       `).join('')}
     </div>
   `;
+
+  if (d.lat && d.lng) {
+    detailMap = L.map('detailMapFrame').setView([d.lat, d.lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(detailMap);
+    L.marker([d.lat, d.lng]).addTo(detailMap).bindPopup(d.name).openPopup();
+    setTimeout(() => detailMap.invalidateSize(), 100);
+  }
 }
 
 function backToList() {
+  if (detailMap) {
+    detailMap.remove();
+    detailMap = null;
+  }
   document.getElementById('section-detail').classList.remove('active');
   document.getElementById('section-detail').style.display = 'none';
   document.getElementById('heroSection').style.display = '';
@@ -586,6 +600,7 @@ function showSection(name) {
 
 // ─── MAP ────────────────────────────────────────────────────
 let leafletMap = null;
+let detailMap = null;
 
 function initMap() {
   const onCampusDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
