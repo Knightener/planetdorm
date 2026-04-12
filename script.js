@@ -64,7 +64,6 @@ let currentDorm = null;
 let selectedRating = 0;
 let lightboxImages = [];
 let lightboxIndex = 0;
-let galleryDorm = 'all';
 
 // ─── RENDER DORM GRID ──────────────────────────────────────
 function dormCardHTML(d) {
@@ -219,7 +218,6 @@ function showSection(name) {
     document.getElementById('section-' + name).classList.add('active');
   }
   if (name === 'map') initMap();
-  if (name === 'gallery') renderGallery();
 }
 
 // ─── MAP ────────────────────────────────────────────────────
@@ -326,6 +324,7 @@ async function submitReview() {
     showToast('Review submitted successfully! Thanks for contributing.', 'success');
   }
 }
+
 
 // Make key functions globally available for onclick handlers
 window.showDetail = showDetail;
