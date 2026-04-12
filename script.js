@@ -613,13 +613,6 @@ function initMap() {
   // Invalidate size in case the map div was hidden when initialized
   setTimeout(() => leafletMap.invalidateSize(), 100);
 
-  const legend = document.getElementById('mapLegend');
-  legend.innerHTML = `<h4>Residence Halls</h4>` + onCampusDorms.map(d => `
-    <div class="map-legend-item" onclick="showDetail('${d.id}');">
-      <span class="dot"></span>
-      <span>${d.name}</span>
-    </div>
-  `).join('');
 }
 
 
