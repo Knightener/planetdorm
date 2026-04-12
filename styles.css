@@ -9,7 +9,7 @@
     --surface2: #1E1E22;
     --surface3: #28282E;
     --text: #ffffff;
-    --text-dim: #ffffff;
+    --text-dim: #9999a8;
     --border: #2A2A30;
     --green: #34D399;
     --amber: #FBBF24;
@@ -26,8 +26,6 @@
 
 body {
     background-image: url("flag-800.png");
-    max-width: 100%;
-    height: auto;
 }
 
 /* NAV */
@@ -91,16 +89,6 @@ nav {
     overflow: hidden;
 }
 
-.hero::before {
-    content: '';
-    position: absolute;
-    top: -120px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 700px;
-    height: 700px;
-    pointer-events: none;
-}
 
 .hero h1 {
     font-family: 'DM Serif Display', serif;
@@ -521,6 +509,12 @@ nav {
 }
 
 /* MAP */
+#section-map {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
 .map-container .leaflet-control-container {
     z-index: auto;
 }
@@ -532,10 +526,10 @@ nav {
 
 .map-container {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border-top: 1px solid var(--border);
     overflow: hidden;
     position: relative;
-    height: 600px;
+    height: calc(100dvh - 60px);
 }
 
 #mapFrame {
@@ -738,7 +732,6 @@ nav {
         width: 100%;
         text-align: left;
         padding: 14px 24px;
-        border-radius: 0;
     }
 
     .detail-view.active {
@@ -755,7 +748,7 @@ nav {
     }
 
     .map-container {
-        height: 400px;
+        height: calc(100dvh - 60px);
     }
 
     .stat-grid {
