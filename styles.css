@@ -8,13 +8,13 @@
     --surface: #161619;
     --surface2: #1E1E22;
     --surface3: #28282E;
-    --text: #ced4e0;
-    --text-dim: #9A978F;
+    --text: #ffffff;
+    --text-dim: #ffffff;
     --border: #2A2A30;
     --green: #34D399;
     --amber: #FBBF24;
     --blue: #60A5FA;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Arial', sans-serif;
     color: var(--text);
 }
 
