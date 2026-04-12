@@ -32,7 +32,8 @@ async function loadAllReviews() {
         date: r.year || 'Unknown',
         rating: r.rating,
         text: r.text,
-        tags: []
+        tags: [],
+        created_at: r.created_at
       });
     }
   });
@@ -548,6 +549,7 @@ function showDetail(id) {
           </div>
           <div class="review-body">${r.text}</div>
           <div class="review-tags">${(r.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          ${r.created_at ? `<div class="review-posted">Posted: ${new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>` : ''}
         </div>
       `).join('')}
     </div>

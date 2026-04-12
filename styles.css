@@ -390,6 +390,12 @@ nav {
     flex-wrap: wrap;
 }
 
+.review-card .review-posted {
+    margin-top: 8px;
+    color: var(--text-dim);
+    font-size: .75rem;
+}
+
 /* WRITE REVIEW MODAL */
 .modal-overlay {
     display: none;
