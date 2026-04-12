@@ -32,7 +32,8 @@ async function loadAllReviews() {
         date: r.year || 'Unknown',
         rating: r.rating,
         text: r.text,
-        tags: []
+        tags: [],
+        created_at: r.created_at
       });
     }
   });
@@ -535,7 +536,7 @@ function showDetail(id) {
           <div class="stat-box"><div class="label">Room Types</div><div class="val" style="font-size:1rem">${d.roomTypes}</div></div>
           <div class="stat-box"><div class="label">A/C</div><div class="val" style="color:${d.ac ? 'var(--green)' : 'var(--red)'}">${d.ac ? 'Yes' : 'No'}</div></div>
         </div>
-        <button class="write-review-btn" onclick="openModal()">✍ Write a Review</button>
+        <button class="write-review-btn" onclick="openModal()">Write a Review</button>
       </div>
     </div>
     <h3 class="section-title">Reviews</h3>
@@ -548,6 +549,7 @@ function showDetail(id) {
           </div>
           <div class="review-body">${r.text}</div>
           <div class="review-tags">${(r.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          ${r.created_at ? `<div class="review-posted">Posted: ${new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>` : ''}
         </div>
       `).join('')}
     </div>
