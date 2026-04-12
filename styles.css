@@ -178,7 +178,7 @@ nav {
 /* DORM GRID */
 .dorm-grid {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
 
@@ -199,6 +199,7 @@ nav {
     height: 170px;
     background-size: cover;
     background-position: center;
+    position: relative;
 }
 
 .dorm-card-img .badge {
@@ -299,6 +300,21 @@ nav {
     grid-template-columns: 1fr 1fr;
     gap: 24px;
     margin-bottom: 32px;
+}
+
+.detail-gallery {
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.detail-gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
 }
 
 .detail-info h2 {
@@ -405,8 +421,6 @@ nav {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .6);
-    backdrop-filter: blur(6px);
     z-index: 200;
     justify-content: center;
     align-items: center;
@@ -419,11 +433,13 @@ nav {
 .modal {
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 32px;
+    border-radius: 16px;
+    padding: 36px;
     width: 90%;
-    max-width: 520px;
+    max-width: 480px;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .modal h3 {
@@ -689,12 +705,20 @@ nav {
         font-size: 2.2rem;
     }
 
+    .dorm-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+    }
+
     .detail-header {
         grid-template-columns: 1fr;
     }
 
     .detail-gallery {
-        max-height: 220px;
+        height: 220px;
     }
 
     .map-container {
