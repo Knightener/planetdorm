@@ -13,13 +13,19 @@
 <nav>
   <div class="nav-inner">
     <div class="logo" onclick="showSection('home')">Planet<span style="color:#EAA000">Dorm</span></div>
-    <div class="nav-links">
-      <button class="active" onclick="showSection('home')" data-section="home">On-campus</button>
-      <button onclick="showSection('map')" data-section="map">Map</button>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <button class="active" onclick="showSection('home');closeNav()" data-section="home">On-campus</button>
+      <button onclick="showSection('map');closeNav()" data-section="map">Map</button>
       <button onclick="location.href='about.html'">About</button>
     </div>
   </div>
 </nav>
+<script>
+function closeNav(){document.getElementById('navLinks').classList.remove('open');document.getElementById('navToggle').classList.remove('open');}
+</script>
 
  
 

@@ -38,6 +38,7 @@ nav {
     background: rgba(12, 12, 14, .85);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
+    isolation: isolate;
 }
 
 .nav-inner {
@@ -677,6 +678,26 @@ nav {
     border-color: var(--red);
 }
 
+/* HAMBURGER */
+.nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 6px;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.nav-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+}
+
 /* RESPONSIVE */
 @media(max-width:768px) {
     .hero h1 {
@@ -687,8 +708,37 @@ nav {
         grid-template-columns: 1fr;
     }
 
+    .nav-toggle {
+        display: flex;
+    }
+
+    .nav-inner {
+        flex-direction: row-reverse;
+    }
+
     .nav-links {
-        flex-wrap: wrap;
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: rgba(12, 12, 14, .97);
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        gap: 0;
+        padding: 8px 0;
+        min-width: 160px;
+    }
+
+    .nav-links.open {
+        display: flex;
+    }
+
+    .nav-links button {
+        width: 100%;
+        text-align: left;
+        padding: 14px 24px;
+        border-radius: 0;
     }
 
     .detail-view.active {

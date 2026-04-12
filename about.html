@@ -49,7 +49,10 @@
 <nav>
   <div class="nav-inner">
     <div class="logo" onclick="location.href='index.html'">Planet<span style="color:#EAA000">Dorm</span></div>
-    <div class="nav-links">
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
       <button onclick="location.href='index.html'" data-section="home">On-campus</button>
       <button onclick="location.href='index.html#map'" data-section="map">Map</button>
       <button class="active" onclick="location.href='about.html'">About</button>
