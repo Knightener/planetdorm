@@ -536,7 +536,7 @@ function showDetail(id) {
           <div class="stat-box"><div class="label">Room Types</div><div class="val" style="font-size:1rem">${d.roomTypes}</div></div>
           <div class="stat-box"><div class="label">A/C</div><div class="val" style="color:${d.ac ? 'var(--green)' : 'var(--red)'}">${d.ac ? 'Yes' : 'No'}</div></div>
         </div>
-        <button class="write-review-btn" onclick="openModal()">✍ Write a Review</button>
+        <button class="write-review-btn" onclick="openModal()">Write a Review</button>
       </div>
     </div>
     <h3 class="section-title">Reviews</h3>
