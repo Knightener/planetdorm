@@ -178,7 +178,7 @@ nav {
 /* DORM GRID */
 .dorm-grid {
     display: grid;
-     grid-template-columns: 1fr 1fr;
+    grid-template-columns: auto auto;
     gap: 20px;
 }
 
@@ -251,17 +251,17 @@ nav {
 }
 
 .tag.good {
-    background: rgba(52, 211, 153, .12);
+    background: var(--surface3);
     color: var(--green);
 }
 
 .tag.mid {
-    background: rgba(251, 191, 36, .12);
+    background: var(--surface3);
     color: var(--amber);
 }
 
 .tag.bad {
-    background: rgba(226, 24, 51, .12);
+    background: var(--surface3);
     color: var(--red);
 }
 
