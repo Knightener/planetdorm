@@ -272,6 +272,10 @@ nav {
 
 .detail-view.active {
     display: block;
+    max-width: 100%;
+    background: rgba(14, 14, 16, 0.88);
+    padding: 32px max(24px, calc((100% - 1200px) / 2 + 24px)) 60px;
+    min-height: 100vh;
 }
 
 .detail-back {
