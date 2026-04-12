@@ -606,7 +606,7 @@ function initMap() {
     marker.bindPopup(`
       <strong>${d.name}</strong><br>
       ${d.rating > 0 ? d.rating.toFixed(1) + '★ · ' + d.reviews + ' review' + (d.reviews !== 1 ? 's' : '') : 'No reviews yet'}<br>
-      <a href="#" onclick="showDetail('${d.id}');showSection('home');return false;">View details →</a>
+      <a href="#" onclick="showDetail('${d.id}');return false;">View reviews</a>
     `);
   });
 
@@ -615,7 +615,7 @@ function initMap() {
 
   const legend = document.getElementById('mapLegend');
   legend.innerHTML = `<h4>Residence Halls</h4>` + onCampusDorms.map(d => `
-    <div class="map-legend-item" onclick="showDetail('${d.id}');showSection('home');">
+    <div class="map-legend-item" onclick="showDetail('${d.id}');">
       <span class="dot"></span>
       <span>${d.name}</span>
     </div>
