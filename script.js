@@ -585,10 +585,10 @@ function showSection(name) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('section-detail').style.display = 'none';
 
+  currentSection = name;
   if (name === 'home' || name === 'offcampus') {
     document.getElementById('heroSection').style.display = '';
     document.getElementById('section-' + name).classList.add('active');
-    currentSection = name;
     if (name === 'offcampus') renderOffCampusDorms();
   } else {
     document.getElementById('heroSection').style.display = 'none';
