@@ -660,16 +660,21 @@ function updateStars() {
   document.querySelectorAll('#starInput span').forEach((s, i) => s.classList.toggle('filled', i < selectedRating));
 }
 
+let _toastTimer = null;
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast toast-${type} show`;
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3500);
+}
+
 async function submitReview() {
   const name = document.getElementById('reviewName').value.trim() || 'Anonymous Terp';
   const text = document.getElementById('reviewText').value.trim();
   const year = document.getElementById('reviewYear').value;
-
-  if (!text || selectedRating === 0) {
-    alert('Please add a rating and review text.');
-    return;
-  }
-  if (!currentDorm) return;
 
   const { error } = await supabase
     .from('reviews')
@@ -683,13 +688,13 @@ async function submitReview() {
 
   if (error) {
     console.error(error);
-    alert('Failed to submit review. Please try again later.');
+    showToast('Failed to submit review. Please try again later.', 'error');
   } else {
     closeModal();
     document.getElementById('reviewName').value = '';
     document.getElementById('reviewText').value = '';
     selectedRating = 0;
-    alert('Review submitted successfully! Thanks for contributing.');
+    showToast('Review submitted successfully! Thanks for contributing.', 'success');
   }
 }
 

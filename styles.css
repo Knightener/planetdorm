@@ -701,3 +701,40 @@ nav {
         grid-template-columns: 1fr;
     }
 }
+
+/* Toast notification */
+.toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface3);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 9999;
+    white-space: nowrap;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.toast.toast-error {
+    border-color: var(--red);
+    color: #ff8a96;
+}
+
+.toast.toast-success {
+    border-color: var(--green);
+    color: var(--green);
+}
