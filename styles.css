@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Merriweather:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
     --red: #E21833;
@@ -14,7 +14,7 @@
     --green: #34D399;
     --amber: #FBBF24;
     --blue: #60A5FA;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Merriweather', serif;
     color: var(--text);
 }
 
@@ -23,6 +23,7 @@
     padding: 0;
     box-sizing: border-box;
 }
+
 
 body {
     background-image: url("flag-800.png");
@@ -83,9 +84,10 @@ nav {
 .hero {
     background: var(--border);
     text-align: center;
-    padding: 80px 24px 50px;
+    padding: 80px 24px;
     position: relative;
     overflow: hidden;
+    
 }
 
 
@@ -176,16 +178,14 @@ nav {
     position: relative;
 }
 
-.dorm-card-img .badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, .7);
-    backdrop-filter: blur(6px);
+.badge-inline {
     color: var(--gold);
     font-weight: 700;
-    font-size: .85rem;
-    padding: 5px 10px;
+}
+
+.badge-inline.no-reviews {
+    color: var(--text-dim);
+    font-weight: 400;
 }
 
 .dorm-card-body {
@@ -611,10 +611,37 @@ nav {
 }
 
 /* FILTER BAR */
+.filter-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.filter-row .filter-bar {
+    margin-bottom: 0;
+}
+
+.sort-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font: 600 .82rem 'Plus Jakarta Sans', sans-serif;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: .2s;
+    flex-shrink: 0;
+}
+
+.sort-select:hover {
+    border-color: var(--red);
+}
+
 .filter-bar {
     display: flex;
     gap: 8px;
-    margin-bottom: 24px;
     flex-wrap: wrap;
 }
 

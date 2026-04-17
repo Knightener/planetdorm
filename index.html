@@ -40,22 +40,36 @@ function closeNav(){document.getElementById('navLinks').classList.remove('open')
 </div>
  
 <div class="section active" id="section-home">
-  <div class="filter-bar" id="filterBar">
-    <button class="active" onclick="setFilter('all',this)">All</button>
-    <button onclick="setFilter('north',this)">North Campus</button>
-    <button onclick="setFilter('south',this)">South Campus</button>
-    <button onclick="setFilter('commons',this)">The Commons</button>
+  <div class="filter-row">
+    <div class="filter-bar" id="filterBar">
+      <button class="active" onclick="setFilter('all',this)">All</button>
+      <button onclick="setFilter('north',this)">North Campus</button>
+      <button onclick="setFilter('south',this)">South Campus</button>
+      <button onclick="setFilter('commons',this)">The Commons</button>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
+      <option value="default">Sort: Default</option>
+      <option value="rating-desc">Rating: High to Low</option>
+      <option value="rating-asc">Rating: Low to High</option>
+    </select>
   </div>
   <div class="dorm-grid" id="dormGrid"></div>
 </div>
 
 <div class="section" id="section-offcampus">
-  <div class="filter-bar" id="offCampusFilterBar">
-    <button class="active" onclick="setOffCampusFilter('all',this)">All</button>
-    <button onclick="setOffCampusFilter('colpark',this)">College Park</button>
-    <button onclick="setOffCampusFilter('hyattsville',this)">Hyattsville</button>
-    <button onclick="setOffCampusFilter('greenbelt',this)">Greenbelt</button>
-    <button onclick="setOffCampusFilter('riverdale',this)">Riverdale Park</button>
+  <div class="filter-row">
+    <div class="filter-bar" id="offCampusFilterBar">
+      <button class="active" onclick="setOffCampusFilter('all',this)">All</button>
+      <button onclick="setOffCampusFilter('colpark',this)">College Park</button>
+      <button onclick="setOffCampusFilter('hyattsville',this)">Hyattsville</button>
+      <button onclick="setOffCampusFilter('greenbelt',this)">Greenbelt</button>
+      <button onclick="setOffCampusFilter('riverdale',this)">Riverdale Park</button>
+    </div>
+    <select class="sort-select" id="offCampusSortSelect" onchange="setSort(this.value)">
+      <option value="default">Sort: Default</option>
+      <option value="rating-desc">Rating: High to Low</option>
+      <option value="rating-asc">Rating: Low to High</option>
+    </select>
   </div>
   <div class="dorm-grid" id="offCampusDormGrid"></div>
 </div>

@@ -64,17 +64,16 @@ let currentDorm = null;
 let selectedRating = 0;
 let lightboxImages = [];
 let lightboxIndex = 0;
+let currentSort = 'default';
 
 // ─── RENDER DORM GRID ──────────────────────────────────────
 function dormCardHTML(d) {
   return `
     <div class="dorm-card" onclick="showDetail('${d.id}')">
-      <div class="dorm-card-img" style="${d.imgs[0] ? `background-image:url('${d.imgs[0]}')` : ''}">
-        <div class="badge">${d.rating.toFixed(1)} ★</div>
-      </div>
+      <div class="dorm-card-img" style="${d.imgs[0] ? `background-image:url('${d.imgs[0]}')` : ''}"></div>
       <div class="dorm-card-body">
         <h3>${d.name}</h3>
-        <div class="meta"><span>${d.type}</span><span>${d.reviews} ${d.reviews === 1 ? 'review' : 'reviews'}</span></div>
+        <div class="meta"><span>${d.type}</span><span class="badge-inline${d.reviews === 0 ? ' no-reviews' : ''}">${d.reviews === 0 ? '0 reviews' : `${d.rating.toFixed(1)} ★ · ${d.reviews} ${d.reviews === 1 ? 'review' : 'reviews'}`}</span></div>
         <div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>
       </div>
     </div>
@@ -89,6 +88,22 @@ function matchesSearch(d, q) {
     (d.tags && d.tags.some(t => t.t.toLowerCase().includes(q)));
 }
 
+function applySorting(arr) {
+  if (currentSort === 'rating-desc') return [...arr].sort((a, b) => {
+    if (a.reviews === 0 && b.reviews === 0) return 0;
+    if (a.reviews === 0) return 1;
+    if (b.reviews === 0) return -1;
+    return b.rating - a.rating;
+  });
+  if (currentSort === 'rating-asc') return [...arr].sort((a, b) => {
+    if (a.reviews === 0 && b.reviews === 0) return 0;
+    if (a.reviews === 0) return 1;
+    if (b.reviews === 0) return -1;
+    return a.rating - b.rating;
+  });
+  return arr;
+}
+
 function renderDorms() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   const grid = document.getElementById('dormGrid');
@@ -97,7 +112,7 @@ function renderDorms() {
     const matchArea = currentFilter === 'all' || d.area === currentFilter;
     return matchCampus && matchArea && matchesSearch(d, q);
   });
-  grid.innerHTML = filtered.map(dormCardHTML).join('');
+  grid.innerHTML = applySorting(filtered).map(dormCardHTML).join('');
 }
 
 function renderOffCampusDorms() {
@@ -108,7 +123,12 @@ function renderOffCampusDorms() {
     const matchArea = offCampusFilter === 'all' || d.area === offCampusFilter;
     return matchCampus && matchArea && matchesSearch(d, q);
   });
-  grid.innerHTML = filtered.map(dormCardHTML).join('');
+  grid.innerHTML = applySorting(filtered).map(dormCardHTML).join('');
+}
+
+function setSort(val) {
+  currentSort = val;
+  filterDorms();
 }
 
 function filterDorms() {
@@ -340,6 +360,7 @@ window.openLightbox = openLightbox;
 window.closeLightbox = closeLightbox;
 window.navLightbox = navLightbox;
 window.showSection = showSection;
+window.setSort = setSort;
 
 // Safe initialization
 document.addEventListener('DOMContentLoaded', () => {
