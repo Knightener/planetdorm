@@ -74,6 +74,10 @@ nav {
     transition: .2s;
 }
 
+.nav-links button {
+    border-radius: 6px;
+}
+
 .nav-links button:hover,
 .nav-links button.active {
     color: var(--text);
@@ -116,6 +120,7 @@ nav {
     margin: auto;
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: 8px;
     overflow: hidden;
 }
 
@@ -161,6 +166,7 @@ nav {
 .dorm-card {
     background: var(--surface);
     border: 2px solid var(--border);
+    border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
     transition: .25s;
@@ -223,6 +229,7 @@ nav {
     font-size: .72rem;
     font-weight: 600;
     padding: 3px 8px;
+    border-radius: 4px;
     background: var(--surface2);
     color: var(--text-dim);
 }
@@ -264,18 +271,24 @@ nav {
 }
 
 .detail-back {
-    background: none;
+    background: var(--surface3);
     border: none;
     color: var(--text-dim);
-    font: 600 .9rem 'DM Serif Display', serif;
+    font: 500 .82rem 'DM Serif Display', serif;
+    letter-spacing: .04em;
+    text-transform: uppercase;
     cursor: pointer;
-    margin-bottom: 20px;
-    display: flex;
+    margin-bottom: 28px;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
+    padding: 7px 14px 7px 10px;
+    border-radius: 999px;
+    transition: color .18s, background .18s;
 }
 
 .detail-back:hover {
+    background: rgba(255,255,255,.08);
     color: var(--text);
 }
 
@@ -323,6 +336,7 @@ nav {
 .stat-box {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: 8px;
     padding: 14px;
 }
 
@@ -347,6 +361,7 @@ nav {
     background: var(--red);
     color: #fff;
     border: none;
+    border-radius: 8px;
     font: 700 .95rem 'DM Serif Display', serif;
     cursor: pointer;
     transition: .2s;
@@ -364,6 +379,7 @@ nav {
 .review-card {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: 10px;
     padding: 20px;
     margin-bottom: 14px;
 }
@@ -440,7 +456,7 @@ nav {
     width: 100%;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 0;
+    border-radius: 6px;
     color: var(--text);
     padding: 12px 16px;
     font: 500 1rem 'DM Serif Display', serif;
@@ -490,7 +506,7 @@ nav {
     flex: 1;
     padding: 15px;
     border: none;
-    border-radius: 0;
+    border-radius: 8px;
     font: 700 1rem 'DM Serif Display', serif;
     cursor: pointer;
     transition: .2s;
@@ -528,7 +544,7 @@ nav {
     color: var(--text-dim);
     padding: 11px 4px;
     font: 600 .95rem 'DM Serif Display', serif;
-    border-radius: 0;
+    border-radius: 6px;
     cursor: pointer;
     transition: border-color .15s, color .15s, background .15s;
     text-align: center;
@@ -644,6 +660,7 @@ nav {
     transform: translateY(-50%);
     background: rgba(255, 255, 255, .1);
     border: none;
+    border-radius: 8px;
     color: #fff;
     font-size: 1.6rem;
     width: 48px;
@@ -681,6 +698,7 @@ nav {
 .sort-select {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: 6px;
     color: var(--text-dim);
     font: 600 .82rem 'DM Serif Display', serif;
     padding: 8px 16px;
@@ -702,6 +720,7 @@ nav {
 .filter-bar button {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: 6px;
     color: var(--text-dim);
     font: 600 .82rem 'DM Serif Display', serif;
     padding: 8px 16px;
