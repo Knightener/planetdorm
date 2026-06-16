@@ -10,6 +10,8 @@ async function loadAllReviews() {
 
   if (error) {
     console.error('Error loading reviews:', error);
+    const overlay = document.getElementById('maintenanceOverlay');
+    overlay.style.display = 'flex';
     return;
   }
 
@@ -364,6 +366,11 @@ async function submitReview() {
     return;
   }
 
+  if (!hcaptcha.getResponse()) {
+    showToast('Please complete the captcha before submitting.', 'error');
+    return;
+  }
+
   const { error } = await supabase
     .from('reviews')
     .insert({
@@ -382,6 +389,7 @@ async function submitReview() {
     document.getElementById('reviewName').value = '';
     document.getElementById('reviewText').value = '';
     selectedRating = 0;
+    hcaptcha.reset();
     showToast('Review submitted successfully! Thanks for contributing.', 'success');
   }
 }

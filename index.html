@@ -109,6 +109,7 @@ function closeNav(){document.getElementById('navLinks').classList.remove('open')
     </select>
     <label>Your Review</label>
     <textarea id="reviewText" placeholder="What was your experience like?" maxlength="2000"></textarea>
+    <div class="h-captcha" data-sitekey="48ce88c8-9f00-47ee-a3f6-900c5abe7686" data-theme="dark"></div>
     <div class="btn-row">
       <button class="cancel-btn" onclick="closeModal()">Cancel</button>
       <button class="submit-btn" onclick="submitReview()">Submit Review</button>
@@ -118,6 +119,12 @@ function closeNav(){document.getElementById('navLinks').classList.remove('open')
  
 <div id="toast" class="toast"></div>
 
+<div id="maintenanceOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#0d1117;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;">
+  <img src="umd logo.png" alt="PlanetDorm" style="width:80px;margin-bottom:1.5rem;opacity:0.85;">
+  <h1 style="color:#EAA000;font-family:'Merriweather',serif;margin-bottom:0.75rem;">We'll be right back</h1>
+  <p style="color:#ccc;font-size:1.1rem;max-width:400px;">The server is temporarily down. We will be back up soon!</p>
+</div>
+
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
   <button class="lightbox-nav prev" onclick="event.stopPropagation();navLightbox(-1)">&#8249;</button>
@@ -125,6 +132,7 @@ function closeNav(){document.getElementById('navLinks').classList.remove('open')
   <button class="lightbox-nav next" onclick="event.stopPropagation();navLightbox(1)">&#8250;</button>
 </div>
  
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <script type="module" src="script.js"></script>
 
 </body>
