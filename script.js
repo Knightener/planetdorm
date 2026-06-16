@@ -77,6 +77,7 @@ let offCampusFilter = 'all';
 let currentSection = 'home';
 let currentDorm = null;
 let selectedRating = 0;
+let selectedYear = '';
 let lightboxImages = [];
 let lightboxIndex = 0;
 let currentSort = 'default';
@@ -194,7 +195,7 @@ function showDetail(id) {
 
         </div>
         ${d.tags && d.tags.length ? `<div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>` : ''}
-        <button class="write-review-btn" onclick="openModal()">Write a Review</button>
+        <button class="write-review-btn" onclick="openInlineForm()">Write a Review</button>
       </div>
     </div>
     ${d.lat && d.lng ? `<div class="detail-map-wrap"><div id="detailMapFrame"></div></div>` : ''}
@@ -229,6 +230,7 @@ function backToList() {
     detailMap.remove();
     detailMap = null;
   }
+  closeInlineForm();
   document.getElementById('section-detail').classList.remove('active');
   document.getElementById('section-detail').style.display = 'none';
   currentDorm = null;
@@ -307,14 +309,45 @@ function navLightbox(dir) {
 }
 
 // ─── REVIEW MODAL ───────────────────────────────────────────
-function openModal() {
-  document.getElementById('reviewModal').classList.add('active');
-  selectedRating = 0;
-  updateStars();
+function initYearPicker() {
+  const now = new Date();
+  const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
+  const picker = document.getElementById('yearPicker');
+  picker.innerHTML = '';
+  for (let y = startYear; y >= startYear - 10; y--) {
+    const label = `${y}-${y + 1}`;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'year-btn';
+    btn.textContent = label;
+    btn.onclick = () => {
+      selectedYear = label;
+      picker.querySelectorAll('.year-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    picker.appendChild(btn);
+  }
 }
 
-function closeModal() {
-  document.getElementById('reviewModal').classList.remove('active');
+function openInlineForm() {
+  const form = document.getElementById('inlineReviewForm');
+  form.style.display = 'block';
+  selectedRating = 0;
+  selectedYear = '';
+  updateStars();
+  initYearPicker();
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeInlineForm() {
+  const form = document.getElementById('inlineReviewForm');
+  form.style.display = 'none';
+  document.getElementById('reviewName').value = '';
+  document.getElementById('reviewText').value = '';
+  document.getElementById('charCount').textContent = '0 / 2000';
+  selectedRating = 0;
+  selectedYear = '';
+  if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
 }
 
 function setRating(n) {
@@ -340,7 +373,12 @@ function showToast(message, type = 'success') {
 async function submitReview() {
   const name = document.getElementById('reviewName').value.trim() || 'Anonymous Terp';
   const text = document.getElementById('reviewText').value.trim();
-  const year = document.getElementById('reviewYear').value;
+  const year = selectedYear;
+
+  if (!year) {
+    showToast('Please select the year you lived there.', 'error');
+    return;
+  }
 
   // Require a star rating before submitting
   if (selectedRating === 0) {
@@ -385,11 +423,7 @@ async function submitReview() {
     console.error(error);
     showToast('Failed to submit review. Please try again later.', 'error');
   } else {
-    closeModal();
-    document.getElementById('reviewName').value = '';
-    document.getElementById('reviewText').value = '';
-    selectedRating = 0;
-    hcaptcha.reset();
+    closeInlineForm();
     showToast('Review submitted successfully! Thanks for contributing.', 'success');
   }
 }
@@ -400,8 +434,8 @@ window.showDetail = showDetail;
 window.filterDorms = filterDorms;
 window.setFilter = setFilter;
 window.setOffCampusFilter = setOffCampusFilter;
-window.openModal = openModal;
-window.closeModal = closeModal;
+window.openInlineForm = openInlineForm;
+window.closeInlineForm = closeInlineForm;
 window.setRating = setRating;
 window.submitReview = submitReview;
 window.backToList = backToList;
@@ -416,4 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDorms();
   loadAllReviews();
   setupReviewsListener();
+  document.getElementById('reviewText').addEventListener('input', function () {
+    document.getElementById('charCount').textContent = `${this.value.length} / 2000`;
+  });
 });

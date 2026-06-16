@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Merriweather:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
     --red: #E21833;
@@ -14,7 +14,7 @@
     --green: #34D399;
     --amber: #FBBF24;
     --blue: #60A5FA;
-    font-family: 'Merriweather', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--text);
 }
 
@@ -49,7 +49,7 @@ nav {
 }
 
 .logo {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 1.6rem;
     color: var(--red);
     cursor: pointer;
@@ -92,7 +92,7 @@ nav {
 
 
 .hero h1 {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 3.2rem;
     line-height: 1.15;
     margin-bottom: 12px;
@@ -146,7 +146,7 @@ nav {
 }
 
 .section-title {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 1.8rem;
     margin-bottom: 24px;
 }
@@ -189,7 +189,7 @@ nav {
 }
 
 .dorm-card-body {
-    padding: 16px;
+    padding: 22px;
 }
 
 .dorm-card-body h3 {
@@ -219,6 +219,7 @@ nav {
 }
 
 .tag {
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: .72rem;
     font-weight: 600;
     padding: 3px 8px;
@@ -253,13 +254,13 @@ nav {
 
 .detail-view.active {
     display: block;
-    max-width: 960px;
+    max-width: 1200px;
     margin: 40px auto 60px;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 14px;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-    padding: 32px 36px 48px;
+    padding: 40px 48px 60px;
 }
 
 .detail-back {
@@ -287,7 +288,7 @@ nav {
 
 .detail-gallery {
     width: 100%;
-    height: 320px;
+    height: 380px;
     overflow: hidden;
     border-radius: 8px;
 }
@@ -301,12 +302,13 @@ nav {
 }
 
 .detail-info h2 {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 2rem;
     margin-bottom: 6px;
 }
 
 .detail-info .meta {
+    font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--text-dim);
     margin-bottom: 16px;
 }
@@ -325,6 +327,7 @@ nav {
 }
 
 .stat-box .label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: .75rem;
     color: var(--text-dim);
     text-transform: uppercase;
@@ -333,6 +336,7 @@ nav {
 }
 
 .stat-box .val {
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 1.4rem;
     font-weight: 700;
 }
@@ -400,95 +404,145 @@ nav {
 }
 
 /* WRITE REVIEW MODAL */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    justify-content: center;
-    align-items: center;
+.review-form {
+    border-top: 1px solid var(--border);
+    padding: 40px 0 60px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.modal-overlay.active {
-    display: flex;
+.review-form h3 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.8rem;
+    margin: 0 0 28px;
+    text-align: center;
 }
 
-.modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 36px;
-    width: 90%;
-    max-width: 480px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 4px 16px rgba(0, 0, 0, 0.2);
+.modal-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 0;
 }
 
-.modal h3 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.4rem;
-    margin-bottom: 20px;
-}
-
-.modal label {
+.review-form label {
     display: block;
-    font-size: .85rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .95rem;
     font-weight: 600;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     color: var(--text-dim);
 }
 
-.modal input,
-.modal select,
-.modal textarea {
+.review-form input,
+.review-form textarea {
     width: 100%;
     background: var(--surface2);
     border: 1px solid var(--border);
+    border-radius: 0;
     color: var(--text);
-    padding: 10px 14px;
-    font: 500 .9rem 'Plus Jakarta Sans', sans-serif;
-    margin-bottom: 16px;
+    padding: 12px 16px;
+    font: 500 1rem 'Plus Jakarta Sans', sans-serif;
+    margin-bottom: 20px;
     outline: none;
+    transition: border-color .15s;
+    box-sizing: border-box;
 }
 
-.modal textarea {
-    height: 120px;
+.review-form textarea {
+    height: 130px;
     resize: vertical;
+    margin-bottom: 4px;
 }
 
-.modal input:focus,
-.modal select:focus,
-.modal textarea:focus {
+.review-form input:focus,
+.review-form textarea:focus {
     border-color: var(--red);
 }
 
-.modal .btn-row {
-    display: flex;
-    gap: 10px;
+.textarea-wrap {
+    position: relative;
+    margin-bottom: 20px;
 }
 
-.modal .btn-row button {
+.char-count {
+    display: block;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    text-align: right;
+    font-size: .85rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.captcha-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.review-form .btn-row {
+    display: flex;
+    gap: 12px;
+}
+
+.review-form .btn-row button {
     flex: 1;
-    padding: 12px;
+    padding: 15px;
     border: none;
-    font: 700 .9rem 'Plus Jakarta Sans', sans-serif;
+    border-radius: 0;
+    font: 700 1rem 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     transition: .2s;
 }
 
-.modal .cancel-btn {
+.review-form .cancel-btn {
     background: var(--surface2);
     color: var(--text-dim);
 }
 
-.modal .submit-btn {
+.review-form .cancel-btn:hover {
+    background: var(--surface3);
+    color: var(--text);
+}
+
+.review-form .submit-btn {
     background: var(--red);
     color: #fff;
 }
 
-.modal .submit-btn:hover {
+.review-form .submit-btn:hover {
     background: var(--red-dark);
+}
+
+.year-picker {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.year-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 11px 4px;
+    font: 600 .95rem 'Plus Jakarta Sans', sans-serif;
+    border-radius: 0;
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+    text-align: center;
+}
+
+.year-btn:hover {
+    border-color: var(--red);
+    color: var(--text);
+}
+
+.year-btn.selected {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
 }
 
 .star-input {
@@ -498,7 +552,7 @@ nav {
 }
 
 .star-input span {
-    font-size: 1.6rem;
+    font-size: 2.2rem;
     cursor: pointer;
     color: var(--surface3);
     transition: .15s;
