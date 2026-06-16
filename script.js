@@ -445,11 +445,28 @@ window.navLightbox = navLightbox;
 window.showSection = showSection;
 window.setSort = setSort;
 
+// ─── SEARCH PLACEHOLDER TYPEWRITER ─────────────────────────
+function startPlaceholderTypewriter() {
+  const el = document.getElementById('searchInput');
+  const phrases = ['Search dorms...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
+  let i = 0, j = 0, del = false, pause = 0;
+
+  setInterval(() => {
+    if (document.activeElement === el || el.value) return;
+    if (pause-- > 0) return;
+    del ? j-- : j++;
+    el.placeholder = phrases[i].slice(0, j);
+    if (!del && j === phrases[i].length) { del = true; pause = 18; }
+    if (del && j === 0) { del = false; i = (i + 1) % phrases.length; pause = 4; }
+  }, 100);
+}
+
 // Safe initialization
 document.addEventListener('DOMContentLoaded', () => {
   renderDorms();
   loadAllReviews();
   setupReviewsListener();
+  startPlaceholderTypewriter();
   document.getElementById('reviewText').addEventListener('input', function () {
     document.getElementById('charCount').textContent = `${this.value.length} / 2000`;
   });

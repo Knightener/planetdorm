@@ -200,6 +200,8 @@ nav {
 
 .dorm-card-body h3 {
     font-size: 1.1rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.75);
     margin-bottom: 4px;
 }
 
@@ -317,6 +319,8 @@ nav {
 .detail-info h2 {
     font-family: 'DM Serif Display', serif;
     font-size: 2rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.75);
     margin-bottom: 6px;
 }
 
@@ -352,7 +356,8 @@ nav {
 .stat-box .val {
     font-family: 'DM Serif Display', serif;
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .write-review-btn {
