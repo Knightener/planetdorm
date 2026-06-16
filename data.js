@@ -102,7 +102,7 @@ export const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9924, lng: -76.9459,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/la-plata-hall-card.jpg?itok=Vakttxhe"],
-    tags: [{ t: 'Integrated Life Sciences LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Integrated Life Sciences LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
 
@@ -113,7 +113,7 @@ export const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9909, lng: -76.9452,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/johnson-whittle-hall-card.jpg?itok=SwfKvXcR"],
-    tags: [{ t: 'University Honors', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
+    tags: [{ t: 'University Honors', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -122,7 +122,7 @@ export const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9919, lng: -76.9450,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/pyon-chen-hall-card.png?itok=9uJ3p-6_"],
-    tags: [{ t: 'University Honors', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
+    tags: [{ t: 'University Honors', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
 
@@ -133,7 +133,7 @@ export const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9939, lng: -76.9498,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/oakland-hall-card.jpeg?itok=cDAAL9M_"],
-    tags: [{ t: 'Semi-Suite', c: 'good' }, { t: 'A/C', c: 'good' }, { t: '24-Hr Service Desk', c: 'good' }],
+    tags: [{ t: 'Semi-Suite', c: 'good' }, { t: 'A/C', c: 'good' }, { t: '24-Hr Service Desk', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
 
@@ -144,7 +144,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9860, lng: -76.9468,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/anne-arundel-hall-card.png?itok=T78Xc6sx"],
-    tags: [{ t: 'Honors Humanities LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Honors Humanities LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -171,7 +171,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9867, lng: -76.9460,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/dorchester-hall-card.jpeg?itok=paBcSgGl"],
-    tags: [{ t: 'Honors Global Challenges LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Honors Global Challenges LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -180,7 +180,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9831, lng: -76.9457,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/prince-frederick-card.jpg?itok=LG0ao1ZG"],
-    tags: [{ t: 'Multiple LLPs', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Semi-Suite/Suite', c: 'good' }],
+    tags: [{ t: 'Multiple LLPs', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Semi-Suite/Suite', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -189,7 +189,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9853, lng: -76.9461,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/queen-annes-hall-card.jpg?itok=HeUF1d8C"],
-    tags: [{ t: "Writers' House LLP", c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: "Writers' House LLP", c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -198,7 +198,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9851, lng: -76.9456,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/somerset-hall-card.jpeg?itok=vsNNUw0J"],
-    tags: [{ t: 'BioFIRE LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'BioFIRE LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -207,7 +207,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9869, lng: -76.9456,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/st-marys-hall-card.jpeg?itok=_USWcu1l"],
-    tags: [{ t: 'Language House LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Suite-style', c: 'good' }],
+    tags: [{ t: 'Language House LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Suite-style', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -236,7 +236,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9845, lng: -76.9334,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/leonardtown-community-card.jpg?itok=U-Z1R5bm"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Newer Building', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
 
@@ -247,7 +247,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9816, lng: -76.9414,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/allegany-hall-card.jpeg?itok=xg44k9l3"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -256,7 +256,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9822, lng: -76.9422,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/baltimore-hall-card.jpg?itok=JGqCIswL"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -265,7 +265,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9829, lng: -76.9423,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/calvert-hall-card.jpg?itok=S1vhEiIO"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -283,7 +283,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9816, lng: -76.9405,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/charles-hall-card.jpeg?itok=PNCCpJHb"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -292,7 +292,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9820, lng: -76.9407,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/frederick-hall-card.jpg?itok=2Cb9kJw4"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -301,7 +301,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9833, lng: -76.9427,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/garrett-hall-card.jpeg?itok=inFNbyCh"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -319,7 +319,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9819, lng: -76.9420,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/howard-hall-card.jpeg?itok=qSoYzx1Y"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -328,7 +328,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9833, lng: -76.9418,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/kent-hall-card.jpg?itok=7oQLUoCR"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -337,7 +337,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9819, lng: -76.9393,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/montgomery-hall-card.png?itok=U1yscOCI"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -346,7 +346,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9826, lng: -76.9418,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/prince-georges-hall-card.jpeg?itok=g34wbb0Q"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -355,7 +355,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9834, lng: -76.9423,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/talbot-hall-card.jpg?itok=3JYb2JS7"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
   {
@@ -364,7 +364,7 @@ export const dorms = [
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9818, lng: -76.9414,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/washington-hall-card.jpeg?itok=8dqumw97"],
-    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }],
+    tags: [{ t: 'Suite/Apartment', c: 'good' }, { t: 'A/C', c: 'good' }, { t: 'Open on Breaks', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
 ];
