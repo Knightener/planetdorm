@@ -56,6 +56,19 @@ function setupReviewsListener() {
     .subscribe();
 }
 
+// ─── UTILS ──────────────────────────────────────────────────
+// Converts characters like < > & " ' into safe HTML entities so that
+// user-submitted text is always displayed as plain text and never
+// interpreted as HTML or JavaScript by the browser (prevents XSS attacks).
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')   // must be first — avoids double-escaping
+    .replace(/</g, '&lt;')    // blocks opening HTML tags
+    .replace(/>/g, '&gt;')    // blocks closing HTML tags
+    .replace(/"/g, '&quot;')  // blocks breaking out of HTML attributes
+    .replace(/'/g, '&#39;');  // blocks single-quote injection
+}
+
 // ─── STATE ──────────────────────────────────────────────────
 let currentFilter = 'all';
 let offCampusFilter = 'all';
@@ -188,11 +201,11 @@ function showDetail(id) {
       ${allReviews.length === 0 ? `<p class="no-reviews">No reviews yet :(</p>` : allReviews.map(r => `
         <div class="review-card">
           <div class="review-top">
-            <span class="name">${r.name}</span>
-            <span><span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span> <span class="date">${r.date}</span></span>
+            <span class="name">${escHtml(r.name)}</span>
+            <span><span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span> <span class="date">${escHtml(r.date)}</span></span>
           </div>
-          <div class="review-body">${r.text}</div>
-          <div class="review-tags">${(r.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          <div class="review-body">${escHtml(r.text)}</div>
+          <div class="review-tags">${(r.tags || []).map(t => `<span class="tag">${escHtml(t)}</span>`).join('')}</div>
           ${r.created_at ? `<div class="review-posted">Posted: ${new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>` : ''}
         </div>
       `).join('')}
@@ -326,6 +339,30 @@ async function submitReview() {
   const name = document.getElementById('reviewName').value.trim() || 'Anonymous Terp';
   const text = document.getElementById('reviewText').value.trim();
   const year = document.getElementById('reviewYear').value;
+
+  // Require a star rating before submitting
+  if (selectedRating === 0) {
+    showToast('Please select a star rating before submitting.', 'error');
+    return;
+  }
+
+  // Require review text — an empty review is not useful
+  if (!text) {
+    showToast('Please write something before submitting.', 'error');
+    return;
+  }
+
+  // Enforce length limits in JS as a second line of defense.
+  // maxlength on the HTML inputs handles normal users, but someone could
+  // bypass the form and send a raw HTTP request with a huge payload.
+  if (name.length > 100) {
+    showToast('Name is too long (max 100 characters).', 'error');
+    return;
+  }
+  if (text.length > 2000) {
+    showToast('Review is too long (max 2000 characters).', 'error');
+    return;
+  }
 
   const { error } = await supabase
     .from('reviews')

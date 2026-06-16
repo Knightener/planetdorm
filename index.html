@@ -90,7 +90,7 @@ function closeNav(){document.getElementById('navLinks').classList.remove('open')
   <div class="modal">
     <h3>Write a Review</h3>
     <label>Your Name</label>
-    <input type="text" id="reviewName" placeholder="Anonymous Terp">
+    <input type="text" id="reviewName" placeholder="Anonymous Terp" maxlength="100">
     <label>Rating</label>
     <div class="star-input" id="starInput">
       <span onclick="setRating(1)">&#9733;</span>
@@ -107,7 +107,7 @@ function closeNav(){document.getElementById('navLinks').classList.remove('open')
       <option>2022-2023</option>
     </select>
     <label>Your Review</label>
-    <textarea id="reviewText" placeholder="What was your experience like?"></textarea>
+    <textarea id="reviewText" placeholder="What was your experience like?" maxlength="2000"></textarea>
     <div class="btn-row">
       <button class="cancel-btn" onclick="closeModal()">Cancel</button>
       <button class="submit-btn" onclick="submitReview()">Submit Review</button>
