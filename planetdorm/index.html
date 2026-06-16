@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanetDorm</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+ 
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="showSection('home')">Planet<span style="color:#EAA000">Dorm</span></div>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <button class="active" onclick="showSection('home');closeNav()" data-section="home">On-campus</button>
+      <button onclick="showSection('map');closeNav()" data-section="map">Map</button>
+      <button onclick="location.href='about.html'">About</button>
+    </div>
+  </div>
+</nav>
+<script>
+function closeNav(){document.getElementById('navLinks').classList.remove('open');document.getElementById('navToggle').classList.remove('open');}
+</script>
+
+ 
+
+
+<div class="hero" id="heroSection">
+  <h1>Find a residence hall</h1>
+  <p>before you move in...</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search dorms..." oninput="filterDorms()">
+
+  </div>
+</div>
+ 
+<div class="section active" id="section-home">
+  <div class="filter-row">
+    <div class="filter-bar" id="filterBar">
+      <button class="active" onclick="setFilter('all',this)">All</button>
+      <button onclick="setFilter('north',this)">North Campus</button>
+      <button onclick="setFilter('south',this)">South Campus</button>
+      <button onclick="setFilter('commons',this)">The Commons</button>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
+      <option value="default">Sort: Default</option>
+      <option value="rating-desc">Rating: High to Low</option>
+      <option value="rating-asc">Rating: Low to High</option>
+    </select>
+  </div>
+  <div class="dorm-grid" id="dormGrid"></div>
+</div>
+
+<div class="section" id="section-offcampus">
+  <div class="filter-row">
+    <div class="filter-bar" id="offCampusFilterBar">
+      <button class="active" onclick="setOffCampusFilter('all',this)">All</button>
+      <button onclick="setOffCampusFilter('colpark',this)">College Park</button>
+      <button onclick="setOffCampusFilter('hyattsville',this)">Hyattsville</button>
+      <button onclick="setOffCampusFilter('greenbelt',this)">Greenbelt</button>
+      <button onclick="setOffCampusFilter('riverdale',this)">Riverdale Park</button>
+    </div>
+    <select class="sort-select" id="offCampusSortSelect" onchange="setSort(this.value)">
+      <option value="default">Sort: Default</option>
+      <option value="rating-desc">Rating: High to Low</option>
+      <option value="rating-asc">Rating: Low to High</option>
+    </select>
+  </div>
+  <div class="dorm-grid" id="offCampusDormGrid"></div>
+</div>
+ 
+<div class="section detail-view" id="section-detail">
+  <button class="detail-back" onclick="backToList()">&#8592; Back to all dorms</button>
+  <div id="detailContent"></div>
+</div>
+ 
+<div class="section" id="section-map">
+  <div class="map-container">
+    <div id="mapFrame"></div>
+  </div>
+</div>
+ 
+
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal">
+    <h3>Write a Review</h3>
+    <label>Your Name</label>
+    <input type="text" id="reviewName" placeholder="Anonymous Terp">
+    <label>Rating</label>
+    <div class="star-input" id="starInput">
+      <span onclick="setRating(1)">&#9733;</span>
+      <span onclick="setRating(2)">&#9733;</span>
+      <span onclick="setRating(3)">&#9733;</span>
+      <span onclick="setRating(4)">&#9733;</span>
+      <span onclick="setRating(5)">&#9733;</span>
+    </div>
+    <label>Year Lived There</label>
+    <select id="reviewYear">
+      <option>2025-2026</option>
+      <option>2024-2025</option>
+      <option>2023-2024</option>
+      <option>2022-2023</option>
+    </select>
+    <label>Your Review</label>
+    <textarea id="reviewText" placeholder="What was your experience like?"></textarea>
+    <div class="btn-row">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="submit-btn" onclick="submitReview()">Submit Review</button>
+    </div>
+  </div>
+</div>
+ 
+<div id="toast" class="toast"></div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <button class="lightbox-nav prev" onclick="event.stopPropagation();navLightbox(-1)">&#8249;</button>
+  <img id="lightboxImg" src="">
+  <button class="lightbox-nav next" onclick="event.stopPropagation();navLightbox(1)">&#8250;</button>
+</div>
+ 
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
+ 
