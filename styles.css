@@ -67,15 +67,12 @@ nav {
 .nav-links button {
     background: none;
     border: none;
+    border-radius: 6px;
     color: var(--text-dim);
     font: 600 .9rem 'DM Serif Display', serif;
     padding: 8px 16px;
     cursor: pointer;
     transition: .2s;
-}
-
-.nav-links button {
-    border-radius: 6px;
 }
 
 .nav-links button:hover,
@@ -755,8 +752,8 @@ nav {
 .nav-toggle span {
     display: block;
     width: 22px;
-    height: 2px;
-    background: var(--text);
+    height: 3px;
+    background: #fff;
     border-radius: 2px;
 }
 

@@ -29,7 +29,6 @@ async function loadAllReviews() {
         date: r.year || 'Unknown',
         rating: r.rating,
         text: r.text,
-        tags: [],
         created_at: r.created_at
       });
     }
@@ -42,8 +41,8 @@ async function loadAllReviews() {
     }
   });
 
-  if (currentSection === 'home') renderDorms();
-  if (currentSection === 'offcampus') renderOffCampusDorms();
+  if (currentSection === 'home') renderDorms('on');
+  if (currentSection === 'offcampus') renderDorms('off');
   if (currentDorm) showDetail(currentDorm.id);
 }
 
@@ -120,26 +119,14 @@ function applySorting(arr) {
   return arr;
 }
 
-function renderDorms() {
+function renderDorms(campus = 'on') {
+  const filter = campus === 'on' ? currentFilter : offCampusFilter;
+  const gridId = campus === 'on' ? 'dormGrid' : 'offCampusDormGrid';
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const grid = document.getElementById('dormGrid');
-  const filtered = dorms.filter(d => {
-    const matchCampus = d.campus === 'on';
-    const matchArea = currentFilter === 'all' || d.area === currentFilter;
-    return matchCampus && matchArea && matchesSearch(d, q);
-  });
-  grid.innerHTML = applySorting(filtered).map(dormCardHTML).join('');
-}
-
-function renderOffCampusDorms() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const grid = document.getElementById('offCampusDormGrid');
-  const filtered = dorms.filter(d => {
-    const matchCampus = d.campus === 'off';
-    const matchArea = offCampusFilter === 'all' || d.area === offCampusFilter;
-    return matchCampus && matchArea && matchesSearch(d, q);
-  });
-  grid.innerHTML = applySorting(filtered).map(dormCardHTML).join('');
+  const filtered = dorms.filter(d =>
+    d.campus === campus && (filter === 'all' || d.area === filter) && matchesSearch(d, q)
+  );
+  document.getElementById(gridId).innerHTML = applySorting(filtered).map(dormCardHTML).join('');
 }
 
 function setSort(val) {
@@ -148,22 +135,21 @@ function setSort(val) {
 }
 
 function filterDorms() {
-  if (currentSection === 'offcampus') renderOffCampusDorms();
-  else renderDorms();
+  renderDorms(currentSection === 'offcampus' ? 'off' : 'on');
 }
 
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('#filterBar button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderDorms();
+  renderDorms('on');
 }
 
 function setOffCampusFilter(f, btn) {
   offCampusFilter = f;
   document.querySelectorAll('#offCampusFilterBar button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderOffCampusDorms();
+  renderDorms('off');
 }
 
 // ─── DETAIL VIEW ────────────────────────────────────────────
@@ -208,7 +194,6 @@ function showDetail(id) {
             <span><span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span> <span class="date">${escHtml(r.date)}</span></span>
           </div>
           <div class="review-body">${escHtml(r.text)}</div>
-          <div class="review-tags">${(r.tags || []).map(t => `<span class="tag">${escHtml(t)}</span>`).join('')}</div>
           ${r.created_at ? `<div class="review-posted">Posted: ${new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>` : ''}
         </div>
       `).join('')}
@@ -253,7 +238,7 @@ function showSection(name) {
   if (name === 'home' || name === 'offcampus') {
     document.getElementById('heroSection').style.display = '';
     document.getElementById('section-' + name).classList.add('active');
-    if (name === 'offcampus') renderOffCampusDorms();
+    if (name === 'offcampus') renderDorms('off');
   } else {
     document.getElementById('heroSection').style.display = 'none';
     document.getElementById('section-' + name).classList.add('active');
@@ -404,7 +389,7 @@ async function submitReview() {
     return;
   }
 
-  if (!hcaptcha.getResponse()) {
+  if (typeof hcaptcha === 'undefined' || !hcaptcha.getResponse()) {
     showToast('Please complete the captcha before submitting.', 'error');
     return;
   }
@@ -429,7 +414,14 @@ async function submitReview() {
 }
 
 
+// ─── NAV ────────────────────────────────────────────────────
+function closeNav() {
+  document.getElementById('navLinks').classList.remove('open');
+  document.getElementById('navToggle').classList.remove('open');
+}
+
 // Make key functions globally available for onclick handlers
+window.closeNav = closeNav;
 window.showDetail = showDetail;
 window.filterDorms = filterDorms;
 window.setFilter = setFilter;
@@ -463,7 +455,7 @@ function startPlaceholderTypewriter() {
 
 // Safe initialization
 document.addEventListener('DOMContentLoaded', () => {
-  renderDorms();
+  renderDorms('on');
   loadAllReviews();
   setupReviewsListener();
   startPlaceholderTypewriter();
