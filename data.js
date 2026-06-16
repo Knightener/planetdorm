@@ -8,7 +8,7 @@ export const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9928, lng: -76.9426,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/bel-air-hall-card.jpeg?itok=hx8ZfWf3"],
-    tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
+    tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
 
   },
   {
@@ -55,7 +55,7 @@ export const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9922, lng: -76.9500,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/denton-hall-card.jpg?itok=H0_AIP2Z"],
-    tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
+    tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
 
   },
   {
@@ -73,7 +73,7 @@ export const dorms = [
     ac: true, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9925, lng: -76.9490,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/elkton-hall-card.jpg?itok=5Ff0OlkT"],
-    tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
+    tags: [{ t: 'A/C', c: 'good' }, { t: 'In-hall Laundry', c: 'good' }],
 
   },
 
@@ -93,7 +93,7 @@ export const dorms = [
     ac: false, dining: 'Yahentamitsi Dining Hall',
     lat: 38.9924, lng: -76.9474,
     imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/hagerstown-hall-card.jpg?itok=8xPwXiCJ"],
-    tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }, { t: 'Closes on Breaks', c: 'bad' }],
+    tags: [{ t: 'No A/C', c: 'bad' }, { t: 'In-hall Laundry', c: 'good' }],
 
   },
   {

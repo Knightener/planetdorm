@@ -216,9 +216,13 @@ function backToList() {
   }
   document.getElementById('section-detail').classList.remove('active');
   document.getElementById('section-detail').style.display = 'none';
-  document.getElementById('heroSection').style.display = '';
-  document.getElementById('section-' + currentSection).classList.add('active');
   currentDorm = null;
+  if (currentSection === 'map') {
+    showSection('home');
+  } else {
+    document.getElementById('heroSection').style.display = '';
+    document.getElementById('section-' + currentSection).classList.add('active');
+  }
 }
 
 // ─── SECTIONS NAV ───────────────────────────────────────────
