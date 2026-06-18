@@ -28,7 +28,7 @@
 
 
 body {
-    background-image: url("flag-800.png");
+    background: #000;
 }
 
 /* NAV */
@@ -85,12 +85,29 @@ nav {
 
 /* HERO */
 .hero {
-    background: var(--border);
+    background: #1a1a1a;
     text-align: center;
     padding: 80px 24px;
     position: relative;
     overflow: hidden;
+}
 
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("flag-800.png");
+    background-size: cover;
+    background-position: center;
+    filter: blur(6px);
+    opacity: 0.45;
+    transform: scale(1.05);
+    z-index: 0;
+}
+
+.hero > * {
+    position: relative;
+    z-index: 1;
 }
 
 
