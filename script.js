@@ -2,16 +2,27 @@ import { supabase } from './supabase.js';
 import { dorms } from './data.js';
 
 // â”€â”€â”€ LOAD REVIEWS FROM SUPABASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function showMaintenanceOverlay() {
+  const overlay = document.getElementById('maintenanceOverlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
 async function loadAllReviews() {
-  const { data, error } = await supabase
-    .from('reviews')
-    .select('*')
-    .order('created_at', { ascending: false });
+  let data, error;
+  try {
+    ({ data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: false }));
+  } catch (e) {
+    console.error('Error loading reviews:', e);
+    showMaintenanceOverlay();
+    return;
+  }
 
   if (error || !data) {
     console.error('Error loading reviews:', error);
-    const overlay = document.getElementById('maintenanceOverlay');
-    overlay.style.display = 'flex';
+    showMaintenanceOverlay();
     return;
   }
 
@@ -454,6 +465,7 @@ function startPlaceholderTypewriter() {
 
 // Safe initialization
 document.addEventListener('DOMContentLoaded', () => {
+  dorms.forEach(d => { d.reviewList = []; });
   renderDorms('on');
   loadAllReviews();
   setupReviewsListener();
