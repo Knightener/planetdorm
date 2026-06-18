@@ -29,6 +29,23 @@ body {
     background-image: url("flag-800.png");
 }
 
+body.detail-open {
+    background-image: none;
+}
+
+body.detail-open::before {
+    content: '';
+    position: fixed;
+    inset: -40px;
+    background-image: var(--dorm-bg-url);
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px);
+    opacity: 0.18;
+    z-index: -1;
+    pointer-events: none;
+}
+
 /* NAV */
 nav {
     position: sticky;
