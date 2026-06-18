@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js';
 import { dorms } from './data.js';
 
-// â”€â”€â”€ LOAD REVIEWS FROM SUPABASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── LOAD REVIEWS FROM SUPABASE ─────────────────────────────
 function showMaintenanceOverlay() {
   const overlay = document.getElementById('maintenanceOverlay');
   if (overlay) overlay.style.display = 'flex';
@@ -61,7 +61,7 @@ async function loadAllReviews() {
   if (currentDorm) showDetail(currentDorm.id);
 }
 
-// â”€â”€â”€ REAL-TIME UPDATES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── REAL-TIME UPDATES ──────────────────────────────────────
 function setupReviewsListener() {
   supabase
     .channel('reviews')
@@ -76,7 +76,7 @@ function setupReviewsListener() {
     });
 }
 
-// â”€â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── UTILS ──────────────────────────────────────────────────
 // Converts characters like < > & " ' into safe HTML entities so that
 // user-submitted text is always displayed as plain text and never
 // interpreted as HTML or JavaScript by the browser (prevents XSS attacks).
@@ -89,7 +89,7 @@ function escHtml(str) {
     .replace(/'/g, '&#39;');  // blocks single-quote injection
 }
 
-// â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── STATE ──────────────────────────────────────────────────
 let currentFilter = 'all';
 let offCampusFilter = 'all';
 let currentSection = 'home';
@@ -100,7 +100,7 @@ let lightboxImages = [];
 let lightboxIndex = 0;
 let currentSort = 'default';
 
-// â”€â”€â”€ RENDER DORM GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── RENDER DORM GRID ──────────────────────────────────────
 function dormCardHTML(d) {
   return `
     <div class="dorm-card" onclick="showDetail('${d.id}')">
@@ -171,7 +171,7 @@ function setOffCampusFilter(f, btn) {
   renderDorms('off');
 }
 
-// â”€â”€â”€ DETAIL VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── DETAIL VIEW ────────────────────────────────────────────
 function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
@@ -250,7 +250,7 @@ function backToList() {
   }
 }
 
-// â”€â”€â”€ SECTIONS NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SECTIONS NAV ───────────────────────────────────────────
 function showSection(name) {
   document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
   document.querySelector(`[data-section="${name}"]`).classList.add('active');
@@ -269,7 +269,7 @@ function showSection(name) {
   if (name === 'map') initMap();
 }
 
-// â”€â”€â”€ MAP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── MAP ────────────────────────────────────────────────────
 let leafletMap = null;
 let detailMap = null;
 
@@ -299,7 +299,7 @@ function initMap() {
   setTimeout(() => leafletMap.invalidateSize(), 100);
 }
 
-// â”€â”€â”€ LIGHTBOX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── LIGHTBOX ───────────────────────────────────────────────
 function openLightbox(imgs, idx) {
   lightboxImages = imgs;
   lightboxIndex = idx;
@@ -316,7 +316,7 @@ function navLightbox(dir) {
   document.getElementById('lightboxImg').src = lightboxImages[lightboxIndex];
 }
 
-// â”€â”€â”€ REVIEW MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── REVIEW MODAL ───────────────────────────────────────────
 function initYearPicker() {
   const now = new Date();
   const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
@@ -437,7 +437,7 @@ async function submitReview() {
 }
 
 
-// â”€â”€â”€ NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── NAV ────────────────────────────────────────────────────
 function closeNav() {
   document.getElementById('navLinks').classList.remove('open');
   document.getElementById('navToggle').classList.remove('open');
@@ -460,7 +460,7 @@ window.navLightbox = navLightbox;
 window.showSection = showSection;
 window.setSort = setSort;
 
-// â”€â”€â”€ SEARCH PLACEHOLDER TYPEWRITER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SEARCH PLACEHOLDER TYPEWRITER ─────────────────────────
 function startPlaceholderTypewriter() {
   const el = document.getElementById('searchInput');
   const phrases = ['Search dorms...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
