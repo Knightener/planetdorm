@@ -407,13 +407,6 @@ nav {
     font-size: .92rem;
 }
 
-.review-card .review-tags {
-    margin-top: 10px;
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
 .review-card .review-posted {
     margin-top: 8px;
     color: var(--text-dim);

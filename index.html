@@ -41,7 +41,7 @@
       <button onclick="setFilter('south',this)">South Campus</button>
       <button onclick="setFilter('commons',this)">The Commons</button>
     </div>
-    <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
+    <select class="sort-select" id="sortSelect" onchange="setSort(this.value,'on')">
       <option value="default">Sort: Default</option>
       <option value="rating-desc">Rating: High to Low</option>
       <option value="rating-asc">Rating: Low to High</option>
@@ -59,7 +59,7 @@
       <button onclick="setOffCampusFilter('greenbelt',this)">Greenbelt</button>
       <button onclick="setOffCampusFilter('riverdale',this)">Riverdale Park</button>
     </div>
-    <select class="sort-select" id="offCampusSortSelect" onchange="setSort(this.value)">
+    <select class="sort-select" id="offCampusSortSelect" onchange="setSort(this.value,'off')">
       <option value="default">Sort: Default</option>
       <option value="rating-desc">Rating: High to Low</option>
       <option value="rating-asc">Rating: Low to High</option>
