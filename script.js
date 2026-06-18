@@ -15,7 +15,7 @@ async function loadAllReviews() {
       .select('*')
       .order('created_at', { ascending: false });
     const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 4000)
+      setTimeout(() => reject(new Error('timeout')), 1500)
     );
     ({ data, error } = await Promise.race([query, timeout]));
   } catch (e) {
