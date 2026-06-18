@@ -8,7 +8,7 @@ async function loadAllReviews() {
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) {
+  if (error || !data) {
     console.error('Error loading reviews:', error);
     const overlay = document.getElementById('maintenanceOverlay');
     overlay.style.display = 'flex';
