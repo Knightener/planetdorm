@@ -105,7 +105,9 @@ function escHtml(str) {
 }
 
 // ─── STATE ──────────────────────────────────────────────────
-let currentFilter = 'all';
+let campusFilters = new Set();
+let roomTypeFilters = new Set();
+let featureFilters = new Set();
 let offCampusFilter = 'all';
 let currentSection = 'home';
 let currentDorm = null;
@@ -156,15 +158,36 @@ function applySorting(arr, sort) {
   return arr;
 }
 
+function passesRoomTypeFilter(d) {
+  if (roomTypeFilters.size === 0) return true;
+  if (roomTypeFilters.has('traditional') && d.type === 'Traditional') return true;
+  if (roomTypeFilters.has('semi-suite') && d.type.includes('Semi-Suite')) return true;
+  if (roomTypeFilters.has('suite') && d.type.includes('Suite') && !d.type.startsWith('Semi-Suite')) return true;
+  if (roomTypeFilters.has('apartment') && d.type.includes('Apartment')) return true;
+  return false;
+}
+
+function passesFeatureFilter(d) {
+  if (featureFilters.has('ac') && !d.ac) return false;
+  if (featureFilters.has('laundry') && !d.tags.some(t => t.t === 'In-hall Laundry')) return false;
+  if (featureFilters.has('llp') && !d.tags.some(t => t.c === 'honors')) return false;
+  return true;
+}
+
 function renderDorms(campus = 'on') {
-  const filter = campus === 'on' ? currentFilter : offCampusFilter;
-  // Pick the correct sort for whichever grid we're rendering.
   const sort = campus === 'on' ? onCampusSort : offCampusSort;
   const gridId = campus === 'on' ? 'dormGrid' : 'offCampusDormGrid';
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const filtered = dorms.filter(d =>
-    d.campus === campus && (filter === 'all' || d.area === filter) && matchesSearch(d, q)
-  );
+  const filtered = dorms.filter(d => {
+    if (d.campus !== campus) return false;
+    if (!matchesSearch(d, q)) return false;
+    if (campus === 'on') {
+      return (campusFilters.size === 0 || campusFilters.has(d.area))
+        && passesRoomTypeFilter(d)
+        && passesFeatureFilter(d);
+    }
+    return offCampusFilter === 'all' || d.area === offCampusFilter;
+  });
   document.getElementById(gridId).innerHTML = applySorting(filtered, sort).map(dormCardHTML).join('');
 }
 
@@ -179,11 +202,44 @@ function filterDorms() {
   renderDorms(currentSection === 'offcampus' ? 'off' : 'on');
 }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('#filterBar button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function syncFilterBtnState() {
+  const anyActive = campusFilters.size > 0 || roomTypeFilters.size > 0 || featureFilters.size > 0;
+  document.getElementById('campusDropdownBtn').classList.toggle('active', anyActive);
+  document.getElementById('dropdownAllBtn').classList.toggle('active', !anyActive);
+}
+
+function setAllFilter() {
+  campusFilters.clear();
+  roomTypeFilters.clear();
+  featureFilters.clear();
+  document.querySelectorAll('#campusDropdownPanel input[type="checkbox"]').forEach(cb => cb.checked = false);
+  syncFilterBtnState();
   renderDorms('on');
+}
+
+function toggleCampusFilter(checkbox) {
+  if (checkbox.checked) campusFilters.add(checkbox.value);
+  else campusFilters.delete(checkbox.value);
+  syncFilterBtnState();
+  renderDorms('on');
+}
+
+function toggleRoomTypeFilter(checkbox) {
+  if (checkbox.checked) roomTypeFilters.add(checkbox.value);
+  else roomTypeFilters.delete(checkbox.value);
+  syncFilterBtnState();
+  renderDorms('on');
+}
+
+function toggleFeatureFilter(checkbox) {
+  if (checkbox.checked) featureFilters.add(checkbox.value);
+  else featureFilters.delete(checkbox.value);
+  syncFilterBtnState();
+  renderDorms('on');
+}
+
+function toggleCampusDropdown() {
+  document.getElementById('campusDropdownPanel').classList.toggle('open');
 }
 
 function setOffCampusFilter(f, btn) {
@@ -222,6 +278,7 @@ function showDetail(id) {
           ${d.tags && d.tags.length ? `<div class="stat-box"><div class="label">Features</div><div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div></div>` : ''}
         </div>
         <button class="write-review-btn" onclick="openInlineForm()">Write a Review</button>
+        ${d.imgs && d.imgs[0] ? (() => { const m = d.imgs[0].match(/\/([^/]+)-card\.[a-z]+/); return m ? `<a class="umd-link-btn" href="https://drf.umd.edu/facilities/residence-halls-communities/${m[1]}" target="_blank" rel="noopener">Official UMD page <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-left:2px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>` : ''; })() : ''}
       </div>
     </div>
     ${d.lat && d.lng ? `<div class="detail-map-wrap"><div id="detailMapFrame"></div></div>` : ''}
@@ -488,7 +545,11 @@ function closeNav() {
 window.closeNav = closeNav;
 window.showDetail = showDetail;
 window.filterDorms = filterDorms;
-window.setFilter = setFilter;
+window.setAllFilter = setAllFilter;
+window.toggleCampusFilter = toggleCampusFilter;
+window.toggleRoomTypeFilter = toggleRoomTypeFilter;
+window.toggleFeatureFilter = toggleFeatureFilter;
+window.toggleCampusDropdown = toggleCampusDropdown;
 window.setOffCampusFilter = setOffCampusFilter;
 window.openInlineForm = openInlineForm;
 window.closeInlineForm = closeInlineForm;
@@ -500,6 +561,13 @@ window.closeLightbox = closeLightbox;
 window.navLightbox = navLightbox;
 window.showSection = showSection;
 window.setSort = setSort;
+
+document.addEventListener('click', e => {
+  const dropdown = document.getElementById('campusDropdown');
+  if (dropdown && !dropdown.contains(e.target)) {
+    document.getElementById('campusDropdownPanel').classList.remove('open');
+  }
+});
 
 // ─── SEARCH PLACEHOLDER TYPEWRITER ─────────────────────────
 function startPlaceholderTypewriter() {

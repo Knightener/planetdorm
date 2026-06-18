@@ -12,7 +12,7 @@
 <body>
 <nav>
   <div class="nav-inner">
-    <div class="logo" onclick="showSection('home')">Planet<span style="color:#EAA000">Dorm</span></div>
+    <div class="logo" onclick="showSection('home')">Planet<span style="color:#ffd200">Dorm</span></div>
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
       <span></span><span></span><span></span>
     </button>
@@ -36,10 +36,33 @@
 <div class="section active" id="section-home">
   <div class="filter-row">
     <div class="filter-bar" id="filterBar">
-      <button class="active" onclick="setFilter('all',this)">All</button>
-      <button onclick="setFilter('north',this)">North Campus</button>
-      <button onclick="setFilter('south',this)">South Campus</button>
-      <button onclick="setFilter('commons',this)">The Commons</button>
+      <div class="filter-dropdown" id="campusDropdown">
+        <button class="filter-dropdown-btn" id="campusDropdownBtn" onclick="toggleCampusDropdown()">Filter</button>
+        <div class="filter-dropdown-panel" id="campusDropdownPanel">
+          <button class="dropdown-all-btn active" id="dropdownAllBtn" onclick="setAllFilter()">All residences</button>
+          <div class="dropdown-sections">
+            <div class="dropdown-col">
+              <p class="dropdown-section-label">Campus</p>
+              <label class="dropdown-check-item"><input type="checkbox" value="north" onchange="toggleCampusFilter(this)"> North Campus</label>
+              <label class="dropdown-check-item"><input type="checkbox" value="south" onchange="toggleCampusFilter(this)"> South Campus</label>
+              <label class="dropdown-check-item"><input type="checkbox" value="commons" onchange="toggleCampusFilter(this)"> The Commons</label>
+            </div>
+            <div class="dropdown-col">
+              <p class="dropdown-section-label">Room Type</p>
+              <label class="dropdown-check-item"><input type="checkbox" value="traditional" onchange="toggleRoomTypeFilter(this)"> Traditional</label>
+              <label class="dropdown-check-item"><input type="checkbox" value="semi-suite" onchange="toggleRoomTypeFilter(this)"> Semi-Suite</label>
+              <label class="dropdown-check-item"><input type="checkbox" value="suite" onchange="toggleRoomTypeFilter(this)"> Suite</label>
+              <label class="dropdown-check-item"><input type="checkbox" value="apartment" onchange="toggleRoomTypeFilter(this)"> Apartment</label>
+            </div>
+            <div class="dropdown-col">
+              <p class="dropdown-section-label">Features</p>
+              <label class="dropdown-check-item"><input type="checkbox" value="ac" onchange="toggleFeatureFilter(this)"> A/C</label>
+              <label class="dropdown-check-item"><input type="checkbox" value="laundry" onchange="toggleFeatureFilter(this)"> In-hall Laundry</label>
+              <label class="dropdown-check-item"><input type="checkbox" value="llp" onchange="toggleFeatureFilter(this)"> Honors / LLP</label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <select class="sort-select" id="sortSelect" onchange="setSort(this.value,'on')">
       <option value="default">Sort: Default</option>
