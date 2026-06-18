@@ -2,6 +2,8 @@ import { supabase } from './supabase.js';
 import { dorms } from './data.js';
 
 // ─── LOAD REVIEWS FROM SUPABASE ─────────────────────────────
+// Shows the full-screen server-down overlay.
+// Shows the full-screen server-down overlay.
 function showMaintenanceOverlay() {
   const overlay = document.getElementById('maintenanceOverlay');
   if (overlay) overlay.style.display = 'flex';
@@ -14,6 +16,8 @@ async function loadAllReviews() {
       .from('reviews')
       .select('*')
       .order('created_at', { ascending: false });
+    // Race the query against a 1.5 s timer — Supabase free-tier pauses hang indefinitely otherwise.
+    // Race the query against a 1.5 s timer — Supabase free-tier pauses hang indefinitely otherwise.
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('timeout')), 1500)
     );
@@ -30,6 +34,7 @@ async function loadAllReviews() {
     return;
   }
 
+  // Reset all dorms so deleted reviews don't linger from the previous load.
   dorms.forEach(d => {
     d.reviewList = [];
     d.reviews = 0;
@@ -69,6 +74,7 @@ function setupReviewsListener() {
       { event: '*', schema: 'public', table: 'reviews' },
       loadAllReviews
     )
+    // CHANNEL_ERROR / TIMED_OUT fire before the HTTP query fails, giving faster overlay detection.
     .subscribe(status => {
       if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         showMaintenanceOverlay();
@@ -122,6 +128,8 @@ function matchesSearch(d, q) {
     (d.tags && d.tags.some(t => t.t.toLowerCase().includes(q)));
 }
 
+// Unreviewed dorms always sort to the bottom regardless of direction.
+// Unreviewed dorms always sort to the bottom regardless of direction.
 function applySorting(arr) {
   if (currentSort === 'rating-desc') return [...arr].sort((a, b) => {
     if (a.reviews === 0 && b.reviews === 0) return 0;
@@ -176,6 +184,8 @@ function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
   currentDorm = d;
+  // Swap the flag background for the dorm's own image while in the detail view.
+  // Swap the flag background for the dorm's own image while in the detail view.
   document.body.style.backgroundImage = 'none';
   const bg = document.getElementById('detailBg');
   if (d.imgs[0]) { bg.style.backgroundImage = `url('${d.imgs[0]}')`; bg.style.display = 'block'; }
@@ -227,6 +237,8 @@ function showDetail(id) {
       attribution: '© OpenStreetMap contributors'
     }).addTo(detailMap);
     L.marker([d.lat, d.lng]).addTo(detailMap).bindPopup(d.name).openPopup();
+    // Leaflet needs the container to be visible before it can measure its size.
+    // Leaflet needs the container to be visible before it can measure its size.
     setTimeout(() => detailMap.invalidateSize(), 100);
   }
 }
@@ -282,6 +294,7 @@ function initMap() {
       attribution: '© OpenStreetMap contributors'
     }).addTo(leafletMap);
   } else {
+    // Re-entering the map tab: clear old markers but keep the tile layer.
     leafletMap.eachLayer(layer => {
       if (layer instanceof L.Marker) leafletMap.removeLayer(layer);
     });
@@ -296,6 +309,8 @@ function initMap() {
     `);
   });
 
+  // Same visibility-timing fix as the detail map.
+  // Same visibility-timing fix as the detail map.
   setTimeout(() => leafletMap.invalidateSize(), 100);
 }
 
@@ -319,6 +334,8 @@ function navLightbox(dir) {
 // ─── REVIEW MODAL ───────────────────────────────────────────
 function initYearPicker() {
   const now = new Date();
+  // Academic year starts in August (month 7); before August the current year hasn't begun yet.
+  // Academic year starts in August (month 7); before August the current year hasn't begun yet.
   const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
   const picker = document.getElementById('yearPicker');
   picker.innerHTML = '';
@@ -355,6 +372,8 @@ function closeInlineForm() {
   document.getElementById('charCount').textContent = '0 / 2000';
   selectedRating = 0;
   selectedYear = '';
+  // hcaptcha may not be loaded yet if the script is still fetching.
+  // hcaptcha may not be loaded yet if the script is still fetching.
   if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
 }
 
@@ -443,7 +462,7 @@ function closeNav() {
   document.getElementById('navToggle').classList.remove('open');
 }
 
-// Make key functions globally available for onclick handlers
+// ES modules don't expose to the global scope, so onclick="..." attributes in HTML can't reach them without this.
 window.closeNav = closeNav;
 window.showDetail = showDetail;
 window.filterDorms = filterDorms;
@@ -467,6 +486,8 @@ function startPlaceholderTypewriter() {
   let i = 0, j = 0, del = false, pause = 0;
 
   setInterval(() => {
+    // Don't animate while the user is typing or has typed something.
+    // Don't animate while the user is typing or has typed something.
     if (document.activeElement === el || el.value) return;
     if (pause-- > 0) return;
     del ? j-- : j++;
@@ -478,6 +499,8 @@ function startPlaceholderTypewriter() {
 
 // Safe initialization
 document.addEventListener('DOMContentLoaded', () => {
+  // Pre-initialize reviewList so showDetail never throws if reviews haven't loaded yet.
+  // Pre-initialize reviewList so showDetail never throws if reviews haven't loaded yet.
   dorms.forEach(d => { d.reviewList = []; });
   renderDorms('on');
   loadAllReviews();
