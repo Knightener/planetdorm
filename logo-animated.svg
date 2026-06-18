@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 32">
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 0.2; }
+      50%       { opacity: 1;   }
+    }
+    .p { animation: pulse 1.4s ease-in-out infinite; }
+    .d { animation: pulse 1.4s ease-in-out infinite; animation-delay: 0.7s; }
+  </style>
+  <text class="p" x="2"  y="26" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="#E21833">P</text>
+  <text class="d" x="16" y="26" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="#ffd200">D</text>
+</svg>

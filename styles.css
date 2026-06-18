@@ -168,18 +168,10 @@ nav {
 .reviews-loading.visible {
     display: flex;
 }
-.reviews-loading::before {
-    content: '';
-    width: 14px;
-    height: 14px;
-    border: 2px solid #333;
-    border-top-color: #EAA000;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+.reviews-loading-icon {
+    width: 56px;
+    height: 48px;
     flex-shrink: 0;
-}
-@keyframes spin {
-    to { transform: rotate(360deg); }
 }
 
 /* DORM GRID */
