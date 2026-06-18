@@ -2,10 +2,20 @@ import { supabase } from './supabase.js';
 import { dorms } from './data.js';
 
 // ─── LOAD REVIEWS FROM SUPABASE ─────────────────────────────
-// Shows the full-screen server-down overlay.
 function showMaintenanceOverlay() {
+  hideReviewsLoading();
   const overlay = document.getElementById('maintenanceOverlay');
   if (overlay) overlay.style.display = 'flex';
+}
+
+function showReviewsLoading() {
+  const el = document.getElementById('reviewsLoading');
+  if (el) el.classList.add('visible');
+}
+
+function hideReviewsLoading() {
+  const el = document.getElementById('reviewsLoading');
+  if (el) el.classList.remove('visible');
 }
 
 async function loadAllReviews() {
@@ -18,7 +28,7 @@ async function loadAllReviews() {
       .order('created_at', { ascending: false });
     // Race the query against a 1.5 s timer — Supabase free-tier pauses hang indefinitely otherwise.
     const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 1500)
+      setTimeout(() => reject(new Error('timeout')), 8000)
     );
     ({ data, error } = await Promise.race([query, timeout]));
   } catch (e) {
@@ -60,6 +70,7 @@ async function loadAllReviews() {
     }
   });
 
+  hideReviewsLoading();
   if (currentSection === 'home') renderDorms('on');
   if (currentSection === 'offcampus') renderDorms('off');
   if (currentDorm) showDetail(currentDorm.id);
@@ -73,10 +84,9 @@ function setupReviewsListener() {
       { event: '*', schema: 'public', table: 'reviews' },
       loadAllReviews
     )
-    // CHANNEL_ERROR / TIMED_OUT fire before the HTTP query fails, giving faster overlay detection.
     .subscribe(status => {
       if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        showMaintenanceOverlay();
+        console.warn('Realtime channel error:', status);
       }
     });
 }
@@ -515,6 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pre-initialize reviewList so showDetail never throws if reviews haven't loaded yet.
   dorms.forEach(d => { d.reviewList = []; });
   renderDorms('on');
+  showReviewsLoading();
   loadAllReviews();
   setupReviewsListener();
   startPlaceholderTypewriter();
