@@ -13,7 +13,8 @@ async function loadAllReviews() {
   try {
     const query = supabase
       .from('reviews')
-      .select('*')
+      // Only fetch the columns we actually use — avoids sending unnecessary data to every visitor.
+      .select('dormId, name, rating, text, year, created_at')
       .order('created_at', { ascending: false });
     // Race the query against a 1.5 s timer — Supabase free-tier pauses hang indefinitely otherwise.
     const timeout = new Promise((_, reject) =>
@@ -102,7 +103,9 @@ let selectedRating = 0;
 let selectedYear = '';
 let lightboxImages = [];
 let lightboxIndex = 0;
-let currentSort = 'default';
+// Two separate sort states so changing the sort on one grid doesn't affect the other.
+let onCampusSort = 'default';
+let offCampusSort = 'default';
 
 // ─── RENDER DORM GRID ──────────────────────────────────────
 function dormCardHTML(d) {
@@ -127,14 +130,14 @@ function matchesSearch(d, q) {
 }
 
 // Unreviewed dorms always sort to the bottom regardless of direction.
-function applySorting(arr) {
-  if (currentSort === 'rating-desc') return [...arr].sort((a, b) => {
+function applySorting(arr, sort) {
+  if (sort === 'rating-desc') return [...arr].sort((a, b) => {
     if (a.reviews === 0 && b.reviews === 0) return 0;
     if (a.reviews === 0) return 1;
     if (b.reviews === 0) return -1;
     return b.rating - a.rating;
   });
-  if (currentSort === 'rating-asc') return [...arr].sort((a, b) => {
+  if (sort === 'rating-asc') return [...arr].sort((a, b) => {
     if (a.reviews === 0 && b.reviews === 0) return 0;
     if (a.reviews === 0) return 1;
     if (b.reviews === 0) return -1;
@@ -145,16 +148,20 @@ function applySorting(arr) {
 
 function renderDorms(campus = 'on') {
   const filter = campus === 'on' ? currentFilter : offCampusFilter;
+  // Pick the correct sort for whichever grid we're rendering.
+  const sort = campus === 'on' ? onCampusSort : offCampusSort;
   const gridId = campus === 'on' ? 'dormGrid' : 'offCampusDormGrid';
   const q = document.getElementById('searchInput').value.toLowerCase();
   const filtered = dorms.filter(d =>
     d.campus === campus && (filter === 'all' || d.area === filter) && matchesSearch(d, q)
   );
-  document.getElementById(gridId).innerHTML = applySorting(filtered).map(dormCardHTML).join('');
+  document.getElementById(gridId).innerHTML = applySorting(filtered, sort).map(dormCardHTML).join('');
 }
 
-function setSort(val) {
-  currentSort = val;
+// campus is passed from the HTML onchange so each sort dropdown only affects its own grid.
+function setSort(val, campus) {
+  if (campus === 'off') offCampusSort = val;
+  else onCampusSort = val;
   filterDorms();
 }
 
@@ -431,6 +438,8 @@ async function submitReview() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // Supabase requires a JWT on all Edge Function calls. The anon key is already
+        // public in supabase.js so including it here adds no new security risk.
         'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxYmZpd2l4bHFzbmpzbXdpcnRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Mjc2OTEsImV4cCI6MjA5MTUwMzY5MX0.Qy2_QBt4l2uRPiLQIKAaao4gNwZf0bkniUob9EtBXMY',
       },
       body: JSON.stringify({
