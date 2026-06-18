@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
 
 :root {
     --red: #E21833;
@@ -37,8 +37,8 @@ body {
     pointer-events: none;
     background-size: cover;
     background-position: center;
-    filter: blur(20px);
-    opacity: 0.35;
+    filter: blur(3px);
+    opacity: 0.55;
 }
 
 /* NAV */

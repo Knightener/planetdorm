@@ -10,10 +10,14 @@ function showMaintenanceOverlay() {
 async function loadAllReviews() {
   let data, error;
   try {
-    ({ data, error } = await supabase
+    const query = supabase
       .from('reviews')
       .select('*')
-      .order('created_at', { ascending: false }));
+      .order('created_at', { ascending: false });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 4000)
+    );
+    ({ data, error } = await Promise.race([query, timeout]));
   } catch (e) {
     console.error('Error loading reviews:', e);
     showMaintenanceOverlay();
@@ -65,7 +69,11 @@ function setupReviewsListener() {
       { event: '*', schema: 'public', table: 'reviews' },
       loadAllReviews
     )
-    .subscribe();
+    .subscribe(status => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        showMaintenanceOverlay();
+      }
+    });
 }
 
 // â”€â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -168,6 +176,7 @@ function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
   currentDorm = d;
+  document.body.style.backgroundImage = 'none';
   const bg = document.getElementById('detailBg');
   if (d.imgs[0]) { bg.style.backgroundImage = `url('${d.imgs[0]}')`; bg.style.display = 'block'; }
   document.getElementById('heroSection').style.display = 'none';
@@ -229,6 +238,7 @@ function backToList() {
   }
   closeInlineForm();
   document.getElementById('detailBg').style.display = 'none';
+  document.body.style.backgroundImage = '';
   document.getElementById('section-detail').classList.remove('active');
   document.getElementById('section-detail').style.display = 'none';
   currentDorm = null;
