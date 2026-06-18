@@ -431,27 +431,37 @@ async function submitReview() {
     return;
   }
 
-  if (typeof hcaptcha === 'undefined' || !hcaptcha.getResponse()) {
+  const captchaToken = typeof hcaptcha !== 'undefined' ? hcaptcha.getResponse() : '';
+  if (!captchaToken) {
     showToast('Please complete the captcha before submitting.', 'error');
     return;
   }
 
-  const { error } = await supabase
-    .from('reviews')
-    .insert({
-      dormId: currentDorm.id,
-      name: name,
-      rating: selectedRating,
-      text: text,
-      year: year
+  let res;
+  try {
+    res = await fetch('https://qqbfiwixlqsnjsmwirtf.supabase.co/functions/v1/submit-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dormId: currentDorm.id,
+        name,
+        rating: selectedRating,
+        text,
+        year,
+        captchaToken,
+      }),
     });
+  } catch {
+    showToast('Network error. Please try again.', 'error');
+    return;
+  }
 
-  if (error) {
-    console.error(error);
-    showToast('Failed to submit review. Please try again later.', 'error');
-  } else {
+  if (res.ok) {
     closeInlineForm();
     showToast('Review submitted successfully! Thanks for contributing.', 'success');
+  } else {
+    const body = await res.json().catch(() => ({}));
+    showToast(body.error || 'Failed to submit review. Please try again later.', 'error');
   }
 }
 
