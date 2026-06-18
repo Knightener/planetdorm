@@ -457,7 +457,8 @@ nav {
     margin-bottom: 0;
 }
 
-.review-form label {
+.review-form label,
+.review-form .review-form-label {
     display: block;
     font-family: 'DM Serif Display', serif;
     font-size: .95rem;
