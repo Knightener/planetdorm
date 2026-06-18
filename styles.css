@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
 
 :root {
     --red: #E21833;
@@ -266,7 +266,7 @@ nav {
     border: 1px solid var(--border);
     border-radius: 14px;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-    padding: 40px 48px 60px;
+    padding: 48px;
 }
 
 .detail-back {
@@ -275,7 +275,6 @@ nav {
     color: var(--text-dim);
     font: 500 .82rem 'DM Serif Display', serif;
     letter-spacing: .04em;
-    text-transform: uppercase;
     cursor: pointer;
     margin-bottom: 28px;
     display: inline-flex;
@@ -861,3 +860,4 @@ nav {
 .stat-box {
     position: relative;
 }
+

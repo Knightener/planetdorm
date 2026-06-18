@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js';
 import { dorms } from './data.js';
 
-// ─── LOAD REVIEWS FROM SUPABASE ─────────────────────────────
+// â”€â”€â”€ LOAD REVIEWS FROM SUPABASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadAllReviews() {
   const { data, error } = await supabase
     .from('reviews')
@@ -46,7 +46,7 @@ async function loadAllReviews() {
   if (currentDorm) showDetail(currentDorm.id);
 }
 
-// ─── REAL-TIME UPDATES ──────────────────────────────────────
+// â”€â”€â”€ REAL-TIME UPDATES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setupReviewsListener() {
   supabase
     .channel('reviews')
@@ -57,20 +57,20 @@ function setupReviewsListener() {
     .subscribe();
 }
 
-// ─── UTILS ──────────────────────────────────────────────────
+// â”€â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Converts characters like < > & " ' into safe HTML entities so that
 // user-submitted text is always displayed as plain text and never
 // interpreted as HTML or JavaScript by the browser (prevents XSS attacks).
 function escHtml(str) {
   return String(str)
-    .replace(/&/g, '&amp;')   // must be first — avoids double-escaping
+    .replace(/&/g, '&amp;')   // must be first â€” avoids double-escaping
     .replace(/</g, '&lt;')    // blocks opening HTML tags
     .replace(/>/g, '&gt;')    // blocks closing HTML tags
     .replace(/"/g, '&quot;')  // blocks breaking out of HTML attributes
     .replace(/'/g, '&#39;');  // blocks single-quote injection
 }
 
-// ─── STATE ──────────────────────────────────────────────────
+// â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let currentFilter = 'all';
 let offCampusFilter = 'all';
 let currentSection = 'home';
@@ -81,7 +81,7 @@ let lightboxImages = [];
 let lightboxIndex = 0;
 let currentSort = 'default';
 
-// ─── RENDER DORM GRID ──────────────────────────────────────
+// â”€â”€â”€ RENDER DORM GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function dormCardHTML(d) {
   return `
     <div class="dorm-card" onclick="showDetail('${d.id}')">
@@ -152,7 +152,7 @@ function setOffCampusFilter(f, btn) {
   renderDorms('off');
 }
 
-// ─── DETAIL VIEW ────────────────────────────────────────────
+// â”€â”€â”€ DETAIL VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
@@ -178,9 +178,8 @@ function showDetail(id) {
           <div class="stat-box"><div class="label">Rating</div><div class="val" style="color:var(--gold)">${d.rating.toFixed(1)} <span style="font-size:.9rem">/ 5</span></div></div>
           <div class="stat-box"><div class="label">${d.reviews === 1 ? 'Review' : 'Reviews'}</div><div class="val">${d.reviews}</div></div>
           <div class="stat-box"><div class="label">Room Types</div><div class="val" style="font-size:1rem">${d.roomTypes}</div></div>
-
+          ${d.tags && d.tags.length ? `<div class="stat-box"><div class="label">Features</div><div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div></div>` : ''}
         </div>
-        ${d.tags && d.tags.length ? `<div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>` : ''}
         <button class="write-review-btn" onclick="openInlineForm()">Write a Review</button>
       </div>
     </div>
@@ -227,7 +226,7 @@ function backToList() {
   }
 }
 
-// ─── SECTIONS NAV ───────────────────────────────────────────
+// â”€â”€â”€ SECTIONS NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showSection(name) {
   document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
   document.querySelector(`[data-section="${name}"]`).classList.add('active');
@@ -246,7 +245,7 @@ function showSection(name) {
   if (name === 'map') initMap();
 }
 
-// ─── MAP ────────────────────────────────────────────────────
+// â”€â”€â”€ MAP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let leafletMap = null;
 let detailMap = null;
 
@@ -276,7 +275,7 @@ function initMap() {
   setTimeout(() => leafletMap.invalidateSize(), 100);
 }
 
-// ─── LIGHTBOX ───────────────────────────────────────────────
+// â”€â”€â”€ LIGHTBOX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openLightbox(imgs, idx) {
   lightboxImages = imgs;
   lightboxIndex = idx;
@@ -293,7 +292,7 @@ function navLightbox(dir) {
   document.getElementById('lightboxImg').src = lightboxImages[lightboxIndex];
 }
 
-// ─── REVIEW MODAL ───────────────────────────────────────────
+// â”€â”€â”€ REVIEW MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function initYearPicker() {
   const now = new Date();
   const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
@@ -371,7 +370,7 @@ async function submitReview() {
     return;
   }
 
-  // Require review text — an empty review is not useful
+  // Require review text â€” an empty review is not useful
   if (!text) {
     showToast('Please write something before submitting.', 'error');
     return;
@@ -414,7 +413,7 @@ async function submitReview() {
 }
 
 
-// ─── NAV ────────────────────────────────────────────────────
+// â”€â”€â”€ NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function closeNav() {
   document.getElementById('navLinks').classList.remove('open');
   document.getElementById('navToggle').classList.remove('open');
@@ -437,7 +436,7 @@ window.navLightbox = navLightbox;
 window.showSection = showSection;
 window.setSort = setSort;
 
-// ─── SEARCH PLACEHOLDER TYPEWRITER ─────────────────────────
+// â”€â”€â”€ SEARCH PLACEHOLDER TYPEWRITER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function startPlaceholderTypewriter() {
   const el = document.getElementById('searchInput');
   const phrases = ['Search dorms...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
@@ -463,3 +462,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('charCount').textContent = `${this.value.length} / 2000`;
   });
 });
+
+
