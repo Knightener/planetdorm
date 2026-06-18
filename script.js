@@ -168,8 +168,8 @@ function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
   currentDorm = d;
-  if (d.imgs[0]) document.body.style.setProperty('--dorm-bg-url', `url('${d.imgs[0]}')`);
-  document.body.classList.add('detail-open');
+  const bg = document.getElementById('detailBg');
+  if (d.imgs[0]) { bg.style.backgroundImage = `url('${d.imgs[0]}')`; bg.style.display = 'block'; }
   document.getElementById('heroSection').style.display = 'none';
   document.getElementById('section-' + currentSection).classList.remove('active');
   const sec = document.getElementById('section-detail');
@@ -228,7 +228,7 @@ function backToList() {
     detailMap = null;
   }
   closeInlineForm();
-  document.body.classList.remove('detail-open');
+  document.getElementById('detailBg').style.display = 'none';
   document.getElementById('section-detail').classList.remove('active');
   document.getElementById('section-detail').style.display = 'none';
   currentDorm = null;

@@ -29,21 +29,16 @@ body {
     background-image: url("flag-800.png");
 }
 
-body.detail-open {
-    background-image: none;
-}
-
-body.detail-open::before {
-    content: '';
+#detailBg {
+    display: none;
     position: fixed;
     inset: -40px;
-    background-image: var(--dorm-bg-url);
+    z-index: 1;
+    pointer-events: none;
     background-size: cover;
     background-position: center;
     filter: blur(20px);
-    opacity: 0.18;
-    z-index: -1;
-    pointer-events: none;
+    opacity: 0.35;
 }
 
 /* NAV */
@@ -284,6 +279,8 @@ nav {
     border-radius: 14px;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
     padding: 48px;
+    position: relative;
+    z-index: 2;
 }
 
 .detail-back {
