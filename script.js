@@ -3,7 +3,6 @@ import { dorms } from './data.js';
 
 // ─── LOAD REVIEWS FROM SUPABASE ─────────────────────────────
 // Shows the full-screen server-down overlay.
-// Shows the full-screen server-down overlay.
 function showMaintenanceOverlay() {
   const overlay = document.getElementById('maintenanceOverlay');
   if (overlay) overlay.style.display = 'flex';
@@ -16,7 +15,6 @@ async function loadAllReviews() {
       .from('reviews')
       .select('*')
       .order('created_at', { ascending: false });
-    // Race the query against a 1.5 s timer — Supabase free-tier pauses hang indefinitely otherwise.
     // Race the query against a 1.5 s timer — Supabase free-tier pauses hang indefinitely otherwise.
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('timeout')), 1500)
@@ -129,7 +127,6 @@ function matchesSearch(d, q) {
 }
 
 // Unreviewed dorms always sort to the bottom regardless of direction.
-// Unreviewed dorms always sort to the bottom regardless of direction.
 function applySorting(arr) {
   if (currentSort === 'rating-desc') return [...arr].sort((a, b) => {
     if (a.reviews === 0 && b.reviews === 0) return 0;
@@ -184,11 +181,6 @@ function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
   currentDorm = d;
-  // Swap the flag background for the dorm's own image while in the detail view.
-  // Swap the flag background for the dorm's own image while in the detail view.
-  document.body.style.backgroundImage = 'none';
-  const bg = document.getElementById('detailBg');
-  if (d.imgs[0]) { bg.style.backgroundImage = `url('${d.imgs[0]}')`; bg.style.display = 'block'; }
   document.getElementById('heroSection').style.display = 'none';
   document.getElementById('section-' + currentSection).classList.remove('active');
   const sec = document.getElementById('section-detail');
@@ -238,7 +230,6 @@ function showDetail(id) {
     }).addTo(detailMap);
     L.marker([d.lat, d.lng]).addTo(detailMap).bindPopup(d.name).openPopup();
     // Leaflet needs the container to be visible before it can measure its size.
-    // Leaflet needs the container to be visible before it can measure its size.
     setTimeout(() => detailMap.invalidateSize(), 100);
   }
 }
@@ -249,8 +240,6 @@ function backToList() {
     detailMap = null;
   }
   closeInlineForm();
-  document.getElementById('detailBg').style.display = 'none';
-  document.body.style.backgroundImage = '';
   document.getElementById('section-detail').classList.remove('active');
   document.getElementById('section-detail').style.display = 'none';
   currentDorm = null;
@@ -453,7 +442,8 @@ async function submitReview() {
         captchaToken,
       }),
     });
-  } catch {
+  } catch (err) {
+    console.error('[submit-review] Network error:', err);
     showToast('Network error. Please try again.', 'error');
     return;
   }
@@ -463,6 +453,7 @@ async function submitReview() {
     showToast('Review submitted successfully! Thanks for contributing.', 'success');
   } else {
     const body = await res.json().catch(() => ({}));
+    console.error('[submit-review] Failed:', res.status, body);
     showToast(body.error || 'Failed to submit review. Please try again later.', 'error');
   }
 }
