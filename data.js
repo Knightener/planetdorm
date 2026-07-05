@@ -206,7 +206,7 @@ export const dorms = [
     rating: 0, reviews: 0, type: 'Suite', roomTypes: 'Doubles, Singles (Suite)',
     ac: true, dining: '251 North Dining Hall',
     lat: 38.9869, lng: -76.9456,
-    imgs: ["https://reslife.umd.edu/sites/default/files/styles/optimized/public/2026-02/st-marys-hall-card.jpeg?itok=_USWcu1l"],
+    imgs: ["https://facilities.umd.edu/sites/default/files/styles/optimized/public/UMDBuildings/062.jpg?itok=ZJMhK8o6"],
     tags: [{ t: 'Language House LLP', c: 'honors' }, { t: 'A/C', c: 'good' }, { t: 'Suite-style', c: 'good' }, { t: 'No In-hall Laundry', c: 'bad' }],
 
   },
