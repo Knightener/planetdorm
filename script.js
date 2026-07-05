@@ -1,7 +1,6 @@
 import { supabase } from './supabase.js';
 import { dorms } from './data.js';
 
-// ─── LOAD REVIEWS FROM SUPABASE ─────────────────────────────
 function showMaintenanceOverlay() {
   hideReviewsLoading();
   const overlay = document.getElementById('maintenanceOverlay');
@@ -23,10 +22,9 @@ async function loadAllReviews() {
   try {
     const query = supabase
       .from('reviews')
-      // Only fetch the columns we actually use — avoids sending unnecessary data to every visitor.
       .select('dormId, name, rating, text, year, created_at')
       .order('created_at', { ascending: false });
-    // Race the query against a 1.5 s timer — Supabase free-tier pauses hang indefinitely otherwise.
+    // Race the query against an 8 s timer - Supabase free-tier pauses hang indefinitely otherwise.
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('timeout')), 8000)
     );
@@ -76,7 +74,6 @@ async function loadAllReviews() {
   if (currentDorm) showDetail(currentDorm.id);
 }
 
-// ─── REAL-TIME UPDATES ──────────────────────────────────────
 function setupReviewsListener() {
   supabase
     .channel('reviews')
@@ -91,20 +88,16 @@ function setupReviewsListener() {
     });
 }
 
-// ─── UTILS ──────────────────────────────────────────────────
-// Converts characters like < > & " ' into safe HTML entities so that
-// user-submitted text is always displayed as plain text and never
-// interpreted as HTML or JavaScript by the browser (prevents XSS attacks).
+// Escape user-submitted text so it can't be interpreted as HTML (XSS).
 function escHtml(str) {
   return String(str)
-    .replace(/&/g, '&amp;')   // must be first â€” avoids double-escaping
-    .replace(/</g, '&lt;')    // blocks opening HTML tags
-    .replace(/>/g, '&gt;')    // blocks closing HTML tags
-    .replace(/"/g, '&quot;')  // blocks breaking out of HTML attributes
-    .replace(/'/g, '&#39;');  // blocks single-quote injection
+    .replace(/&/g, '&amp;')   // & first, so the others aren't double-escaped
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-// ─── STATE ──────────────────────────────────────────────────
 let campusFilters = new Set();
 let roomTypeFilters = new Set();
 let featureFilters = new Set();
@@ -119,14 +112,22 @@ let lightboxIndex = 0;
 let onCampusSort = 'default';
 let offCampusSort = 'default';
 
-// ─── RENDER DORM GRID ──────────────────────────────────────
+// Color tier for a rating: 1-2 red, 3 orange, 4 gold, 5 diamond (averages round to nearest).
+function ratingTier(rating) {
+  const n = Math.round(rating);
+  if (n <= 2) return 'rating-red';
+  if (n === 3) return 'rating-orange';
+  if (n === 4) return 'rating-gold';
+  return 'rating-diamond';
+}
+
 function dormCardHTML(d) {
   return `
     <div class="dorm-card" onclick="showDetail('${d.id}')">
       <div class="dorm-card-img" style="${d.imgs[0] ? `background-image:url('${d.imgs[0]}')` : ''}"></div>
       <div class="dorm-card-body">
         <h3>${d.name}</h3>
-        <div class="meta"><span>${d.type}</span><span class="badge-inline${d.reviews === 0 ? ' no-reviews' : ''}">${d.reviews === 0 ? '0 reviews' : `${d.rating.toFixed(1)} ★ · ${d.reviews} ${d.reviews === 1 ? 'review' : 'reviews'}`}</span></div>
+        <div class="meta"><span>${d.type}</span><span class="badge-inline ${d.reviews === 0 ? 'no-reviews' : ratingTier(d.rating)}">${d.reviews === 0 ? '0 reviews' : `${d.rating.toFixed(1)} ★ · ${d.reviews} ${d.reviews === 1 ? 'review' : 'reviews'}`}</span></div>
         <div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>
       </div>
     </div>
@@ -238,8 +239,37 @@ function toggleFeatureFilter(checkbox) {
   renderDorms('on');
 }
 
+function closeOtherDropdownPanels(exceptPanel) {
+  document.querySelectorAll('.filter-dropdown-panel').forEach(p => {
+    if (p !== exceptPanel) p.classList.remove('open');
+  });
+}
+
 function toggleCampusDropdown() {
-  document.getElementById('campusDropdownPanel').classList.toggle('open');
+  const panel = document.getElementById('campusDropdownPanel');
+  closeOtherDropdownPanels(panel);
+  panel.classList.toggle('open');
+}
+
+const SORT_LABELS = {
+  'default': 'Sort: Default',
+  'rating-desc': 'Rating: High to Low',
+  'rating-asc': 'Rating: Low to High'
+};
+
+function toggleSortDropdown(panelId) {
+  const panel = document.getElementById(panelId);
+  closeOtherDropdownPanels(panel);
+  panel.classList.toggle('open');
+}
+
+function selectSort(btn, val, campus) {
+  const panel = btn.closest('.filter-dropdown-panel');
+  panel.querySelectorAll('.dropdown-all-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  panel.classList.remove('open');
+  panel.previousElementSibling.textContent = SORT_LABELS[val];
+  setSort(val, campus);
 }
 
 function setOffCampusFilter(f, btn) {
@@ -249,7 +279,6 @@ function setOffCampusFilter(f, btn) {
   renderDorms('off');
 }
 
-// ─── DETAIL VIEW ────────────────────────────────────────────
 function showDetail(id) {
   const d = dorms.find(x => x.id === id);
   if (!d) return;
@@ -272,7 +301,7 @@ function showDetail(id) {
         <h2>${d.name}</h2>
         <div class="meta">${d.type} · Built ${d.built} · ${d.area.charAt(0).toUpperCase() + d.area.slice(1)} Campus</div>
         <div class="stat-grid">
-          <div class="stat-box"><div class="label">Rating</div><div class="val" style="color:var(--gold)">${d.rating.toFixed(1)} <span style="font-size:.9rem">/ 5</span></div></div>
+          <div class="stat-box"><div class="label">Rating</div><div class="val${d.reviews > 0 ? ` ${ratingTier(d.rating)}` : ''}">${d.rating.toFixed(1)} <span style="font-size:.9rem">/ 5</span></div></div>
           <div class="stat-box"><div class="label">${d.reviews === 1 ? 'Review' : 'Reviews'}</div><div class="val">${d.reviews}</div></div>
           <div class="stat-box"><div class="label">Room Types</div><div class="val" style="font-size:1rem">${d.roomTypes}</div></div>
           ${d.tags && d.tags.length ? `<div class="stat-box"><div class="label">Features</div><div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div></div>` : ''}
@@ -288,7 +317,7 @@ function showDetail(id) {
         <div class="review-card">
           <div class="review-top">
             <span class="name">${escHtml(r.name)}</span>
-            <span><span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span> <span class="date">${escHtml(r.date)}</span></span>
+            <span><span class="stars ${ratingTier(r.rating)}">${'★'.repeat(r.rating)}</span><span class="stars stars-empty">${'☆'.repeat(5 - r.rating)}</span> <span class="date">${escHtml(r.date)}</span></span>
           </div>
           <div class="review-body">${escHtml(r.text)}</div>
           ${r.created_at ? `<div class="review-posted">Posted: ${new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>` : ''}
@@ -298,10 +327,8 @@ function showDetail(id) {
   `;
 
   if (d.lat && d.lng) {
-    detailMap = L.map('detailMapFrame').setView([d.lat, d.lng], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(detailMap);
+    detailMap = L.map('detailMapFrame', CAMPUS_MAP_OPTIONS).setView([d.lat, d.lng], 16);
+    addBaseTiles(detailMap);
     L.marker([d.lat, d.lng]).addTo(detailMap).bindPopup(d.name).openPopup();
     // Leaflet needs the container to be visible before it can measure its size.
     setTimeout(() => detailMap.invalidateSize(), 100);
@@ -325,7 +352,6 @@ function backToList() {
   }
 }
 
-// ─── SECTIONS NAV ───────────────────────────────────────────
 function showSection(name) {
   document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
   document.querySelector(`[data-section="${name}"]`).classList.add('active');
@@ -341,21 +367,37 @@ function showSection(name) {
     document.getElementById('heroSection').style.display = 'none';
     document.getElementById('section-' + name).classList.add('active');
   }
+  document.getElementById('siteDisclaimer').style.display = name === 'map' ? 'none' : '';
   if (name === 'map') initMap();
 }
 
-// ─── MAP ────────────────────────────────────────────────────
 let leafletMap = null;
 let detailMap = null;
+
+// Keep the viewport on and around UMD's campus.
+const CAMPUS_BOUNDS = [[38.970, -76.975], [39.005, -76.915]];
+const CAMPUS_MAP_OPTIONS = {
+  maxBounds: CAMPUS_BOUNDS,
+  maxBoundsViscosity: 1.0,
+  minZoom: 14,
+  maxZoom: 19
+};
+
+// One basemap for both themes; dark mode restyles the tiles with a CSS
+// filter (see .leaflet-tile-pane in styles.css) so no labels are lost.
+function addBaseTiles(map) {
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(map);
+}
 
 function initMap() {
   const onCampusDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
 
   if (!leafletMap) {
-    leafletMap = L.map('mapFrame').setView([38.9875, -76.9440], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(leafletMap);
+    leafletMap = L.map('mapFrame', CAMPUS_MAP_OPTIONS).setView([38.9875, -76.9440], 14);
+    addBaseTiles(leafletMap);
   } else {
     // Re-entering the map tab: clear old markers but keep the tile layer.
     leafletMap.eachLayer(layer => {
@@ -367,17 +409,15 @@ function initMap() {
     const marker = L.marker([d.lat, d.lng]).addTo(leafletMap);
     marker.bindPopup(`
       <strong>${d.name}</strong><br>
-      ${d.rating > 0 ? d.rating.toFixed(1) + '★ · ' + d.reviews + ' review' + (d.reviews !== 1 ? 's' : '') : 'No reviews yet :('}<br>
+      ${d.rating > 0 ? `<span class="${ratingTier(d.rating)}">${d.rating.toFixed(1)}★</span> · ` + d.reviews + ' review' + (d.reviews !== 1 ? 's' : '') : 'No reviews yet :('}<br>
       <a href="#" onclick="showDetail('${d.id}');return false;">View reviews</a>
     `);
   });
 
   // Same visibility-timing fix as the detail map.
-  // Same visibility-timing fix as the detail map.
   setTimeout(() => leafletMap.invalidateSize(), 100);
 }
 
-// ─── LIGHTBOX ───────────────────────────────────────────────
 function openLightbox(imgs, idx) {
   lightboxImages = imgs;
   lightboxIndex = idx;
@@ -394,10 +434,8 @@ function navLightbox(dir) {
   document.getElementById('lightboxImg').src = lightboxImages[lightboxIndex];
 }
 
-// ─── REVIEW MODAL ───────────────────────────────────────────
 function initYearPicker() {
   const now = new Date();
-  // Academic year starts in August (month 7); before August the current year hasn't begun yet.
   // Academic year starts in August (month 7); before August the current year hasn't begun yet.
   const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
   const picker = document.getElementById('yearPicker');
@@ -445,7 +483,10 @@ function setRating(n) {
 }
 
 function updateStars() {
-  document.querySelectorAll('#starInput span').forEach((s, i) => s.classList.toggle('filled', i < selectedRating));
+  const input = document.getElementById('starInput');
+  input.classList.remove('rating-red', 'rating-orange', 'rating-gold', 'rating-diamond');
+  if (selectedRating > 0) input.classList.add(ratingTier(selectedRating));
+  input.querySelectorAll('span').forEach((s, i) => s.classList.toggle('filled', i < selectedRating));
 }
 
 let _toastTimer = null;
@@ -469,21 +510,17 @@ async function submitReview() {
     return;
   }
 
-  // Require a star rating before submitting
   if (selectedRating === 0) {
     showToast('Please select a star rating before submitting.', 'error');
     return;
   }
 
-  // Require review text â€” an empty review is not useful
   if (!text) {
     showToast('Please write something before submitting.', 'error');
     return;
   }
 
-  // Enforce length limits in JS as a second line of defense.
-  // maxlength on the HTML inputs handles normal users, but someone could
-  // bypass the form and send a raw HTTP request with a huge payload.
+  // maxlength covers the inputs; the server enforces these limits too.
   if (name.length > 100) {
     showToast('Name is too long (max 100 characters).', 'error');
     return;
@@ -505,8 +542,7 @@ async function submitReview() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Supabase requires a JWT on all Edge Function calls. The anon key is already
-        // public in supabase.js so including it here adds no new security risk.
+        // Supabase requires a JWT on Edge Function calls; the anon key is public anyway.
         'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxYmZpd2l4bHFzbmpzbXdpcnRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Mjc2OTEsImV4cCI6MjA5MTUwMzY5MX0.Qy2_QBt4l2uRPiLQIKAaao4gNwZf0bkniUob9EtBXMY',
       },
       body: JSON.stringify({
@@ -535,13 +571,12 @@ async function submitReview() {
 }
 
 
-// ─── NAV ────────────────────────────────────────────────────
 function closeNav() {
   document.getElementById('navLinks').classList.remove('open');
   document.getElementById('navToggle').classList.remove('open');
 }
 
-// ES modules don't expose to the global scope, so onclick="..." attributes in HTML can't reach them without this.
+// Expose handlers for the inline onclick attributes (ES module scope isn't global).
 window.closeNav = closeNav;
 window.showDetail = showDetail;
 window.filterDorms = filterDorms;
@@ -550,6 +585,8 @@ window.toggleCampusFilter = toggleCampusFilter;
 window.toggleRoomTypeFilter = toggleRoomTypeFilter;
 window.toggleFeatureFilter = toggleFeatureFilter;
 window.toggleCampusDropdown = toggleCampusDropdown;
+window.toggleSortDropdown = toggleSortDropdown;
+window.selectSort = selectSort;
 window.setOffCampusFilter = setOffCampusFilter;
 window.openInlineForm = openInlineForm;
 window.closeInlineForm = closeInlineForm;
@@ -563,20 +600,19 @@ window.showSection = showSection;
 window.setSort = setSort;
 
 document.addEventListener('click', e => {
-  const dropdown = document.getElementById('campusDropdown');
-  if (dropdown && !dropdown.contains(e.target)) {
-    document.getElementById('campusDropdownPanel').classList.remove('open');
-  }
+  document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+    if (!dropdown.contains(e.target)) {
+      dropdown.querySelector('.filter-dropdown-panel')?.classList.remove('open');
+    }
+  });
 });
 
-// ─── SEARCH PLACEHOLDER TYPEWRITER ─────────────────────────
 function startPlaceholderTypewriter() {
   const el = document.getElementById('searchInput');
   const phrases = ['Search dorms...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
   let i = 0, j = 0, del = false, pause = 0;
 
   setInterval(() => {
-    // Don't animate while the user is typing or has typed something.
     // Don't animate while the user is typing or has typed something.
     if (document.activeElement === el || el.value) return;
     if (pause-- > 0) return;
@@ -587,9 +623,7 @@ function startPlaceholderTypewriter() {
   }, 100);
 }
 
-// Safe initialization
 document.addEventListener('DOMContentLoaded', () => {
-  // Pre-initialize reviewList so showDetail never throws if reviews haven't loaded yet.
   // Pre-initialize reviewList so showDetail never throws if reviews haven't loaded yet.
   dorms.forEach(d => { d.reviewList = []; });
   renderDorms('on');

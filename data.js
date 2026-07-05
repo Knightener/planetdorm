@@ -1,7 +1,7 @@
-// ─── DORM DATA ──────────────────────────────────────────────
+// DORM DATA
 export const dorms = [
 
-  // ── NORTH CAMPUS: Cambridge Community ──────────────────────
+  // NORTH CAMPUS: Cambridge Community
   {
     id: 'belair', name: 'Bel Air Hall', campus: 'on', area: 'north', built: '1965',
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
@@ -48,7 +48,7 @@ export const dorms = [
 
   },
 
-  // ── NORTH CAMPUS: Denton Community ─────────────────────────
+  // NORTH CAMPUS: Denton Community
   {
     id: 'denton', name: 'Denton Hall', campus: 'on', area: 'north', built: '1966',
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
@@ -77,7 +77,7 @@ export const dorms = [
 
   },
 
-  // ── NORTH CAMPUS: Ellicott Community ───────────────────────
+  // NORTH CAMPUS: Ellicott Community
   {
     id: 'ellicott', name: 'Ellicott Hall', campus: 'on', area: 'north', built: '1962',
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles, Triples',
@@ -106,7 +106,7 @@ export const dorms = [
 
   },
 
-  // ── NORTH CAMPUS: Heritage Community ───────────────────────
+  // NORTH CAMPUS: Heritage Community
   {
     id: 'johnsonwhittle', name: 'Johnson-Whittle Hall', campus: 'on', area: 'north', built: '2013',
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
@@ -126,7 +126,7 @@ export const dorms = [
 
   },
 
-  // ── NORTH CAMPUS: Oakland Hall ─────────────────────────────
+  // NORTH CAMPUS: Oakland Hall
   {
     id: 'oakland', name: 'Oakland Hall', campus: 'on', area: 'north', built: '2009',
     rating: 0, reviews: 0, type: 'Semi-Suite', roomTypes: 'Doubles (Semi-Suite)',
@@ -137,7 +137,7 @@ export const dorms = [
 
   },
 
-  // ── SOUTH CAMPUS: North Hill Community ─────────────────────
+  // SOUTH CAMPUS: North Hill Community
   {
     id: 'annearundel', name: 'Anne Arundel Hall', campus: 'on', area: 'south', built: '1965',
     rating: 0, reviews: 0, type: 'Traditional', roomTypes: 'Doubles',
@@ -229,7 +229,7 @@ export const dorms = [
 
   },
 
-  // ── SOUTH CAMPUS: Leonardtown Community ────────────────────
+  // SOUTH CAMPUS: Leonardtown Community
   {
     id: 'leonardtown', name: 'Leonardtown', campus: 'on', area: 'south', built: '2011',
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',
@@ -240,7 +240,7 @@ export const dorms = [
 
   },
 
-  // ── THE COMMONS: South Hill Community ──────────────────────
+  // THE COMMONS: South Hill Community
   {
     id: 'allegany', name: 'Allegany Hall', campus: 'on', area: 'commons', built: '2000',
     rating: 0, reviews: 0, type: 'Suite/Apartment', roomTypes: 'Singles, Doubles (Suite/Apt)',

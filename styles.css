@@ -18,9 +18,31 @@
     --green: #34D399;
     --amber: #FBBF24;
     --blue: #60A5FA;
+    --bg: #000000;
+    --nav-bg: #0c0c0e;
+    --hero-bg: #1a1a1a;
+    --heading: rgba(255, 255, 255, 0.75);
+    --hover: rgba(255, 255, 255, 0.06);
     --font: 'Manrope', sans-serif;
     font-family: var(--font);
     color: var(--text);
+}
+
+:root[data-theme="light"] {
+    --surface: #ffffff;
+    --surface2: #ffffff;
+    --surface3: #e7e7ec;
+    --text: #17171c;
+    --text-dim: #5f5f6e;
+    --border: #d8d8e0;
+    --green: #0e9f6e;
+    --amber: #b45309;
+    --blue: #2563eb;
+    --bg: #f4f4f6;
+    --nav-bg: #ffffff;
+    --hero-bg: #e9e9ee;
+    --heading: rgba(0, 0, 0, 0.78);
+    --hover: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -31,7 +53,8 @@
 
 
 body {
-    background: #000;
+    background: var(--bg);
+    color: var(--text);
 }
 
 /* NAV */
@@ -39,13 +62,13 @@ nav {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(12, 12, 14, 1);
+    background: var(--nav-bg);
     border-bottom: 1px solid var(--border);
     isolation: isolate;
 }
 
 .nav-inner {
-    max-width: 1200px;
+    width: 100%;
     margin: auto;
     display: flex;
     align-items: center;
@@ -88,7 +111,7 @@ nav {
 
 /* HERO */
 .hero {
-    background: #1a1a1a;
+    background: var(--hero-bg);
     text-align: center;
     padding: 80px 24px;
     position: relative;
@@ -160,7 +183,7 @@ nav {
 /* SECTIONS */
 .section {
     display: none;
-    max-width: 1200px;
+    width: 100%;
     margin: auto;
     padding: 32px 24px 60px;
 }
@@ -207,12 +230,10 @@ nav {
     border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
-    transition: .25s;
 }
 
 .dorm-card:hover {
     border-color: var(--red);
-    box-shadow: 0 12px 32px rgba(226, 24, 51, .12);
 }
 
 .dorm-card-img {
@@ -239,7 +260,7 @@ nav {
 .dorm-card-body h3 {
     font-size: 1.1rem;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--heading);
     margin-bottom: 4px;
 }
 
@@ -301,8 +322,8 @@ nav {
 
 .detail-view.active {
     display: block;
-    max-width: 1200px;
-    margin: 40px auto 60px;
+    width: auto;
+    margin: 40px 24px 60px;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -327,7 +348,7 @@ nav {
 }
 
 .detail-back:hover {
-    background: rgba(255,255,255,.08);
+    background: var(--hover);
     color: var(--text);
 }
 
@@ -357,7 +378,7 @@ nav {
     font-family: var(--font);
     font-size: 2rem;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--heading);
     margin-bottom: 6px;
 }
 
@@ -394,7 +415,7 @@ nav {
     font-family: var(--font);
     font-size: 1.4rem;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--heading);
 }
 
 .write-review-btn {
@@ -431,7 +452,7 @@ nav {
 }
 
 .umd-link-btn:hover {
-    background: rgba(0, 0, 0, 0.816);
+    background: var(--hover);
 }
 
 /* REVIEWS LIST */
@@ -679,6 +700,65 @@ nav {
     height: 100%;
 }
 
+/* Dark theme: invert the OSM tiles so the map goes dark without losing
+   any street/landmark labels. Light theme shows the tiles as-is. */
+.leaflet-container {
+    background: #111;
+}
+
+.leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+
+[data-theme="light"] .leaflet-container {
+    background: #ddd;
+}
+
+[data-theme="light"] .leaflet-tile-pane {
+    filter: none;
+}
+
+/* Theme Leaflet's UI (popups, zoom buttons, attribution) to match the site */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: var(--nav-bg);
+    color: var(--text);
+}
+
+.leaflet-popup-content a {
+    color: var(--blue);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--text-dim);
+}
+
+.leaflet-bar a {
+    background: var(--nav-bg);
+    color: var(--text);
+    border-bottom-color: var(--border);
+}
+
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+    background: var(--surface3);
+    color: var(--text);
+}
+
+.leaflet-bar a.leaflet-disabled {
+    background: var(--nav-bg);
+    color: var(--border);
+}
+
+.leaflet-control-attribution {
+    background: var(--nav-bg);
+    color: var(--text-dim);
+}
+
+.leaflet-control-attribution a {
+    color: var(--blue);
+}
+
 /* LIGHTBOX */
 .lightbox {
     display: none;
@@ -752,20 +832,16 @@ nav {
     margin-bottom: 0;
 }
 
-.sort-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text-dim);
-    font: 600 .9rem var(--font);
-    padding: 10px 18px;
-    cursor: pointer;
-    transition: .2s;
+.sort-dropdown {
     flex-shrink: 0;
 }
 
-.sort-select:hover {
-    border-color: var(--red);
+#sortDropdownPanel,
+#sortDropdownOffPanel {
+    left: auto;
+    right: 0;
+    width: 220px;
+    max-width: calc(100vw - 48px);
 }
 
 .filter-bar {
@@ -859,7 +935,7 @@ nav {
 }
 
 .dropdown-check-item:hover {
-    background: rgba(255,255,255,.05);
+    background: var(--hover);
     color: var(--text);
 }
 
@@ -888,7 +964,7 @@ nav {
 
 .dropdown-all-btn:hover {
     color: var(--text);
-    background: rgba(255,255,255,.05);
+    background: var(--hover);
 }
 
 .dropdown-all-btn.active {
@@ -907,7 +983,7 @@ nav {
 }
 
 @media (max-width: 768px) {
-    .filter-dropdown-panel {
+    #campusDropdownPanel {
         width: calc(100vw - 48px);
         max-height: 70vh;
         overflow-y: auto;
@@ -921,6 +997,66 @@ nav {
         border-left: none;
         border-top: 1px solid var(--border);
     }
+}
+
+/* THEME TOGGLE */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .2s;
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    color: var(--text);
+    border-color: var(--text-dim);
+}
+
+.theme-toggle .icon-moon {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .icon-moon {
+    display: block;
+}
+
+/* Light-mode adjustments for effects tuned to the dark theme */
+[data-theme="light"] .hero::before {
+    opacity: .3;
+}
+
+[data-theme="light"] .detail-view.active {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .filter-dropdown-panel {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .toast {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .toast.toast-error {
+    color: var(--red);
 }
 
 /* HAMBURGER */
@@ -939,7 +1075,7 @@ nav {
     display: block;
     width: 22px;
     height: 3px;
-    background: #fff;
+    background: var(--text);
     border-radius: 2px;
 }
 
@@ -966,7 +1102,7 @@ nav {
         position: absolute;
         top: 100%;
         left: 0;
-        background: rgba(12, 12, 14, 0.98);
+        background: var(--nav-bg);
         border: 1px solid var(--border);
         border-top: none;
         border-radius: 0 0 8px 8px;
@@ -1048,4 +1184,56 @@ nav {
 
 .stat-box {
     position: relative;
+}
+/* Rating tier colors */
+:root {
+    --rating-red: #ff5252;
+    --rating-orange: #ff9800;
+    --rating-diamond-grad: linear-gradient(110deg, #7dd8ff 0%, #ffffff 25%, #b9f2ff 45%, #8fd3f4 60%, #ffffff 80%, #7dd8ff 100%);
+}
+
+:root[data-theme="light"] {
+    --rating-red: #e21833;
+    --rating-orange: #e07800;
+    --rating-diamond-grad: linear-gradient(110deg, #1493cf 0%, #62c8f0 25%, #2fa8dd 45%, #0e7fb8 60%, #62c8f0 80%, #1493cf 100%);
+}
+
+.rating-red,
+.stat-box .val.rating-red,
+.star-input.rating-red span.filled {
+    color: var(--rating-red);
+}
+
+.rating-orange,
+.stat-box .val.rating-orange,
+.star-input.rating-orange span.filled {
+    color: var(--rating-orange);
+}
+
+.rating-gold,
+.stat-box .val.rating-gold,
+.star-input.rating-gold span.filled {
+    color: var(--gold);
+}
+
+.rating-diamond,
+.stat-box .val.rating-diamond,
+.star-input.rating-diamond span.filled {
+    background-image: var(--rating-diamond-grad);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: diamondShine 2.5s linear infinite;
+}
+
+@keyframes diamondShine {
+    to {
+        background-position: -200% center;
+    }
+}
+
+.stars-empty {
+    color: var(--text-dim);
 }

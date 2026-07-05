@@ -5,15 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About – PlanetDorm</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script>
+(function(){
+  var saved = localStorage.getItem('pd-theme');
+  if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.dataset.theme = 'light';
+  }
+})();
+function toggleTheme(){
+  var root = document.documentElement;
+  if (root.dataset.theme === 'light') {
+    delete root.dataset.theme;
+    localStorage.setItem('pd-theme', 'dark');
+  } else {
+    root.dataset.theme = 'light';
+    localStorage.setItem('pd-theme', 'light');
+  }
+}
+</script>
 <link rel="stylesheet" href="styles.css">
 <style>
   body {
     background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url("flag-800.png");
   }
 
+  [data-theme="light"] body {
+    background-image: linear-gradient(rgba(244,244,246,0.85), rgba(244,244,246,0.85)), url("flag-800.png");
+  }
+
+  [data-theme="light"] .about-container {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  }
+
   .about-container {
-    max-width: 720px;
-    margin: 40px auto 60px;
+    margin: 40px 24px 60px;
     padding: 32px 36px 48px;
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -29,14 +54,14 @@
   }
 
   .about-container h1 {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font);
     font-size: 2.4rem;
     color: var(--text);
     margin-bottom: 16px;
   }
 
   .about-container h2 {
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--font);
     font-size: 1.2rem;
     font-weight: 600;
     color: var(--gold);
@@ -55,13 +80,19 @@
 <nav>
   <div class="nav-inner">
     <div class="logo" onclick="location.href='index.html'">Planet<span style="color:#EAA000">Dorm</span></div>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="nav-links" id="navLinks">
-      <button onclick="location.href='index.html'" data-section="home">On-campus</button>
-      <button onclick="location.href='index.html#map'" data-section="map">Map</button>
-      <button class="active" onclick="location.href='about.html'">About</button>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <button onclick="location.href='index.html'" data-section="home">On-campus</button>
+        <button onclick="location.href='index.html#map'" data-section="map">Map</button>
+        <button class="active" onclick="location.href='about.html'">About</button>
+      </div>
     </div>
   </div>
 </nav>
@@ -81,11 +112,14 @@
   <h2>Have a suggestion or any feedback on the website?:</h2>
   <p>Send us an email at alekandayad@gmail.com</p>
 
+  <h2>Legal</h2>
+  <p>Reviews you submit are public. To learn how we handle your information, read our <a href="privacy.html" style="color:var(--gold)">Privacy Notice</a>. By using the site, you agree to our <a href="terms.html" style="color:var(--gold)">Terms and Conditions</a>.</p>
+
 </div>
 
 <p style="text-align:center; font-size: 0.75rem; color: var(--text-dim); margin: 8px 0 4px;">This website is not affiliated with the University of Maryland.</p>
 
-<footer style="text-align:center; padding: 20px; color: #ffffff; font-size: 1rem;">
+<footer style="text-align:center; padding: 20px; color: var(--text); font-size: 1rem;">
   Made with ❤️ by Alek and Ayad, two current students at UMD.
   <br> Version 0.1
 </footer>

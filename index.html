@@ -5,6 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PlanetDorm</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script>
+(function(){
+  var saved = localStorage.getItem('pd-theme');
+  if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.dataset.theme = 'light';
+  }
+})();
+function toggleTheme(){
+  var root = document.documentElement;
+  if (root.dataset.theme === 'light') {
+    delete root.dataset.theme;
+    localStorage.setItem('pd-theme', 'dark');
+  } else {
+    root.dataset.theme = 'light';
+    localStorage.setItem('pd-theme', 'light');
+  }
+}
+</script>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -13,13 +31,19 @@
 <nav>
   <div class="nav-inner">
     <div class="logo" onclick="showSection('home')">Planet<span style="color:#ffd200">Dorm</span></div>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="nav-links" id="navLinks">
-      <button class="active" onclick="showSection('home');closeNav()" data-section="home">On-campus</button>
-      <button onclick="showSection('map');closeNav()" data-section="map">Map</button>
-      <button onclick="location.href='about.html'">About</button>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <button class="active" onclick="showSection('home');closeNav()" data-section="home">On-campus</button>
+        <button onclick="showSection('map');closeNav()" data-section="map">Map</button>
+        <button onclick="location.href='about.html'">About</button>
+      </div>
     </div>
   </div>
 </nav>
@@ -64,11 +88,14 @@
         </div>
       </div>
     </div>
-    <select class="sort-select" id="sortSelect" onchange="setSort(this.value,'on')">
-      <option value="default">Sort: Default</option>
-      <option value="rating-desc">Rating: High to Low</option>
-      <option value="rating-asc">Rating: Low to High</option>
-    </select>
+    <div class="filter-dropdown sort-dropdown" id="sortDropdown">
+      <button class="filter-dropdown-btn" id="sortDropdownBtn" onclick="toggleSortDropdown('sortDropdownPanel')">Sort: Default</button>
+      <div class="filter-dropdown-panel sort-dropdown-panel" id="sortDropdownPanel">
+        <button class="dropdown-all-btn active" onclick="selectSort(this,'default','on')">Default</button>
+        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-desc','on')">Rating: High to Low</button>
+        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-asc','on')">Rating: Low to High</button>
+      </div>
+    </div>
   </div>
   <div id="reviewsLoading" class="reviews-loading"><img src="logo-animated.svg" class="reviews-loading-icon" alt=""></div>
   <div class="dorm-grid" id="dormGrid"></div>
@@ -83,11 +110,14 @@
       <button onclick="setOffCampusFilter('greenbelt',this)">Greenbelt</button>
       <button onclick="setOffCampusFilter('riverdale',this)">Riverdale Park</button>
     </div>
-    <select class="sort-select" id="offCampusSortSelect" onchange="setSort(this.value,'off')">
-      <option value="default">Sort: Default</option>
-      <option value="rating-desc">Rating: High to Low</option>
-      <option value="rating-asc">Rating: Low to High</option>
-    </select>
+    <div class="filter-dropdown sort-dropdown" id="sortDropdownOff">
+      <button class="filter-dropdown-btn" id="sortDropdownOffBtn" onclick="toggleSortDropdown('sortDropdownOffPanel')">Sort: Default</button>
+      <div class="filter-dropdown-panel sort-dropdown-panel" id="sortDropdownOffPanel">
+        <button class="dropdown-all-btn active" onclick="selectSort(this,'default','off')">Default</button>
+        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-desc','off')">Rating: High to Low</button>
+        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-asc','off')">Rating: Low to High</button>
+      </div>
+    </div>
   </div>
   <div class="dorm-grid" id="offCampusDormGrid"></div>
 </div>
@@ -135,12 +165,14 @@
   </div>
 </div>
 
+<p id="siteDisclaimer" style="text-align:center; font-size: 0.75rem; color: var(--text-dim); margin: 16px 0 20px;">This website is not affiliated with the University of Maryland.</p>
+
 <div id="toast" class="toast"></div>
 
-<div id="maintenanceOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#0d1117;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;">
-  <img src="favicon.svg" alt="PlanetDorm" style="width:80px;margin-bottom:1.5rem;">
+<div id="maintenanceOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;">
+  <img src="logo-animated.svg" alt="PlanetDorm" style="width:80px;margin-bottom:1.5rem;">
   <h1 style="color:#EAA000;font-family:'DM Serif Display',serif;margin-bottom:0.75rem;">We'll be right back...</h1>
-  <p style="color:#ccc;font-size:1.1rem;max-width:400px;">Our review server is temporarily down. We will be back up soon!</p>
+  <p style="color:var(--text-dim);font-size:1.1rem;max-width:400px;">Our review server is temporarily down. We will be back up soon!</p>
 </div>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -150,6 +182,9 @@
   <button class="lightbox-nav next" onclick="event.stopPropagation();navLightbox(1)">&#8250;</button>
 </div>
 
+<script>
+  document.querySelector('.h-captcha').setAttribute('data-theme', document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+</script>
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <script type="module" src="script.js"></script>
 

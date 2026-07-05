@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Notice – PlanetDorm</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script>
+(function(){
+  var saved = localStorage.getItem('pd-theme');
+  if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+    document.documentElement.dataset.theme = 'light';
+  }
+})();
+function toggleTheme(){
+  var root = document.documentElement;
+  if (root.dataset.theme === 'light') {
+    delete root.dataset.theme;
+    localStorage.setItem('pd-theme', 'dark');
+  } else {
+    root.dataset.theme = 'light';
+    localStorage.setItem('pd-theme', 'light');
+  }
+}
+</script>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .legal-container {
+    max-width: 860px;
+    margin: 40px auto 60px;
+    padding: 32px 36px 48px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  [data-theme="light"] .legal-container {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  @media(max-width: 768px) {
+    .legal-container {
+      margin: 16px;
+      padding: 20px 18px 32px;
+    }
+  }
+
+  .legal-container h1 {
+    font-family: var(--font);
+    font-size: 2rem;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .legal-container h2 {
+    font-family: var(--font);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--gold);
+    margin: 36px 0 10px;
+    scroll-margin-top: 80px;
+  }
+
+  .legal-container h3 {
+    font-family: var(--font);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 24px 0 8px;
+    scroll-margin-top: 80px;
+  }
+
+  .legal-container p, .legal-container li {
+    color: var(--text-dim);
+    line-height: 1.7;
+    font-size: .95rem;
+    margin-bottom: 12px;
+  }
+
+  .legal-container ul, .legal-container ol {
+    padding-left: 24px;
+    margin-bottom: 16px;
+  }
+
+  .legal-container a {
+    color: var(--gold);
+  }
+
+  .legal-container strong {
+    color: var(--text);
+  }
+
+  .legal-updated {
+    color: var(--text-dim);
+    font-size: .85rem;
+    margin-bottom: 28px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="location.href='index.html'">Planet<span style="color:#EAA000">Dorm</span></div>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <button onclick="location.href='index.html'" data-section="home">On-campus</button>
+        <button onclick="location.href='index.html#map'" data-section="map">Map</button>
+        <button class="active" onclick="location.href='about.html'">About</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="legal-container">
+  <h1>Privacy Notice</h1>
+  <p class="legal-updated"><strong>Last updated July 5, 2026</strong></p>
+
+  <p>This Privacy Notice for PlanetDorm ("<strong>we</strong>," "<strong>us</strong>," or "<strong>our</strong>"), describes how and why we might access, collect, store, use, and/or share ("<strong>process</strong>") your personal information when you use our services ("<strong>Services</strong>"), including when you visit our website or submit a dorm review. Questions or concerns? Reading this Privacy Notice will help you understand your privacy rights and choices. We are responsible for making decisions about how your personal information is processed. If you do not agree with our policies and practices, please do not use our Services.</p>
+
+  <h2 id="summary">SUMMARY OF KEY POINTS</h2>
+  <p><em>This summary provides key points from our Privacy Notice, but you can find out more details about any of these topics by clicking the link following each key point or by using our table of contents below to find the section you are looking for.</em></p>
+  <ul>
+    <li><strong>What personal information do we process?</strong> When you visit, use, or navigate our Services, we may process personal information depending on how you interact with us and the Services, the choices you make, and the products and features you use. Learn more about <a href="#personalinfo">personal information you disclose to us</a>.</li>
+    <li><strong>Do we process any sensitive personal information?</strong> Some of the information may be considered "special" or "sensitive" in certain jurisdictions, for example your racial or ethnic origins, sexual orientation, and religious beliefs. We do not process sensitive personal information.</li>
+    <li><strong>Do we collect any information from third parties?</strong> We do not collect information from third parties.</li>
+    <li><strong>How do we process your information?</strong> We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent. We process your information only when we have a valid legal reason to do so. Learn more about <a href="#infouse">how we process your information</a>.</li>
+    <li><strong>In what situations and with which parties do we share personal information?</strong> We may share information in specific situations and with specific third parties. Learn more about <a href="#whoshare">when and with whom we share your personal information</a>.</li>
+    <li><strong>What are your rights?</strong> Depending on where you are located geographically, the applicable privacy law may mean you have certain rights regarding your personal information. Learn more about <a href="#privacyrights">your privacy rights</a>.</li>
+    <li><strong>How do you exercise your rights?</strong> The easiest way to exercise your rights is by submitting a <a href="https://app.termly.io/dsar/3bde0f74-0653-4f06-81a3-a4dcd4f9b182" target="_blank" rel="noopener">data subject access request</a>, or by contacting us. We will consider and act upon any request in accordance with applicable data protection laws.</li>
+  </ul>
+  <p>Want to learn more about what we do with any information we collect? <a href="#toc">Review the Privacy Notice in full</a>.</p>
+
+  <h2 id="toc">TABLE OF CONTENTS</h2>
+  <ol>
+    <li><a href="#infocollect">WHAT INFORMATION DO WE COLLECT?</a></li>
+    <li><a href="#infouse">HOW DO WE PROCESS YOUR INFORMATION?</a></li>
+    <li><a href="#whoshare">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</a></li>
+    <li><a href="#cookies">DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?</a></li>
+    <li><a href="#intltransfers">IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?</a></li>
+    <li><a href="#inforetain">HOW LONG DO WE KEEP YOUR INFORMATION?</a></li>
+    <li><a href="#infominors">DO WE COLLECT INFORMATION FROM MINORS?</a></li>
+    <li><a href="#privacyrights">WHAT ARE YOUR PRIVACY RIGHTS?</a></li>
+    <li><a href="#DNT">CONTROLS FOR DO-NOT-TRACK FEATURES</a></li>
+    <li><a href="#policyupdates">DO WE MAKE UPDATES TO THIS NOTICE?</a></li>
+    <li><a href="#contact">HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</a></li>
+    <li><a href="#request">HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?</a></li>
+  </ol>
+
+  <h2 id="infocollect">1. WHAT INFORMATION DO WE COLLECT?</h2>
+  <h3 id="personalinfo">Personal information you disclose to us</h3>
+  <p>We collect personal information that you voluntarily provide to us when you submit a dorm review or otherwise contact us. The only personal information we collect is the optional display name you choose to attach to a review, along with the review text and academic year you select.</p>
+  <p><strong>Sensitive Information.</strong> We do not process sensitive information.</p>
+  <p>All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information.</p>
+  <h3>Information automatically collected</h3>
+  <p>PlanetDorm itself does not run analytics or track visitors. However, the infrastructure providers that operate our Services — Supabase (which hosts our review database) and hCaptcha (which screens review submissions for bots) — may automatically log technical information such as your IP address, browser and device characteristics, and operating system. This information does not reveal your specific identity and is needed to maintain the security and operation of the Services.</p>
+  <p>We do not use tracking cookies. Your light/dark theme preference is stored locally in your browser and never leaves your device.</p>
+
+  <h2 id="infouse">2. HOW DO WE PROCESS YOUR INFORMATION?</h2>
+  <p>We process your personal information for a variety of reasons, depending on how you interact with our Services, including:</p>
+  <ul>
+    <li><strong>To display user-submitted dorm reviews.</strong> The display name (optional) and review text you submit are published publicly on the site.</li>
+    <li><strong>For security and fraud prevention.</strong> We use a captcha service (hCaptcha) to prevent automated spam submissions.</li>
+  </ul>
+
+  <h2 id="whoshare">3. WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</h2>
+  <p>We do not sell your personal information, and we do not share it with advertisers, affiliates, or business partners. Your information is only handled by the following service providers as part of operating the site:</p>
+  <ul>
+    <li><strong>Supabase.</strong> Our review database is hosted on Supabase, which stores the reviews you submit.</li>
+    <li><strong>hCaptcha.</strong> Review submissions are verified by hCaptcha to prevent automated spam. hCaptcha processes technical data (such as your IP address) as part of its bot detection; see the <a href="https://www.hcaptcha.com/privacy" target="_blank" rel="noopener">hCaptcha Privacy Policy</a>.</li>
+    <li><strong>OpenStreetMap.</strong> When you use the campus map, your browser loads map tiles directly from OpenStreetMap's servers, which receive standard web request data (such as your IP address).</li>
+  </ul>
+  <p>Note that reviews you submit — including the display name you attach to them — are published publicly on the site.</p>
+
+  <h2 id="cookies">4. DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?</h2>
+  <p>PlanetDorm does not use cookies, web beacons, pixels, or any advertising or analytics trackers. The only data stored in your browser is your light/dark theme preference, kept in localStorage on your device. The hCaptcha widget on the review form may use cookies or similar technologies as part of its bot detection; see the <a href="https://www.hcaptcha.com/privacy" target="_blank" rel="noopener">hCaptcha Privacy Policy</a> for details.</p>
+
+  <h2 id="intltransfers">5. IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?</h2>
+  <p>Our servers are located in the United States. Regardless of your location, please be aware that your information may be transferred to, stored by, and processed by us in our facilities and in the facilities of the third parties with whom we may share your personal information (see "<a href="#whoshare">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</a>" above), including facilities in the United States and other countries.</p>
+  <p>If you are a resident in the European Economic Area (EEA), United Kingdom (UK), or Switzerland, then these countries may not necessarily have data protection laws or other similar laws as comprehensive as those in your country. However, we will take all necessary measures to protect your personal information in accordance with this Privacy Notice and applicable law.</p>
+
+  <h2 id="inforetain">6. HOW LONG DO WE KEEP YOUR INFORMATION?</h2>
+  <p>We will only keep your personal information for as long as it is necessary for the purposes set out in this Privacy Notice, unless a longer retention period is required or permitted by law (such as tax, accounting, or other legal requirements).</p>
+  <p>When we have no ongoing legitimate business need to process your personal information, we will either delete or anonymize such information, or, if this is not possible (for example, because your personal information has been stored in backup archives), then we will securely store your personal information and isolate it from any further processing until deletion is possible.</p>
+
+  <h2 id="infominors">7. DO WE COLLECT INFORMATION FROM MINORS?</h2>
+  <p>We do not knowingly collect, solicit data from, or market to children under 18 years of age, nor do we knowingly sell such personal information. By using the Services, you represent that you are at least 18 or that you are the parent or guardian of such a minor and consent to such minor dependent's use of the Services. If we learn that personal information from users less than 18 years of age has been collected, we will take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 18, please contact us at alekandayad@gmail.com.</p>
+
+  <h2 id="privacyrights">8. WHAT ARE YOUR PRIVACY RIGHTS?</h2>
+  <p><strong>Withdrawing your consent:</strong> If we are relying on your consent to process your personal information, which may be express and/or implied consent depending on the applicable law, you have the right to withdraw your consent at any time. You can withdraw your consent at any time by contacting us by using the contact details provided in the section "<a href="#contact">HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</a>" below. However, please note that this will not affect the lawfulness of the processing before its withdrawal nor, when applicable law allows, will it affect the processing of your personal information conducted in reliance on lawful processing grounds other than consent.</p>
+  <h3>Your Reviews</h3>
+  <p>PlanetDorm does not have user accounts. If you would like a review you submitted to be corrected or removed, contact us using the contact information provided in this notice and we will delete it from our active database. However, we may retain some information in our files to prevent fraud, troubleshoot problems, assist with any investigations, enforce our legal terms and/or comply with applicable legal requirements.</p>
+
+  <h2 id="DNT">9. CONTROLS FOR DO-NOT-TRACK FEATURES</h2>
+  <p>Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track ("DNT") feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. At this stage, no uniform technology standard for recognizing and implementing DNT signals has been finalized. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in the future, we will inform you about that practice in a revised version of this Privacy Notice.</p>
+
+  <h2 id="policyupdates">10. DO WE MAKE UPDATES TO THIS NOTICE?</h2>
+  <p>We may update this Privacy Notice from time to time. The updated version will be indicated by an updated "Revised" date at the top of this Privacy Notice. If we make material changes to this Privacy Notice, we may notify you either by prominently posting a notice of such changes or by directly sending you a notification. We encourage you to review this Privacy Notice frequently to be informed of how we are protecting your information.</p>
+
+  <h2 id="contact">11. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</h2>
+  <p>If you have questions or comments about this notice, you may contact us by email at alekandayad@gmail.com.</p>
+
+  <h2 id="request">12. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?</h2>
+  <p>Based on the applicable laws of your country, you may have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. You may also have the right to withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law. To request to review, update, or delete your personal information, please fill out and submit a <a href="https://app.termly.io/dsar/3bde0f74-0653-4f06-81a3-a4dcd4f9b182" target="_blank" rel="noopener">data subject access request</a>.</p>
+</div>
+
+<p style="text-align:center; font-size: 0.75rem; color: var(--text-dim); margin: 8px 0 20px;">This website is not affiliated with the University of Maryland.</p>
+
+</body>
+</html>
