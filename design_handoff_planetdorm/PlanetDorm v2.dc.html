@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=DM+Serif+Display&amp;display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #E21833; --red-dark: #B01228; --gold: #cc9b00; --logo-gold: #d9a300;
+  --bg: #faf9f7; --ink: #17161a; --dim: #6e6c75; --line: #e2e0da;
+  --hover: rgba(0,0,0,0.04); --field: #ffffff;
+  --green: #0e7a52; --orange: #c05f00;
+  --plat-grad: linear-gradient(110deg, #5d7488 0%, #c9d6e0 25%, #8fa5b5 45%, #52687b 60%, #c9d6e0 80%, #5d7488 100%);
+}
+:root[data-theme="dark"] {
+  --bg: #131215; --ink: #f2f0eb; --dim: #97949e; --line: #2c2a30;
+  --hover: rgba(255,255,255,0.06); --field: #1b1a1e;
+  --green: #4cc492; --orange: #e59a4b; --gold: #f0c53c; --logo-gold: #ffd200;
+  --plat-grad: linear-gradient(110deg, #9fb6c9 0%, #ffffff 25%, #cfe2ef 45%, #a7c4d8 60%, #ffffff 80%, #9fb6c9 100%);
+}
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Manrope', sans-serif; }
+a { color: var(--ink); }
+a:hover { color: var(--red); }
+input, textarea, button { font-family: 'Manrope', sans-serif; }
+input::placeholder, textarea::placeholder { color: var(--dim); }
+@keyframes platShine { to { background-position: -200% center; } }
+</style>
+</helmet>
+
+<nav style="position:sticky;top:0;z-index:1000;background:var(--bg);border-bottom:1px solid var(--line)">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;padding:18px 40px;gap:24px;flex-wrap:wrap">
+    <div onClick="{{ goHome }}" style="font-size:1.45rem;font-weight:800;letter-spacing:-.01em;cursor:pointer;color:var(--red)">Planet<span style="color:var(--logo-gold)">Dorm</span></div>
+    <div style="display:flex;align-items:center;gap:28px">
+      <button onClick="{{ goHome }}" style="background:none;border:none;padding:0;font-size:.92rem;font-weight:600;cursor:pointer;color:{{ navHomeColor }};border-bottom:2px solid {{ navHomeLine }};padding-bottom:3px" style-hover="color:var(--ink)">On-campus</button>
+      <button onClick="{{ goMap }}" style="background:none;border:none;padding:0;font-size:.92rem;font-weight:600;cursor:pointer;color:{{ navMapColor }};border-bottom:2px solid {{ navMapLine }};padding-bottom:3px" style-hover="color:var(--ink)">Map</button>
+      <button onClick="{{ goAbout }}" style="background:none;border:none;padding:0;font-size:.92rem;font-weight:600;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;padding-bottom:3px" style-hover="color:var(--ink)">About</button>
+      <button onClick="{{ toggleTheme }}" aria-label="Toggle theme" style="background:none;border:none;padding:0;cursor:pointer;color:var(--dim);display:flex;align-items:center" style-hover="color:var(--ink)">
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </sc-if>
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+        </sc-if>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<sc-if value="{{ showHome }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Home — hero + hall directory" style="width:100%;padding:0 48px;box-sizing:border-box">
+
+    <div style="padding:88px 0 56px;border-bottom:1px solid var(--line)">
+      <h1 style="font-weight:800;font-size:clamp(2.4rem,4.5vw,3.8rem);line-height:1.08;letter-spacing:-.02em;margin:0 0 14px;max-width:16em">Find a residence hall before you move in<span style="color:var(--red)">.</span></h1>
+      <p style="color:var(--dim);font-size:1.02rem;margin:0 0 40px;max-width:34em">Honest reviews of every University of Maryland residence hall, written by the Terps who lived there.</p>
+      <input type="text" ref="{{ searchRef }}" value="{{ q }}" onChange="{{ onSearch }}" placeholder="Search halls..." style="width:100%;max-width:440px;background:none;border:none;border-bottom:2px solid var(--ink);color:var(--ink);padding:10px 0;font-size:1.15rem;font-weight:500;outline:none;box-sizing:border-box" style-focus="border-bottom-color:var(--red)">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;padding:28px 0;border-bottom:1px solid var(--line)">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);width:76px;flex-shrink:0">Campus</span>
+        <sc-for list="{{ campusOpts }}" as="o" hint-placeholder-count="3">
+          <button onClick="{{ o.onToggle }}" style="border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }};border-radius:999px;padding:6px 14px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s" style-hover="border-color:var(--ink)">{{ o.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);width:76px;flex-shrink:0">Rooms</span>
+        <sc-for list="{{ roomOpts }}" as="o" hint-placeholder-count="4">
+          <button onClick="{{ o.onToggle }}" style="border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }};border-radius:999px;padding:6px 14px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s" style-hover="border-color:var(--ink)">{{ o.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);width:76px;flex-shrink:0">Features</span>
+        <sc-for list="{{ featOpts }}" as="o" hint-placeholder-count="3">
+          <button onClick="{{ o.onToggle }}" style="border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }};border-radius:999px;padding:6px 14px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s" style-hover="border-color:var(--ink)">{{ o.label }}</button>
+        </sc-for>
+        <sc-if value="{{ anyFilter }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ setAllFilter }}" style="border:none;background:none;color:var(--red);font-size:.82rem;font-weight:700;cursor:pointer;padding:6px 4px;text-decoration:underline">Clear all</button>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:24px 0 8px">
+      <span style="font-size:.88rem;color:var(--dim);font-weight:600">{{ countLabel }}</span>
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--dim)">Sort</span>
+        <sc-for list="{{ sortOpts }}" as="o" hint-placeholder-count="3">
+          <button onClick="{{ o.onSelect }}" style="background:none;border:none;padding:0 0 2px;font-size:.85rem;font-weight:600;cursor:pointer;color:{{ o.color }};border-bottom:2px solid {{ o.line }}" style-hover="color:var(--ink)">{{ o.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;padding-bottom:80px">
+      <sc-for list="{{ cards }}" as="d" hint-placeholder-count="8">
+        <div onClick="{{ d.open }}" style="display:grid;grid-template-columns:104px 1fr auto;gap:24px;align-items:center;padding:20px 8px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s" style-hover="background:var(--hover)">
+          <div style="width:104px;height:72px;background-size:cover;background-position:center;background-color:var(--line);background-image:url('{{ d.img }}')"></div>
+          <div style="min-width:0">
+            <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 3px">{{ d.name }}</h3>
+            <div style="font-size:.85rem;color:var(--dim)">{{ d.metaLine }}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:1.15rem;font-weight:800;color:{{ d.rColor }};background-image:{{ d.rGrad }};background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:{{ d.rFill }};animation:{{ d.rAnim }}">{{ d.ratingText }}</div>
+            <div style="font-size:.78rem;color:var(--dim)">{{ d.reviewsText }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Dorm detail + reviews" style="width:100%;padding:32px 48px 80px;box-sizing:border-box">
+    <button onClick="{{ backToList }}" style="background:none;border:1px solid var(--line);border-radius:999px;padding:9px 20px;color:var(--dim);font-size:.85rem;font-weight:600;letter-spacing:.02em;cursor:pointer;margin-bottom:32px;transition:.15s" style-hover="border-color:var(--ink);color:var(--ink);background:var(--hover)">All halls</button>
+
+    <div style="display:grid;grid-template-columns:320px 1fr;gap:40px;align-items:start">
+
+      <div style="position:sticky;top:88px;border:1px solid var(--line);background:var(--field);border-radius:12px;padding:20px;box-sizing:border-box">
+        <div onClick="{{ det.openLightbox }}" role="img" aria-label="{{ det.name }}" style="height:160px;border-radius:8px;background-color:var(--line);background-image:url('{{ det.img }}');background-size:cover;background-position:center;cursor:pointer;margin-bottom:16px"></div>
+        <h2 style="font-weight:800;font-size:1.35rem;letter-spacing:-.01em;line-height:1.2;margin:0 0 4px">{{ det.name }}</h2>
+        <div style="color:var(--dim);font-size:.8rem;margin-bottom:16px">{{ det.meta }}</div>
+
+        <div style="border:1px solid var(--line);border-radius:8px;height:150px;box-sizing:border-box;margin-bottom:16px;background:repeating-linear-gradient(45deg,var(--hover),var(--hover) 10px,var(--bg) 10px,var(--bg) 20px);display:flex;align-items:center;justify-content:center"><span style="font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--dim);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:4px 9px;text-align:center">Leaflet map — {{ det.name }}</span></div>
+
+        <div style="display:flex;align-items:baseline;gap:12px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+          <span style="font-weight:800;font-size:2.2rem;letter-spacing:-.02em;line-height:1;color:{{ det.rColor }};background-image:{{ det.rGrad }};background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:{{ det.rFill }};animation:{{ det.rAnim }}">{{ det.ratingNum }}</span>
+          <div>
+            <div><span style="letter-spacing:1px;font-size:.85rem;color:{{ det.rColor }};background-image:{{ det.rGrad }};background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:{{ det.rFill }};animation:{{ det.rAnim }}">{{ det.starsFullAvg }}</span><span style="letter-spacing:1px;font-size:.85rem;color:var(--line)">{{ det.starsEmptyAvg }}</span></div>
+            <div style="font-size:.75rem;color:var(--dim);margin-top:1px">{{ det.reviewCount }}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">
+          <sc-for list="{{ det.dist }}" as="b" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:10px 1fr 18px;gap:8px;align-items:center">
+              <span style="font-size:.72rem;font-weight:700;color:var(--dim);text-align:right">{{ b.label }}</span>
+              <div style="height:6px;border-radius:3px;background:var(--hover);position:relative;overflow:hidden"><div style="position:absolute;inset:0 auto 0 0;width:{{ b.pct }};background:var(--logo-gold)"></div></div>
+              <span style="font-size:.72rem;font-weight:600;color:var(--dim)">{{ b.count }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;border-top:1px solid var(--line);padding-top:14px;margin-bottom:18px">
+          <sc-for list="{{ det.checks }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;gap:14px;align-items:baseline">
+              <span style="color:var(--ink);flex-shrink:0">{{ c.label }}</span>
+              <span style="color:{{ c.color }};font-weight:700;text-align:right">{{ c.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <button onClick="{{ openForm }}" style="width:100%;padding:13px;background:var(--red);color:#ffffff;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s" style-hover="background:var(--red-dark)">Write a review</button>
+        <sc-if value="{{ det.hasUmdLink }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;margin-top:12px"><a href="{{ det.umdLink }}" target="_blank" rel="noopener" style="font-size:.85rem;font-weight:600;color:var(--dim);text-decoration:underline" style-hover="color:var(--red)">Official UMD page &#8599;</a></div>
+        </sc-if>
+      </div>
+
+      <div style="min-width:0">
+        <div data-screen-label="Quick review strip" style="background:var(--field);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <div role="group" aria-label="Star rating" style="display:flex;gap:2px">
+              <sc-for list="{{ starInput }}" as="s" hint-placeholder-count="5">
+                <span onClick="{{ s.onSet }}" style="font-size:1.4rem;cursor:pointer;transition:.15s;color:{{ s.color }};line-height:1;background-image:{{ s.grad }};background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:{{ s.fill }};animation:{{ s.anim }}">&#9733;</span>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ quickYears }}" as="y" hint-placeholder-count="3">
+                <button type="button" onClick="{{ y.onSet }}" style="font-size:.72rem;font-weight:700;padding:6px 11px;border-radius:999px;cursor:pointer;transition:.15s;background:{{ y.bg }};border:1px solid {{ y.border }};color:{{ y.color }}" style-hover="border-color:var(--ink)">{{ y.label }}</button>
+              </sc-for>
+            </div>
+            <input type="text" value="{{ revText }}" onChange="{{ onRevText }}" maxLength="2000" placeholder="Quick review — what's the one thing to know?" style="flex:1;min-width:220px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px 14px;font-size:.85rem;font-weight:500;outline:none" style-focus="border-color:var(--red)">
+            <button onClick="{{ quickSubmit }}" style="background:var(--logo-gold);border:none;color:#17161a;font-weight:800;font-size:.8rem;padding:10px 18px;border-radius:8px;cursor:pointer;transition:.2s" style-hover="background:var(--red);color:#ffffff">Post</button>
+          </div>
+          <div style="font-size:.72rem;color:var(--dim);margin-top:10px">Posting as <strong style="color:var(--ink)">Anonymous Terp</strong> &#183; for a named review use "Write a review"</div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px">
+          <h3 style="font-weight:800;font-size:1rem;letter-spacing:-.01em;margin:0">{{ det.reviewCount }}</h3>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ revSortOpts }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.onSelect }}" style="font-size:.72rem;font-weight:700;padding:5px 10px;border-radius:6px;cursor:pointer;transition:.15s;border:none;background:{{ o.bg }};color:{{ o.color }}" style-hover="color:var(--ink)">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-if value="{{ det.noReviews }}" hint-placeholder-val="{{ false }}"><p style="color:var(--dim);padding:16px 0">No reviews yet :( &#8212; be the first to write one.</p></sc-if>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ det.reviews }}" as="r" hint-placeholder-count="2">
+            <div style="display:flex;gap:14px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:16px 18px">
+              <div style="width:36px;height:36px;border-radius:50%;background:{{ r.avBg }};color:#ffffff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0">{{ r.initial }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+                  <span style="font-weight:700;font-size:.88rem">{{ r.name }}</span>
+                  <span style="white-space:nowrap"><span style="letter-spacing:1px;font-size:.78rem;color:{{ r.sColor }};background-image:{{ r.sGrad }};background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:{{ r.sFill }};animation:{{ r.sAnim }}">{{ r.starsFull }}</span><span style="letter-spacing:1px;font-size:.78rem;color:var(--line)">{{ r.starsEmpty }}</span></span>
+                  <span style="font-size:.75rem;color:var(--dim);margin-left:auto;white-space:nowrap">{{ r.date }} &#183; {{ r.posted }}</span>
+                </div>
+                <p style="margin:0;font-size:.9rem;line-height:1.6;color:var(--ink)">{{ r.text }}</p>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+    <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Write a review form" style="padding:48px 0 0;max-width:600px">
+        <h3 style="font-weight:800;font-size:1.5rem;letter-spacing:-.01em;margin:0 0 28px">Write a review</h3>
+        <label style="display:block;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;color:var(--dim)">Your name</label>
+        <input type="text" value="{{ revName }}" onChange="{{ onRevName }}" placeholder="Anonymous Terp" maxLength="100" style="width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);padding:12px 14px;font-size:1rem;font-weight:500;margin-bottom:24px;outline:none;box-sizing:border-box" style-focus="border-color:var(--red)">
+
+        <p style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:0 0 8px;color:var(--dim)">Rating</p>
+        <div role="group" aria-label="Star rating" style="display:flex;gap:6px;margin-bottom:24px">
+          <sc-for list="{{ starInput }}" as="s" hint-placeholder-count="5">
+            <span onClick="{{ s.onSet }}" style="font-size:2.1rem;cursor:pointer;transition:.15s;color:{{ s.color }};line-height:1;background-image:{{ s.grad }};background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:{{ s.fill }};animation:{{ s.anim }}">&#9733;</span>
+          </sc-for>
+        </div>
+
+        <p style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:0 0 8px;color:var(--dim)">Year lived there</p>
+        <div role="group" aria-label="Year lived there" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px">
+          <sc-for list="{{ years }}" as="y" hint-placeholder-count="8">
+            <button type="button" onClick="{{ y.onSet }}" style="padding:10px 4px;font-weight:600;font-size:.9rem;cursor:pointer;transition:.15s;text-align:center;background:{{ y.bg }};border:1px solid {{ y.border }};color:{{ y.color }}" style-hover="border-color:var(--ink)">{{ y.label }}</button>
+          </sc-for>
+        </div>
+
+        <label style="display:block;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;color:var(--dim)">Your review</label>
+        <textarea value="{{ revText }}" onChange="{{ onRevText }}" placeholder="What was your experience like?" maxLength="2000" style="width:100%;height:130px;resize:vertical;background:var(--field);border:1px solid var(--line);color:var(--ink);padding:12px 14px;font-size:1rem;font-weight:500;outline:none;box-sizing:border-box" style-focus="border-color:var(--red)"></textarea>
+        <span style="display:block;text-align:right;font-size:.8rem;color:var(--dim);margin:4px 0 24px">{{ charCount }}</span>
+
+        <div onClick="{{ toggleCaptcha }}" style="width:303px;height:78px;background:var(--field);border:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 16px;box-sizing:border-box;cursor:pointer;user-select:none;margin-bottom:28px">
+          <div style="width:28px;height:28px;border:2px solid {{ capBorder }};background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:1.1rem;flex-shrink:0">{{ capMark }}</div>
+          <span style="font-size:.9rem;color:var(--ink)">I am human</span>
+          <span style="margin-left:auto;font-size:.65rem;color:var(--dim);font-family:ui-monospace,Menlo,monospace;text-align:right">hCaptcha<br>Privacy &#183; Terms</span>
+        </div>
+
+        <div style="display:flex;gap:12px">
+          <button onClick="{{ closeForm }}" style="flex:1;padding:14px;border:1px solid var(--line);background:none;color:var(--dim);font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s" style-hover="color:var(--ink);border-color:var(--ink)">Cancel</button>
+          <button onClick="{{ submitReview }}" style="flex:1;padding:14px;border:none;background:var(--red);color:#ffffff;font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s" style-hover="background:var(--red-dark)">Submit review</button>
+        </div>
+      </div>
+    </sc-if>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showMap }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Campus map" style="border-top:1px solid var(--line);height:calc(100dvh - 64px);position:relative;overflow:hidden;background:repeating-linear-gradient(45deg,var(--hover),var(--hover) 12px,var(--bg) 12px,var(--bg) 24px);display:flex;align-items:center;justify-content:center">
+    <div style="text-align:center;background:var(--bg);border:1px solid var(--line);padding:20px 28px">
+      <p style="font-family:ui-monospace,Menlo,monospace;font-size:.85rem;color:var(--dim);margin:0 0 6px">Leaflet campus map placeholder</p>
+      <p style="font-size:.8rem;color:var(--dim);margin:0">OpenStreetMap tiles &#183; markers for every on-campus hall &#183; popups link to dorm reviews</p>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showDisclaimer }}" hint-placeholder-val="{{ true }}">
+  <p style="text-align:center;font-size:.75rem;color:var(--dim);margin:0;padding:20px 24px 28px;border-top:1px solid var(--line)">This website is not affiliated with the University of Maryland.</p>
+</sc-if>
+
+<div style="position:fixed;bottom:32px;left:50%;background:var(--ink);color:{{ toastColor }};padding:14px 22px;font-size:.92rem;font-weight:600;z-index:9999;white-space:nowrap;pointer-events:none;transition:opacity .25s ease,transform .25s ease;opacity:{{ toastOpacity }};transform:{{ toastTransform }}">{{ toastMsg }}</div>
+
+<sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeLightbox }}" style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;display:flex;justify-content:center;align-items:center">
+    <button onClick="{{ closeLightbox }}" style="position:absolute;top:20px;right:24px;background:none;border:none;color:#ffffff;font-size:2rem;cursor:pointer">&times;</button>
+    <div role="img" style="width:90%;height:85vh;background-image:url('{{ lightboxSrc }}');background-size:contain;background-repeat:no-repeat;background-position:center"></div>
+  </div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light' | 'dark'&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;seedReviews&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Data&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: 'home', dormId: null, theme: 'light', q: '', reviewSort: 'newest',
+    campusF: [], roomF: [], featF: [], sort: 'default',
+    formOpen: false, revName: '', revText: '', revRating: 0, revYear: '', capOk: false,
+    toastMsg: '', toastType: 'success', toastShow: false,
+    lightboxSrc: null, dorms: []
+  };
+
+  componentDidMount() {
+    const saved = localStorage.getItem('pd2-theme');
+    const theme = this.props.theme ?? (saved === 'dark' ? 'dark' : 'light');
+    this.applyTheme(theme);
+    import('./data.js').then(m => {
+      const dorms = m.dorms.map(d => Object.assign({}, d, { reviewList: [] }));
+      if (this.props.seedReviews ?? true) this.seed(dorms);
+      dorms.forEach(d => {
+        d.reviews = d.reviewList.length;
+        d.rating = d.reviews ? d.reviewList.reduce((s, r) => s + r.rating, 0) / d.reviews : 0;
+      });
+      this.setState({ dorms, theme });
+    });
+    this.startTypewriter();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.theme !== prevProps.theme && this.props.theme) {
+      this.applyTheme(this.props.theme);
+      this.setState({ theme: this.props.theme });
+    }
+  }
+
+  componentWillUnmount() {
+    if (this._tw) clearInterval(this._tw);
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+  }
+
+  applyTheme(theme) {
+    if (theme === 'dark') document.documentElement.dataset.theme = 'dark';
+    else delete document.documentElement.dataset.theme;
+  }
+
+  startTypewriter() {
+    const phrases = ['Search halls...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
+    let i = 0, j = 0, del = false, pause = 0;
+    this._tw = setInterval(() => {
+      const el = this._searchEl;
+      if (!el || document.activeElement === el || el.value) return;
+      if (pause-- > 0) return;
+      del ? j-- : j++;
+      el.placeholder = phrases[i].slice(0, j);
+      if (!del && j === phrases[i].length) { del = true; pause = 18; }
+      if (del && j === 0) { del = false; i = (i + 1) % phrases.length; pause = 4; }
+    }, 100);
+  }
+
+  seed(dorms) {
+    const S = {
+      oakland: [
+        ['Jess M.', '2024-2025', 5, "Semi-suites are the move. Sharing a bathroom with only 3 other people instead of a whole floor is a game changer. The 24-hour service desk staff are super nice too.", '2025-06-02'],
+        ['Anonymous Terp', '2023-2024', 4, "Great building, close to Yahentamitsi and the Eppley gym. Only downside is the walk to south campus classes. Rooms are a good size for doubles.", '2024-05-18']
+      ],
+      cumberland: [
+        ['Priya S.', '2024-2025', 5, "Honestly the best community on North Campus. My floor did everything together. AC works great and laundry in the basement is never crowded.", '2025-05-30'],
+        ['Devon', '2023-2024', 5, "Lived on the 7th floor with a view of the fields. RAs were awesome. Would 100% choose Cumberland again.", '2024-06-11']
+      ],
+      laplata: [
+        ['Anonymous Terp', '2024-2025', 4, "La Plata is huge so you meet a ton of people. Being open on breaks saved me during Thanksgiving. No in-hall laundry is annoying but Ellicott's is close.", '2025-04-22'],
+        ['Sam K.', '2022-2023', 4, "Solid dorm. ILS community on the lower floors is tight-knit. Elevators get slow during move-in week but otherwise fine.", '2023-05-29']
+      ],
+      ellicott: [
+        ['Anonymous Terp', '2024-2025', 2, "No AC is BRUTAL in late August and early September. Buy two fans minimum. Location is great though, right next to the diner.", '2025-05-14'],
+        ['Marcus T.', '2023-2024', 3, "You get used to the heat after the first month. Gemstone community is genuinely great and made it worth it for me.", '2024-06-03']
+      ],
+      hagerstown: [
+        ['Anonymous Terp', '2023-2024', 3, "Classic old-school dorm experience. No AC but the walls have character. Basement lounge is a hidden gem for studying.", '2024-05-20']
+      ],
+      denton: [
+        ['Lena W.', '2024-2025', 4, "Denton is underrated. Right next to the dining hall, AC, laundry downstairs. Rooms are small but you're never in them anyway.", '2025-06-01'],
+        ['Anonymous Terp', '2023-2024', 5, "Loved my year here. The community feel of the Denton quad is unmatched on North Campus.", '2024-05-25']
+      ],
+      stmarys: [
+        ['Camille R.', '2024-2025', 4, "Language House is an amazing program and the suites are so much nicer than traditional halls. Kitchen in the suite is clutch.", '2025-05-19']
+      ],
+      leonardtown: [
+        ['Anonymous Terp', '2024-2025', 5, "Basically an apartment with a meal plan. Full kitchen, your own room, and it's quiet. Far from north campus but the 104 bus works.", '2025-06-05'],
+        ['Jordan P.', '2023-2024', 4, "Best kept secret for upperclassmen housing. The walk to Route 1 food is 5 minutes.", '2024-05-28']
+      ],
+      cecil: [
+        ['Anonymous Terp', '2023-2024', 2, "Cheapest option for a reason. No AC and the building shows its age. But you're 2 minutes from South Campus dining.", '2024-06-08']
+      ],
+      annearundel: [
+        ['Nadia F.', '2024-2025', 4, "Honors Humanities made this dorm for me. Small community, everyone knows each other. AC and open on breaks are big pluses.", '2025-05-21']
+      ],
+      princefrederick: [
+        ['Anonymous Terp', '2024-2025', 5, "Newest-feeling dorm on South Campus. Semi-suites are spacious and the study lounges on every floor are gorgeous.", '2025-05-31'],
+        ['Alex D.', '2023-2024', 4, "Really nice building. Gets loud on weekends since it's big, but the rooms themselves are great.", '2024-06-02']
+      ],
+      johnsonwhittle: [
+        ['Anonymous Terp', '2024-2025', 4, "Newer building, everything works, and the Honors community is friendly. Wish it had in-hall laundry.", '2025-05-27']
+      ]
+    };
+    dorms.forEach(d => {
+      (S[d.id] || []).forEach(([name, date, rating, text, posted]) => {
+        d.reviewList.push({ name, date, rating, text, created_at: posted });
+      });
+    });
+  }
+
+  ratingColor(rating) {
+    const n = Math.round(rating);
+    if (n <= 2) return 'var(--red)';
+    if (n === 3) return 'var(--orange)';
+    if (n === 4) return 'var(--gold)';
+    return 'var(--green)';
+  }
+
+  tierFields(rating) {
+    if (Math.round(rating) >= 5) return { color: 'transparent', grad: 'var(--plat-grad)', fill: 'transparent', anim: 'platShine 2.5s linear infinite' };
+    return { color: this.ratingColor(rating), grad: 'none', fill: 'currentColor', anim: 'none' };
+  }
+
+  toast(msg, type) {
+    this.setState({ toastMsg: msg, toastType: type, toastShow: true });
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => this.setState({ toastShow: false }), 3500);
+  }
+
+  passesFilters(d) {
+    const { campusF, roomF, featF, q } = this.state;
+    if (q) {
+      const s = q.toLowerCase();
+      const hit = d.name.toLowerCase().includes(s) || d.area.toLowerCase().includes(s) ||
+        (d.type && d.type.toLowerCase().includes(s)) ||
+        (d.tags && d.tags.some(t => t.t.toLowerCase().includes(s)));
+      if (!hit) return false;
+    }
+    if (campusF.length && !campusF.includes(d.area)) return false;
+    if (roomF.length) {
+      let ok = false;
+      if (roomF.includes('traditional') && d.type === 'Traditional') ok = true;
+      if (roomF.includes('semi-suite') && d.type.includes('Semi-Suite')) ok = true;
+      if (roomF.includes('suite') && d.type.includes('Suite') && !d.type.startsWith('Semi-Suite')) ok = true;
+      if (roomF.includes('apartment') && d.type.includes('Apartment')) ok = true;
+      if (!ok) return false;
+    }
+    if (featF.includes('ac') && !d.ac) return false;
+    if (featF.includes('laundry') && !d.tags.some(t => t.t === 'In-hall Laundry')) return false;
+    if (featF.includes('llp') && !d.tags.some(t => t.c === 'honors')) return false;
+    return true;
+  }
+
+  sortDorms(arr) {
+    const s = this.state.sort;
+    if (s === 'default') return arr;
+    return [...arr].sort((a, b) => {
+      if (a.reviews === 0 && b.reviews === 0) return 0;
+      if (a.reviews === 0) return 1;
+      if (b.reviews === 0) return -1;
+      return s === 'rating-desc' ? b.rating - a.rating : a.rating - b.rating;
+    });
+  }
+
+  toggleIn(key, val) {
+    const arr = this.state[key];
+    this.setState({ [key]: arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val] });
+  }
+
+  quickSubmit = () => {
+    const { revYear, revRating, revText, dorms, dormId } = this.state;
+    if (revRating === 0) return this.toast('Please select a star rating.', 'error');
+    if (!revYear) return this.toast('Please select the year you lived there.', 'error');
+    if (!revText.trim()) return this.toast('Please write something before posting.', 'error');
+    const d = dorms.find(x => x.id === dormId);
+    d.reviewList.unshift({
+      name: 'Anonymous Terp', date: revYear, rating: revRating,
+      text: revText.trim(), created_at: new Date().toISOString()
+    });
+    d.reviews = d.reviewList.length;
+    d.rating = d.reviewList.reduce((s, r) => s + r.rating, 0) / d.reviews;
+    this.setState({ revText: '', revRating: 0, revYear: '', dorms: [...dorms] });
+    this.toast('Review posted! Thanks for contributing.', 'success');
+  };
+
+  submitReview = () => {
+    const { revYear, revRating, revText, revName, capOk, dorms, dormId } = this.state;
+    if (!revYear) return this.toast('Please select the year you lived there.', 'error');
+    if (revRating === 0) return this.toast('Please select a star rating before submitting.', 'error');
+    if (!revText.trim()) return this.toast('Please write something before submitting.', 'error');
+    if (!capOk) return this.toast('Please complete the captcha before submitting.', 'error');
+    const d = dorms.find(x => x.id === dormId);
+    d.reviewList.unshift({
+      name: revName.trim() || 'Anonymous Terp', date: revYear, rating: revRating,
+      text: revText.trim(), created_at: new Date().toISOString()
+    });
+    d.reviews = d.reviewList.length;
+    d.rating = d.reviewList.reduce((s, r) => s + r.rating, 0) / d.reviews;
+    this.setState({ formOpen: false, revName: '', revText: '', revRating: 0, revYear: '', capOk: false, dorms: [...dorms] });
+    this.toast('Review submitted successfully! Thanks for contributing.', 'success');
+  };
+
+  renderVals() {
+    const st = this.state;
+    const effTheme = st.theme;
+    const anyFilter = st.campusF.length > 0 || st.roomF.length > 0 || st.featF.length > 0;
+
+    const filtered = this.sortDorms(st.dorms.filter(d => d.campus === 'on' && this.passesFilters(d)));
+    const cards = filtered.map(d => {
+      const none = d.reviews === 0;
+      const tf = this.tierFields(d.rating);
+      const area = d.area === 'north' ? 'North Campus' : d.area === 'south' ? 'South Campus' : 'The Commons';
+      const tagStr = d.tags.map(t => t.t).join(' \u00b7 ');
+      return {
+        name: d.name, img: d.imgs[0] || '',
+        metaLine: d.type + ' \u00b7 ' + area + (tagStr ? ' \u00b7 ' + tagStr : ''),
+        ratingText: none ? '\u2014' : d.rating.toFixed(1) + ' \u2605',
+        rColor: none ? 'var(--dim)' : tf.color,
+        rGrad: none ? 'none' : tf.grad,
+        rFill: none ? 'currentColor' : tf.fill,
+        rAnim: none ? 'none' : tf.anim,
+        reviewsText: none ? 'No reviews' : d.reviews + (d.reviews === 1 ? ' review' : ' reviews'),
+        open: () => this.setState({ view: 'detail', dormId: d.id, formOpen: false })
+      };
+    });
+
+    const mkOpts = (defs, key) => defs.map(([value, label]) => {
+      const sel = st[key].includes(value);
+      return {
+        label,
+        bg: sel ? 'var(--ink)' : 'none',
+        color: sel ? 'var(--bg)' : 'var(--dim)',
+        border: sel ? 'var(--ink)' : 'var(--line)',
+        onToggle: () => this.toggleIn(key, value)
+      };
+    });
+
+    let det = null;
+    if (st.view === 'detail' && st.dormId) {
+      const d = st.dorms.find(x => x.id === st.dormId);
+      if (d) {
+        const areaLabel = d.area.charAt(0).toUpperCase() + d.area.slice(1);
+        const m = (d.imgs[0] || '').match(/\/([^/]+)-card\.[a-z]+/);
+        det = {
+          name: d.name, img: d.imgs[0] || '',
+          meta: d.type + ' \u00b7 Built ' + d.built + ' \u00b7 ' + areaLabel + ' Campus',
+          ratingBig: d.reviews > 0 ? d.rating.toFixed(1) + ' \u2605' : 'No ratings',
+          ratingNum: d.reviews > 0 ? d.rating.toFixed(1) : '\u2013',
+          starsFullAvg: '\u2605'.repeat(Math.round(d.rating)),
+          starsEmptyAvg: '\u2606'.repeat(5 - Math.round(d.rating)),
+          dist: [5, 4, 3, 2, 1].map(n => {
+            const c = d.reviewList.filter(r => r.rating === n).length;
+            return { label: n, count: c, pct: d.reviewList.length ? (c / d.reviewList.length * 100).toFixed(0) + '%' : '0%' };
+          }),
+          rColor: d.reviews > 0 ? this.tierFields(d.rating).color : 'var(--dim)',
+          rGrad: d.reviews > 0 ? this.tierFields(d.rating).grad : 'none',
+          rFill: d.reviews > 0 ? this.tierFields(d.rating).fill : 'currentColor',
+          rAnim: d.reviews > 0 ? this.tierFields(d.rating).anim : 'none',
+          reviewCount: d.reviews + (d.reviews === 1 ? ' review' : ' reviews'),
+          reviewCountNum: d.reviews,
+          roomTypes: d.roomTypes,
+          tagLine: d.tags.map(t => t.t).join(' \u00b7 ') || '\u2014',
+          checks: (() => {
+            const hasTag = n => d.tags.some(t => t.t === n);
+            const rows = [
+              { label: 'A/C', value: d.ac ? '\u2713' : '\u2715', color: d.ac ? 'var(--green)' : 'var(--red)' },
+              { label: 'In-hall laundry', value: hasTag('In-hall Laundry') ? '\u2713' : '\u2715', color: hasTag('In-hall Laundry') ? 'var(--green)' : 'var(--red)' }
+            ];
+            d.tags.filter(t => t.t !== 'A/C' && t.t !== 'In-hall Laundry').forEach(t => rows.push({ label: t.t, value: '\u2713', color: 'var(--green)' }));
+            rows.push({ label: 'Rooms', value: d.roomTypes, color: 'var(--dim)' });
+            rows.push({ label: 'Dining', value: (d.dining || '\u2014').replace(' Dining Hall', ''), color: 'var(--dim)' });
+            rows.push({ label: 'Built', value: d.built, color: 'var(--dim)' });
+            return rows;
+          })(),
+          hasUmdLink: !!m,
+          umdLink: m ? 'https://drf.umd.edu/facilities/residence-halls-communities/' + m[1] : '',
+          noReviews: d.reviewList.length === 0,
+          reviews: [...d.reviewList].sort((a, b) => {
+            if (st.reviewSort === 'highest') return b.rating - a.rating;
+            if (st.reviewSort === 'lowest') return a.rating - b.rating;
+            return new Date(b.created_at) - new Date(a.created_at);
+          }).map(r => ({
+            name: r.name, date: r.date, text: r.text,
+            initial: (r.name.trim()[0] || 'A').toUpperCase(),
+            avBg: r.name.toLowerCase().startsWith('anonymous') ? 'var(--dim)' : 'var(--red)',
+            starsFull: '\u2605'.repeat(r.rating), starsEmpty: '\u2606'.repeat(5 - r.rating),
+            sColor: this.tierFields(r.rating).color,
+            sGrad: this.tierFields(r.rating).grad,
+            sFill: this.tierFields(r.rating).fill,
+            sAnim: this.tierFields(r.rating).anim,
+            posted: new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+          })),
+          openLightbox: () => this.setState({ lightboxSrc: d.imgs[0] })
+        };
+      }
+    }
+
+    const now = new Date();
+    const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
+    const years = [];
+    for (let y = startYear; y >= startYear - 10; y--) {
+      const label = y + '-' + (y + 1);
+      const sel = st.revYear === label;
+      years.push({
+        label,
+        bg: sel ? 'var(--ink)' : 'var(--field)',
+        border: sel ? 'var(--ink)' : 'var(--line)',
+        color: sel ? 'var(--bg)' : 'var(--dim)',
+        onSet: () => this.setState({ revYear: label })
+      });
+    }
+
+    const stf = this.tierFields(st.revRating);
+    const starInput = [1, 2, 3, 4, 5].map(n => {
+      const filled = n <= st.revRating;
+      return {
+        color: filled ? stf.color : 'var(--line)',
+        grad: filled ? stf.grad : 'none',
+        fill: filled ? stf.fill : 'currentColor',
+        anim: filled ? stf.anim : 'none',
+        onSet: () => this.setState({ revRating: n })
+      };
+    });
+
+    const SORT_LABELS = { 'default': 'Default', 'rating-desc': 'Highest rated', 'rating-asc': 'Lowest rated' };
+
+    return {
+      isDark: effTheme === 'dark',
+      isLight: effTheme !== 'dark',
+      toggleTheme: () => {
+        const next = effTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('pd2-theme', next);
+        this.applyTheme(next);
+        this.setState({ theme: next });
+      },
+
+      goHome: () => this.setState({ view: 'home', dormId: null, formOpen: false }),
+      goMap: () => this.setState({ view: 'map', dormId: null, formOpen: false }),
+      goAbout: () => this.toast('About page not included in this prototype.', 'success'),
+      navHomeColor: st.view !== 'map' ? 'var(--ink)' : 'var(--dim)',
+      navHomeLine: st.view !== 'map' ? 'var(--red)' : 'transparent',
+      navMapColor: st.view === 'map' ? 'var(--ink)' : 'var(--dim)',
+      navMapLine: st.view === 'map' ? 'var(--red)' : 'transparent',
+
+      showHome: st.view === 'home',
+      showDetail: st.view === 'detail' && !!det,
+      showMap: st.view === 'map',
+      showDisclaimer: st.view !== 'map',
+
+      q: st.q,
+      onSearch: e => this.setState({ q: e.target.value }),
+      searchRef: el => { this._searchEl = el; },
+
+      anyFilter,
+      setAllFilter: () => this.setState({ campusF: [], roomF: [], featF: [] }),
+      campusOpts: mkOpts([['north', 'North Campus'], ['south', 'South Campus'], ['commons', 'The Commons']], 'campusF'),
+      roomOpts: mkOpts([['traditional', 'Traditional'], ['semi-suite', 'Semi-Suite'], ['suite', 'Suite'], ['apartment', 'Apartment']], 'roomF'),
+      featOpts: mkOpts([['ac', 'A/C'], ['laundry', 'In-hall Laundry'], ['llp', 'Honors / LLP']], 'featF'),
+
+      countLabel: filtered.length + (filtered.length === 1 ? ' hall' : ' halls'),
+      sortOpts: ['default', 'rating-desc', 'rating-asc'].map(v => ({
+        label: SORT_LABELS[v],
+        color: st.sort === v ? 'var(--ink)' : 'var(--dim)',
+        line: st.sort === v ? 'var(--red)' : 'transparent',
+        onSelect: () => this.setState({ sort: v })
+      })),
+
+      cards,
+      det,
+      backToList: () => this.setState({ view: 'home', dormId: null, formOpen: false }),
+
+      formOpen: st.formOpen,
+      openForm: () => this.setState({ formOpen: true, revRating: 0, revYear: '', capOk: false }),
+      closeForm: () => this.setState({ formOpen: false, revName: '', revText: '', revRating: 0, revYear: '', capOk: false }),
+      revName: st.revName,
+      onRevName: e => this.setState({ revName: e.target.value }),
+      revText: st.revText,
+      onRevText: e => this.setState({ revText: e.target.value }),
+      charCount: st.revText.length + ' / 2000',
+      years, starInput,
+      quickYears: years.slice(0, 4),
+      quickSubmit: this.quickSubmit,
+      revSortOpts: [['newest', 'Newest'], ['highest', 'Highest'], ['lowest', 'Lowest']].map(([v, l]) => ({
+        label: l,
+        bg: st.reviewSort === v ? 'var(--ink)' : 'none',
+        color: st.reviewSort === v ? 'var(--bg)' : 'var(--dim)',
+        onSelect: () => this.setState({ reviewSort: v })
+      })),
+      toggleCaptcha: () => this.setState({ capOk: !st.capOk }),
+      capBorder: st.capOk ? 'var(--green)' : 'var(--line)',
+      capMark: st.capOk ? '\u2713' : '',
+      submitReview: this.submitReview,
+
+      toastMsg: st.toastMsg,
+      toastOpacity: st.toastShow ? '1' : '0',
+      toastTransform: st.toastShow ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(20px)',
+      toastColor: st.toastMsg && st.toastType === 'error' ? '#ff9aa6' : 'var(--bg)',
+
+      lightboxOpen: !!st.lightboxSrc,
+      lightboxSrc: st.lightboxSrc || '',
+      closeLightbox: () => this.setState({ lightboxSrc: null })
+    };
+  }
+}
+</script>
+</body>
+</html>
