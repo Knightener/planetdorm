@@ -327,11 +327,17 @@ function showDetail(id) {
   `;
 
   if (d.lat && d.lng) {
-    detailMap = L.map('detailMapFrame', CAMPUS_MAP_OPTIONS).setView([d.lat, d.lng], 16);
-    addBaseTiles(detailMap);
-    L.marker([d.lat, d.lng]).addTo(detailMap).bindPopup(d.name).openPopup();
-    // Leaflet needs the container to be visible before it can measure its size.
-    setTimeout(() => detailMap.invalidateSize(), 100);
+    // MapLibre uses [lng, lat] order (opposite of Leaflet's [lat, lng]).
+    detailMap = createCampusMap('detailMapFrame', [d.lng, d.lat], 16.5);
+    detailMap.on('load', () => {
+      new maplibregl.Marker({ color: '#EAA000' })
+        .setLngLat([d.lng, d.lat])
+        .setPopup(new maplibregl.Popup({ offset: 28 }).setText(d.name))
+        .addTo(detailMap)
+        .togglePopup();
+    });
+    // The container is hidden until the detail view opens; resize once visible.
+    setTimeout(() => detailMap.resize(), 100);
   }
 }
 
@@ -371,51 +377,108 @@ function showSection(name) {
   if (name === 'map') initMap();
 }
 
-let leafletMap = null;
+let campusMap = null;
 let detailMap = null;
+let campusMarkers = [];
+// Every live MapLibre map, so the theme toggle can restyle all of them at once.
+let activeMaps = [];
 
-// Keep the viewport on and around UMD's campus.
-const CAMPUS_BOUNDS = [[38.970, -76.975], [39.005, -76.915]];
-const CAMPUS_MAP_OPTIONS = {
-  maxBounds: CAMPUS_BOUNDS,
-  maxBoundsViscosity: 1.0,
-  minZoom: 14,
-  maxZoom: 19
+// Keep the viewport on and around UMD's campus. MapLibre bounds are
+// [[west, south], [east, north]] in [lng, lat] order.
+const CAMPUS_BOUNDS = [[-76.975, 38.970], [-76.915, 39.005]];
+
+// OpenFreeMap vector styles (free, no API key). Light/dark to match the site
+// theme; both get real 3D building extrusions added on top.
+function mapStyleUrl() {
+  return document.documentElement.dataset.theme === 'light'
+    ? 'https://tiles.openfreemap.org/styles/liberty'
+    : 'https://tiles.openfreemap.org/styles/dark';
+}
+
+// Extrude the OpenMapTiles `building` layer into 3D. Inserted just below the
+// first text label so street/place names stay readable on top of buildings.
+function add3dBuildings(map) {
+  if (map.getLayer('3d-buildings')) return;
+  let labelLayerId;
+  for (const l of map.getStyle().layers) {
+    if (l.type === 'symbol' && l.layout && l.layout['text-field']) { labelLayerId = l.id; break; }
+  }
+  const dark = document.documentElement.dataset.theme !== 'light';
+  map.addLayer({
+    id: '3d-buildings',
+    source: 'openmaptiles',
+    'source-layer': 'building',
+    type: 'fill-extrusion',
+    minzoom: 14,
+    paint: {
+      'fill-extrusion-color': dark ? '#3a3f4a' : '#d9d0c3',
+      // Grow buildings from flat to full height as you zoom in, for a smooth reveal.
+      'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['get', 'render_height']],
+      'fill-extrusion-base': ['get', 'render_min_height'],
+      'fill-extrusion-opacity': 0.9
+    }
+  }, labelLayerId);
+}
+
+// Factory: a pitched campus map, locked to campus bounds, with 3D buildings.
+function createCampusMap(container, center, zoom) {
+  const map = new maplibregl.Map({
+    container,
+    style: mapStyleUrl(),
+    center,
+    zoom,
+    pitch: 50,
+    bearing: -17,
+    minZoom: 14,
+    maxZoom: 19,
+    maxBounds: CAMPUS_BOUNDS
+  });
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-left');
+  map.on('load', () => add3dBuildings(map));
+  activeMaps.push(map);
+  map.on('remove', () => { activeMaps = activeMaps.filter(m => m !== map); });
+  return map;
+}
+
+// Live theme switching: swap the base style and re-add 3D buildings. Markers
+// are DOM overlays and survive setStyle, so they don't need re-adding.
+window.refreshMapTheme = function () {
+  activeMaps.forEach(map => {
+    map.setStyle(mapStyleUrl());
+    map.once('styledata', () => add3dBuildings(map));
+  });
 };
 
-// One basemap for both themes; dark mode restyles the tiles with a CSS
-// filter (see .leaflet-tile-pane in styles.css) so no labels are lost.
-function addBaseTiles(map) {
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
-  }).addTo(map);
+function addCampusMarkers(dormList) {
+  dormList.forEach(d => {
+    const popup = new maplibregl.Popup({ offset: 28 }).setHTML(`
+      <strong>${d.name}</strong><br>
+      ${d.rating > 0 ? `<span class="${ratingTier(d.rating)}">${d.rating.toFixed(1)}★</span> · ` + d.reviews + ' review' + (d.reviews !== 1 ? 's' : '') : 'No reviews yet :('}<br>
+      <a href="#" onclick="showDetail('${d.id}');return false;">View reviews</a>
+    `);
+    const marker = new maplibregl.Marker({ color: '#EAA000' })
+      .setLngLat([d.lng, d.lat])
+      .setPopup(popup)
+      .addTo(campusMap);
+    campusMarkers.push(marker);
+  });
 }
 
 function initMap() {
   const onCampusDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
 
-  if (!leafletMap) {
-    leafletMap = L.map('mapFrame', CAMPUS_MAP_OPTIONS).setView([38.9875, -76.9440], 14);
-    addBaseTiles(leafletMap);
+  if (!campusMap) {
+    campusMap = createCampusMap('mapFrame', [-76.9440, 38.9875], 14.5);
+    campusMap.on('load', () => addCampusMarkers(onCampusDorms));
   } else {
-    // Re-entering the map tab: clear old markers but keep the tile layer.
-    leafletMap.eachLayer(layer => {
-      if (layer instanceof L.Marker) leafletMap.removeLayer(layer);
-    });
+    // Re-entering the map tab: rebuild markers on the existing map.
+    campusMarkers.forEach(m => m.remove());
+    campusMarkers = [];
+    addCampusMarkers(onCampusDorms);
   }
 
-  onCampusDorms.forEach(d => {
-    const marker = L.marker([d.lat, d.lng]).addTo(leafletMap);
-    marker.bindPopup(`
-      <strong>${d.name}</strong><br>
-      ${d.rating > 0 ? `<span class="${ratingTier(d.rating)}">${d.rating.toFixed(1)}★</span> · ` + d.reviews + ' review' + (d.reviews !== 1 ? 's' : '') : 'No reviews yet :('}<br>
-      <a href="#" onclick="showDetail('${d.id}');return false;">View reviews</a>
-    `);
-  });
-
-  // Same visibility-timing fix as the detail map.
-  setTimeout(() => leafletMap.invalidateSize(), 100);
+  // The map tab is hidden until selected; resize once its container is visible.
+  setTimeout(() => campusMap.resize(), 100);
 }
 
 function openLightbox(imgs, idx) {
