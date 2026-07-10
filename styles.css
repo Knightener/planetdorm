@@ -1101,6 +1101,10 @@ nav {
   gap: 12px;
   scrollbar-width: thin;
   scrollbar-color: var(--surface3) transparent;
+  /* Keep touch scrolling inside the list: without this, hitting the top or
+     bottom chains the scroll to the page and drags the map view with it. */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 .map-sidebar-list::-webkit-scrollbar { width: 6px; }
 .map-sidebar-list::-webkit-scrollbar-track { background: transparent; }
@@ -1198,7 +1202,14 @@ nav {
   position: relative;
   flex: 1;
   min-width: 0;
+  /* Own stacking context: markers (z-index up to 10) must never paint over
+     the sidebar/bottom sheet (z-index 6), which lives outside this box. */
+  z-index: 1;
 }
+
+/* Clear the sidebar collapse toggle, which sits on the seam at the map's
+   top-left corner right where the zoom buttons would otherwise be. */
+.map-container .maplibregl-ctrl-top-left .maplibregl-ctrl { margin-top: 58px; }
 
 #mapFrame { width: 100%; height: 100%; }
 
