@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Plata Hall — Dorm Reviews</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+// Same theme model as the rest of the site (persisted under "pd2-theme").
+(function(){
+  var saved = localStorage.getItem('pd2-theme');
+  var dark = saved ? saved === 'dark'
+    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (dark) document.documentElement.dataset.theme = 'dark';
+})();
+function toggleTheme(){
+  var root = document.documentElement;
+  var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  if (next === 'dark') root.dataset.theme = 'dark';
+  else delete root.dataset.theme;
+  localStorage.setItem('pd2-theme', next);
+}
+</script>
+<style>
+/* "Terp Classic" dorm reviews page — its own visual system per the design
+   handoff (design_handoff_dorm_reviews/dorm-reviews-1a.html), independent of
+   the PlanetDorm v2 tokens in styles.css. Light-only by design. */
+:root {
+  --td-red: #e21833;
+  --td-gold: #ffd200;
+  --td-red-tint: #fdeaec;
+  --td-gold-tint: #fdf6e0;
+  --td-ink: #1a1a1a;
+  --td-body: #3d3a34;
+  --td-secondary: #5c574e;
+  --td-muted: #8a857c;
+  --td-page: #faf9f7;
+  --td-card: #fff;
+  --td-border: #ece9e4;
+  --td-border2: #e5e1da;
+  --td-track: #f2f0ec;
+  --td-star: #ffb400;
+  --td-pos: #0b7a4b;
+  --td-pos-bg: #e7f4ee;
+  --td-neg: #b3540e;
+  --td-neg-bg: #fdf0e5;
+  --td-stripe: #f5f3ef;
+}
+
+/* Dark theme — mapped onto the site's dark palette (styles.css). */
+:root[data-theme="dark"] {
+  --td-red-tint: rgba(226, 24, 51, 0.16);
+  --td-gold-tint: rgba(255, 210, 0, 0.10);
+  --td-ink: #f2f0eb;
+  --td-body: #cfccc5;
+  --td-secondary: #aaa7b0;
+  --td-muted: #97949e;
+  --td-page: #131215;
+  --td-card: #1b1a1e;
+  --td-border: #2c2a30;
+  --td-border2: #35333b;
+  --td-track: rgba(255, 255, 255, 0.08);
+  --td-pos: #4cc492;
+  --td-pos-bg: rgba(76, 196, 146, 0.12);
+  --td-neg: #e59a4b;
+  --td-neg-bg: rgba(229, 154, 75, 0.14);
+  --td-stripe: #201f24;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--td-page);
+  color: var(--td-ink);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.td-page { max-width: 1180px; margin: 0 auto; }
+
+button { font: inherit; background: none; border: none; cursor: pointer; }
+a { color: var(--td-ink); text-decoration: none; }
+a:hover { color: var(--td-red); }
+
+/* ---------------- NAV (PlanetDorm site nav, same as the home page;
+   the only part of this page that follows the site theme) ---------------- */
+:root {
+  --bg: #faf9f7; --ink: #17161a; --dim: #6e6c75; --line: #e2e0da;
+  --red: #E21833; --logo-gold: #d9a300;
+}
+
+:root[data-theme="dark"] {
+  --bg: #131215; --ink: #f2f0eb; --dim: #97949e; --line: #2c2a30;
+  --logo-gold: #ffd200;
+}
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  isolation: isolate;
+  font-family: 'Manrope', sans-serif;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 40px;
+}
+
+.logo {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--red);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.logo span { color: var(--logo-gold); }
+
+.nav-right { display: flex; align-items: center; gap: 28px; }
+
+.nav-links { display: flex; align-items: center; gap: 28px; }
+
+.nav-links button {
+  background: none;
+  border: none;
+  padding: 0 0 3px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s;
+}
+
+.nav-links button:hover { color: var(--ink); }
+
+.nav-links button.active {
+  color: var(--ink);
+  border-bottom-color: var(--red);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: var(--dim);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.theme-toggle:hover { color: var(--ink); }
+.theme-toggle .icon-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+.nav-theme-toggle { display: none; align-items: center; gap: 12px; }
+.nav-theme-toggle .icon-moon,
+.nav-theme-toggle .label-dark { display: none; }
+:root[data-theme="dark"] .nav-theme-toggle .icon-sun,
+:root[data-theme="dark"] .nav-theme-toggle .label-light { display: none; }
+:root[data-theme="dark"] .nav-theme-toggle .icon-moon { display: block; }
+:root[data-theme="dark"] .nav-theme-toggle .label-dark { display: inline; }
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 6px;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform 0.25s, opacity 0.2s;
+  transform-origin: center;
+}
+
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 768px) {
+  .nav-inner { padding: 16px 20px; }
+  .nav-toggle { display: flex; position: relative; z-index: 1000; }
+  .nav-right { gap: 14px; }
+  .nav-right > .theme-toggle { display: none; }
+
+  .nav-links {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 80px 16px 32px;
+    z-index: 999;
+    overflow-y: auto;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links button {
+    width: 100%;
+    text-align: left;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    border-bottom: none;
+  }
+  .nav-links button.active { border-bottom: none; color: var(--red); }
+  .nav-theme-toggle { display: flex; margin-top: auto; border-top: 1px solid var(--line); padding-top: 24px; }
+}
+
+/* ---------------- GALLERY ---------------- */
+.td-gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 150px 150px;
+  gap: 8px;
+  padding: 20px 32px 0;
+}
+
+.td-gallery .cell {
+  border-radius: 14px;
+  background: repeating-linear-gradient(45deg, var(--td-border), var(--td-border) 10px, var(--td-stripe) 10px, var(--td-stripe) 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 12px 'Space Mono', ui-monospace, monospace;
+  color: var(--td-muted);
+  overflow: hidden;
+}
+
+.td-gallery .cell.hero { grid-row: span 2; }
+
+.td-gallery .cell.photo {
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+}
+
+/* ---------------- DORM HEADER ---------------- */
+.td-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 24px 32px 8px;
+}
+
+.td-header-left { flex: 1; }
+
+.td-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.td-header h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; color: var(--td-ink); }
+
+:root[data-theme="dark"] .td-badge { color: #ff97a4; }
+
+.td-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--td-red);
+  background: var(--td-red-tint);
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.td-subline { margin-top: 6px; font-size: 14px; color: var(--td-muted); }
+
+.td-amenities { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+.td-amenity {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.td-score { text-align: right; flex: none; }
+
+.td-score-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.td-score-num { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; color: var(--td-ink); }
+
+.td-score-stars { color: var(--td-star); font-size: 20px; letter-spacing: 2px; white-space: nowrap; }
+.star-empty { color: var(--td-border2); }
+
+.td-score-meta { font-size: 13px; color: var(--td-muted); margin-top: 2px; }
+.td-score-meta strong { font-weight: 700; color: var(--td-ink); }
+
+/* ---------------- BODY GRID ---------------- */
+.td-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  padding: 20px 32px 32px;
+  align-items: start;
+}
+
+.td-reviews { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+/* Filter / sort chips. */
+.td-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.td-chip {
+  position: relative;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  padding: 7px 14px;
+  border-radius: 999px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.td-chip:hover { border-color: var(--td-muted); }
+
+.td-chip.active {
+  color: var(--td-page);
+  background: var(--td-ink);
+  border-color: var(--td-ink);
+  font-weight: 700;
+}
+
+.td-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  min-width: 150px;
+  background: var(--td-card);
+  border: 1px solid var(--td-border);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  display: none;
+  flex-direction: column;
+  text-align: left;
+}
+
+.td-menu.open { display: flex; }
+
+.td-menu button {
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  padding: 7px 10px;
+  border-radius: 8px;
+}
+
+.td-menu button:hover { background: var(--td-track); }
+.td-menu button.selected { color: var(--td-ink); background: var(--td-gold-tint); font-weight: 700; }
+
+/* Review cards. */
+.td-card {
+  background: var(--td-card);
+  border: 1px solid var(--td-border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  transition: box-shadow 0.15s;
+}
+
+.td-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+
+.rev-head { display: flex; align-items: center; gap: 12px; }
+
+.rev-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.rev-avatar.v0 { background: var(--td-gold); color: #1a1a1a; }
+.rev-avatar.v1 { background: var(--td-red); color: #fff; }
+.rev-avatar.v2 { background: #1a1a1a; color: var(--td-gold); }
+:root[data-theme="dark"] .rev-avatar.v2 { background: #2c2a30; }
+
+.rev-id { flex: 1; min-width: 0; }
+.rev-name { font-weight: 700; font-size: 14.5px; color: var(--td-ink); }
+.rev-name .sub { font-weight: 500; color: var(--td-muted); font-size: 12.5px; }
+.rev-meta { font-size: 12px; color: var(--td-muted); }
+.rev-stars { color: var(--td-star); font-size: 15px; letter-spacing: 1px; white-space: nowrap; }
+
+.rev-body { margin: 14px 0 0; font-size: 14px; line-height: 1.6; color: var(--td-body); text-wrap: pretty; }
+
+.rev-foot { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+
+.rev-tag { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+.rev-tag.pos { color: var(--td-pos); background: var(--td-pos-bg); }
+.rev-tag.neg { color: var(--td-neg); background: var(--td-neg-bg); }
+
+.rev-helpful {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-muted);
+  transition: color 0.15s;
+}
+
+.rev-helpful:hover { color: var(--td-ink); }
+.rev-helpful.voted { color: var(--td-pos); cursor: default; }
+
+.td-empty { color: var(--td-muted); font-size: 14px; padding: 8px 2px; }
+
+/* Show-all ghost button. */
+.td-show-all {
+  align-self: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--td-red);
+  padding: 10px 22px;
+  border: 1.5px solid var(--td-red);
+  border-radius: 999px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.td-show-all:hover { background: var(--td-red); color: #fff; }
+
+/* ---------------- SIDEBAR ---------------- */
+.td-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+.td-card-title { font-weight: 800; font-size: 15px; color: var(--td-ink); margin-bottom: 14px; }
+
+.bd-rows { display: flex; flex-direction: column; gap: 11px; }
+
+.bd-row { display: flex; align-items: center; gap: 10px; }
+.bd-label { width: 86px; font-size: 12.5px; color: var(--td-secondary); flex-shrink: 0; }
+.bd-track { flex: 1; height: 8px; background: var(--td-track); border-radius: 999px; overflow: hidden; }
+.bd-fill { height: 100%; background: var(--td-red); border-radius: 999px; }
+.bd-score { width: 26px; text-align: right; font-size: 12.5px; font-weight: 700; color: var(--td-ink); }
+
+.bd-foot {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--td-track);
+  font-size: 12.5px;
+  color: var(--td-muted);
+  line-height: 1.5;
+}
+
+.cmp-rows { display: flex; flex-direction: column; gap: 2px; }
+
+.cmp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cmp-row:hover { background: var(--td-track); }
+.cmp-row.current { background: var(--td-gold-tint); cursor: default; }
+
+.cmp-name { flex: 1; font-size: 13.5px; color: var(--td-secondary); min-width: 0; }
+.cmp-row.current .cmp-name { font-weight: 700; color: var(--td-ink); }
+.cmp-rating { font-size: 12.5px; font-weight: 700; color: var(--td-ink); white-space: nowrap; }
+.cmp-price { font-size: 12px; color: var(--td-muted); white-space: nowrap; }
+
+.cmp-foot {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--td-red);
+}
+
+.td-write-btn {
+  width: 100%;
+  padding: 12px 22px;
+  background: var(--td-red);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+
+.td-write-btn:hover { background: #b01228; }
+
+/* ---------------- WRITE-A-REVIEW FORM ---------------- */
+.td-form-title { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; color: var(--td-ink); margin-bottom: 16px; }
+
+.td-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--td-secondary);
+  margin: 0 0 6px;
+}
+
+.td-input, .td-textarea {
+  width: 100%;
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  border-radius: 10px;
+  color: var(--td-ink);
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.td-input:focus, .td-textarea:focus { border-color: var(--td-red); }
+.td-input::placeholder, .td-textarea::placeholder { color: var(--td-muted); }
+.td-input { margin-bottom: 16px; }
+.td-textarea { height: 120px; resize: vertical; }
+
+.td-star-picker { display: flex; gap: 6px; margin-bottom: 16px; }
+.td-star-picker span {
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--td-border2);
+  transition: color 0.15s;
+}
+.td-star-picker span.filled { color: var(--td-star); }
+
+.td-years { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+.td-year {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  padding: 7px 14px;
+  border-radius: 999px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.td-year:hover { border-color: var(--td-muted); }
+.td-year.active { color: var(--td-page); background: var(--td-ink); border-color: var(--td-ink); font-weight: 700; }
+
+.td-char { display: block; text-align: right; font-size: 12px; color: var(--td-muted); margin-top: 4px; }
+
+.td-form-btns { display: flex; gap: 10px; margin-top: 4px; }
+
+.td-cancel, .td-submit {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: 999px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.td-cancel { color: var(--td-secondary); border: 1.5px solid var(--td-border2); }
+.td-cancel:hover { color: var(--td-ink); border-color: var(--td-ink); }
+.td-submit { color: #fff; background: var(--td-red); border: 1.5px solid var(--td-red); }
+.td-submit:hover { background: #b01228; border-color: #b01228; }
+
+/* ---------------- TOAST ---------------- */
+.td-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--td-ink);
+  color: var(--td-page);
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  z-index: 9999;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.td-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.td-toast.error { color: #ff9aa6; }
+
+/* ---------------- LIGHTBOX ---------------- */
+.td-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 3000;
+  justify-content: center;
+  align-items: center;
+}
+
+.td-lightbox.active { display: flex; }
+.td-lightbox img { max-width: 90%; max-height: 85vh; object-fit: contain; }
+
+.td-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  color: #fff;
+  font-size: 2rem;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 1024px) {
+  .td-body { grid-template-columns: 1fr; }
+  /* Stacked layout: review CTA comes first in the sidebar, so it always
+     sits directly under the last review. */
+  .td-write-btn { order: 1; }
+  #breakdownCard { order: 2; }
+  #compareCard { order: 3; }
+}
+
+@media (max-width: 640px) {
+  .td-gallery {
+    display: flex;
+    overflow-x: auto;
+    padding: 16px 20px 0;
+    scroll-snap-type: x mandatory;
+  }
+  .td-gallery .cell { flex: none; width: 240px; height: 150px; scroll-snap-align: start; }
+
+  .td-header { flex-direction: column; gap: 14px; padding: 20px 20px 8px; }
+  .td-score { text-align: left; }
+  .td-score-row { justify-content: flex-start; }
+  .td-body { padding: 16px 20px 28px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="location.href='index.html'">Planet<span>Dorm</span></div>
+    <div class="nav-right">
+      <div class="nav-links" id="navLinks">
+        <button class="active" onclick="location.href='index.html'">On-campus</button>
+        <button onclick="location.href='index.html#map'">Map</button>
+        <button onclick="location.href='about.html'">About</button>
+        <button class="nav-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span class="label-light">Light mode</span>
+          <span class="label-dark">Dark mode</span>
+        </button>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="td-page">
+
+  <div class="td-gallery" id="gallery"></div>
+
+  <div class="td-header" id="dormHeader"></div>
+
+  <div class="td-body">
+    <div class="td-reviews">
+      <div class="td-card" id="reviewForm" hidden>
+        <div class="td-form-title">Write a review</div>
+        <label class="td-label" for="formName">Your name</label>
+        <input type="text" id="formName" class="td-input" placeholder="Anonymous Terp" maxlength="100">
+        <div class="td-label">Rating</div>
+        <div class="td-star-picker" id="formStars"></div>
+        <div class="td-label">Year lived there</div>
+        <div class="td-years" id="formYears"></div>
+        <label class="td-label" for="formText">Your review</label>
+        <textarea id="formText" class="td-textarea" maxlength="2000" placeholder="What was your experience like?"></textarea>
+        <span class="td-char" id="charCount">0 / 2000</span>
+        <div id="formCaptcha" style="margin:14px 0 18px"></div>
+        <div class="td-form-btns">
+          <button class="td-cancel" id="formCancel">Cancel</button>
+          <button class="td-submit" id="formSubmit">Submit review</button>
+        </div>
+      </div>
+      <div class="td-filters" id="filterRow"></div>
+      <div id="reviewsList" class="td-reviews" style="padding:0"></div>
+      <button class="td-show-all" id="showAllBtn" hidden></button>
+    </div>
+
+    <div class="td-sidebar">
+      <div class="td-card" id="breakdownCard" hidden></div>
+      <div class="td-card" id="compareCard" hidden></div>
+      <button class="td-write-btn" id="writeReviewLink">Write a review</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="td-toast" id="toast"></div>
+
+<div class="td-lightbox" id="lightbox" onclick="this.classList.remove('active')">
+  <button class="td-lightbox-close">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<script type="module">
+import { supabase } from './supabase.js';
+import { dorms } from './data.js';
+
+/* ------------------------------------------------------------------ *
+ * Editorial dorm metadata the data model doesn't carry (walk times,  *
+ * pricing, category scores). Values for La Plata are final copy from *
+ * the design handoff; other dorms fall back to derived fields and    *
+ * hide the sections they have no data for.                           *
+ * ------------------------------------------------------------------ */
+const DORM_META = {
+  laplata: {
+    subline: 'Denton Community · 5 min to Eppley · 8 min to Stamp · Traditional-style, air-conditioned',
+    amenities: ['❄ AC', 'Elevator', 'Community bathrooms', 'Laundry each floor', 'Freshman-heavy'],
+    price: '$4,706', priceShort: '$4.7k', priceRoom: 'double',
+    categoryScores: [
+      ['Location', 4.7], ['Community', 4.4], ['Cleanliness', 4.0],
+      ['Facilities', 3.8], ['Quietness', 3.1]
+    ],
+    nearby: [
+      { id: 'oakland', price: '$5.6k' },
+      { id: 'ellicott', price: '$4.5k' },
+      { id: 'cumberland', price: '$4.5k' }
+    ],
+    galleryLabels: ['[ double room ]', '[ lounge ]', '[ bathroom ]', '[ +12 photos ]']
+  }
+};
+
+const params = new URLSearchParams(location.search);
+const dormId = params.get('dorm') || 'laplata';
+const dorm = dorms.find(d => d.id === dormId) || dorms.find(d => d.id === 'laplata');
+const meta = DORM_META[dorm.id] || {};
+
+/* ------------------------------------------------------------------ *
+ * State (per the handoff's State Management section)                 *
+ * ------------------------------------------------------------------ */
+const INITIAL_VISIBLE = 5;
+let reviews = [];                 // this dorm's reviews (Supabase)
+let nearbyRatings = {};           // dormId -> { avg, count }
+let filters = { sort: 'helpful', roomType: null, yearLived: null, minRating: 0 };
+let visibleCount = INITIAL_VISIBLE;
+let helpfulVotes = new Set(JSON.parse(localStorage.getItem('td-helpful') || '[]'));
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function starsHTML(rating, size) {
+  const full = Math.round(rating);
+  return `<span style="font-size:${size}px;letter-spacing:${size >= 20 ? 2 : 1}px;color:var(--td-star)">${'★'.repeat(full)}<span class="star-empty">${'★'.repeat(5 - full)}</span></span>`;
+}
+
+// "2024-2025" -> "2024–25"
+function periodLabel(year) {
+  const m = /^(\d{4})-(\d{4})$/.exec(year || '');
+  return m ? `${m[1]}–${m[2].slice(2)}` : (year || '');
+}
+
+function areaBadge(d) {
+  if (d.area === 'north') return 'North Campus';
+  if (d.area === 'south') return 'South Campus';
+  return 'The Commons';
+}
+
+// Server-side counts (reviews.helpful_count) already include this user's past
+// votes; overrides hold optimistic/confirmed counts for votes cast this visit.
+const helpfulOverrides = new Map();
+
+function helpfulCount(r) {
+  return helpfulOverrides.get(String(r.id)) ?? r.helpful_count ?? 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Static sections (gallery + header shell)                           *
+ * ------------------------------------------------------------------ */
+function renderGallery() {
+  const img = dorm.imgs?.[0] || '';
+  const labels = meta.galleryLabels || ['[ room ]', '[ lounge ]', '[ bathroom ]', '[ photos ]'];
+  const hero = img
+    ? `<div class="cell hero photo" style="background-image:url('${img}')" onclick="openLightbox('${img.replace(/'/g, "\\'")}')" role="img" aria-label="${escHtml(dorm.name)}"></div>`
+    : `<div class="cell hero">[ exterior photo ]</div>`;
+  document.getElementById('gallery').innerHTML =
+    hero + labels.map(l => `<div class="cell">${escHtml(l)}</div>`).join('');
+}
+
+function fallbackSubline() {
+  const dining = (dorm.dining || '').replace(' Dining Hall', '');
+  return [dorm.type, dining && `Near ${dining}`, `Built ${dorm.built}`, dorm.ac ? 'air-conditioned' : 'no A/C']
+    .filter(Boolean).join(' · ');
+}
+
+function fallbackAmenities() {
+  const out = [dorm.ac ? '❄ AC' : null];
+  dorm.tags?.forEach(t => { if (t.t !== 'A/C') out.push(t.t); });
+  return out.filter(Boolean);
+}
+
+function renderHeader() {
+  const count = reviews.length;
+  const avg = count ? reviews.reduce((s, r) => s + r.rating, 0) / count : 0;
+  const amenities = meta.amenities || fallbackAmenities();
+  const priceHtml = meta.price
+    ? ` · <strong>${meta.price}</strong>/semester (${meta.priceRoom || 'double'})` : '';
+  document.getElementById('dormHeader').innerHTML = `
+    <div class="td-header-left">
+      <div class="td-title-row">
+        <h1>${escHtml(dorm.name)}</h1>
+        <span class="td-badge">${escHtml(areaBadge(dorm))}</span>
+      </div>
+      <div class="td-subline">${escHtml(meta.subline || fallbackSubline())}</div>
+      <div class="td-amenities">${amenities.map(a => `<span class="td-amenity">${escHtml(a)}</span>`).join('')}</div>
+    </div>
+    <div class="td-score">
+      <div class="td-score-row">
+        <span class="td-score-num">${count ? avg.toFixed(1) : '—'}</span>
+        <span class="td-score-stars">${starsHTML(avg, 20)}</span>
+      </div>
+      <div class="td-score-meta">${count} review${count === 1 ? '' : 's'}${priceHtml}</div>
+    </div>`;
+  document.title = `${dorm.name} — Dorm Reviews`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Filters / sorting                                                  *
+ * ------------------------------------------------------------------ */
+function distinct(list, key) {
+  return [...new Set(list.map(r => r[key]).filter(Boolean))];
+}
+
+function filteredReviews() {
+  let out = reviews.filter(r =>
+    (!filters.roomType || r.roomType === filters.roomType) &&
+    (!filters.yearLived || r.year === filters.yearLived) &&
+    r.rating >= filters.minRating
+  );
+  if (filters.sort === 'helpful') {
+    out = [...out].sort((a, b) =>
+      helpfulCount(b) - helpfulCount(a) || new Date(b.created_at) - new Date(a.created_at));
+  } else {
+    out = [...out].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+  return out;
+}
+
+function menuHTML(id, items, selected, allLabel) {
+  const rows = [`<button data-val="" class="${selected ? '' : 'selected'}">${allLabel}</button>`]
+    .concat(items.map(v =>
+      `<button data-val="${escHtml(v)}" class="${selected === v ? 'selected' : ''}">${escHtml(periodLabel(v) || v)}</button>`));
+  return `<div class="td-menu" id="${id}">${rows.join('')}</div>`;
+}
+
+function renderFilters() {
+  const years = distinct(reviews, 'year').sort().reverse();
+  const roomTypes = distinct(reviews, 'roomType');
+  const row = document.getElementById('filterRow');
+  row.innerHTML = `
+    <button class="td-chip ${filters.sort === 'helpful' ? 'active' : ''}" data-act="sort-helpful">Most helpful</button>
+    <button class="td-chip ${filters.sort === 'newest' ? 'active' : ''}" data-act="sort-newest">Newest</button>
+    <button class="td-chip ${filters.roomType ? 'active' : ''}" data-act="menu-room">Room type ▾${menuHTML('roomMenu', roomTypes, filters.roomType, 'All room types')}</button>
+    <button class="td-chip ${filters.yearLived ? 'active' : ''}" data-act="menu-year">Year lived ▾${menuHTML('yearMenu', years, filters.yearLived, 'All years')}</button>
+    <button class="td-chip ${filters.minRating ? 'active' : ''}" data-act="min-rating">★ 4+</button>`;
+
+  row.querySelectorAll('.td-chip').forEach(chip => {
+    chip.addEventListener('click', e => {
+      const menuBtn = e.target.closest('.td-menu button');
+      const act = chip.dataset.act;
+      if (menuBtn) {
+        const val = menuBtn.dataset.val || null;
+        if (act === 'menu-room') filters.roomType = val;
+        if (act === 'menu-year') filters.yearLived = val;
+        applyFilters();
+        return;
+      }
+      if (act === 'sort-helpful' || act === 'sort-newest') {
+        filters.sort = act === 'sort-helpful' ? 'helpful' : 'newest';
+        applyFilters();
+      } else if (act === 'min-rating') {
+        filters.minRating = filters.minRating ? 0 : 4;
+        applyFilters();
+      } else {
+        const menu = chip.querySelector('.td-menu');
+        document.querySelectorAll('.td-menu.open').forEach(m => { if (m !== menu) m.classList.remove('open'); });
+        menu.classList.toggle('open');
+      }
+    });
+  });
+}
+
+function applyFilters() {
+  visibleCount = INITIAL_VISIBLE;
+  renderFilters();
+  renderReviews();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.td-chip')) {
+    document.querySelectorAll('.td-menu.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+/* ------------------------------------------------------------------ *
+ * Review list                                                        *
+ * ------------------------------------------------------------------ */
+function reviewCardHTML(r, i) {
+  const name = r.name || 'Anonymous Terp';
+  const initial = (name.trim()[0] || 'A').toUpperCase();
+  const sub = [r.classYear, r.major].filter(Boolean).join(', ');
+  const metaBits = [
+    r.year ? `Lived here ${periodLabel(r.year)}` : null,
+    r.roomType || null,
+    r.floor ? `${r.floor} floor` : null
+  ].filter(Boolean).join(' · ');
+  const tags = (r.tags || []).map(t =>
+    `<span class="rev-tag ${t.s === 'neg' ? 'neg' : 'pos'}">${escHtml(t.t || t)}</span>`).join('');
+  const voted = helpfulVotes.has(String(r.id));
+  return `
+    <div class="td-card">
+      <div class="rev-head">
+        <div class="rev-avatar v${i % 3}">${escHtml(initial)}</div>
+        <div class="rev-id">
+          <div class="rev-name">${escHtml(name)}${sub ? ` <span class="sub">· ${escHtml(sub)}</span>` : ''}</div>
+          <div class="rev-meta">${escHtml(metaBits)}</div>
+        </div>
+        <div class="rev-stars">${'★'.repeat(r.rating)}<span class="star-empty">${'★'.repeat(5 - r.rating)}</span></div>
+      </div>
+      <p class="rev-body">${escHtml(r.text)}</p>
+      <div class="rev-foot">
+        ${tags}
+        <button class="rev-helpful ${voted ? 'voted' : ''}" data-id="${escHtml(String(r.id))}">👍 Helpful (${helpfulCount(r)})</button>
+      </div>
+    </div>`;
+}
+
+function renderReviews() {
+  const list = document.getElementById('reviewsList');
+  const all = filteredReviews();
+  const shown = all.slice(0, visibleCount);
+
+  list.innerHTML = shown.length
+    ? shown.map(reviewCardHTML).join('')
+    : `<p class="td-empty">${reviews.length ? 'No reviews match these filters.' : 'No reviews yet — be the first to write one.'}</p>`;
+
+  const btn = document.getElementById('showAllBtn');
+  btn.hidden = all.length <= visibleCount;
+  btn.textContent = `Show all ${all.length} reviews`;
+
+  list.querySelectorAll('.rev-helpful').forEach(b => {
+    b.addEventListener('click', () => voteHelpful(b.dataset.id));
+  });
+}
+
+// "Helpful" votes go through the vote-helpful edge function, which dedupes
+// per voter server-side; localStorage mirrors voted state for instant UI.
+const VOTE_URL = 'https://qqbfiwixlqsnjsmwirtf.supabase.co/functions/v1/vote-helpful';
+
+function clientId() {
+  let id = localStorage.getItem('td-client-id');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('td-client-id', id);
+  }
+  return id;
+}
+
+function saveVotes() {
+  localStorage.setItem('td-helpful', JSON.stringify([...helpfulVotes]));
+}
+
+async function voteHelpful(id) {
+  if (!id || helpfulVotes.has(String(id))) return;
+  const review = reviews.find(r => String(r.id) === String(id));
+  if (!review) return;
+
+  // Optimistic: mark voted and bump the count immediately.
+  helpfulVotes.add(String(id));
+  helpfulOverrides.set(String(id), (review.helpful_count ?? 0) + 1);
+  saveVotes();
+  renderReviews();
+
+  let res, body;
+  try {
+    res = await fetch(VOTE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ANON_JWT}` },
+      body: JSON.stringify({ reviewId: review.id, clientId: clientId() })
+    });
+    body = await res.json().catch(() => ({}));
+  } catch (err) {
+    console.error('[vote-helpful] Network error:', err);
+    res = null;
+  }
+
+  if (!res || (!res.ok && res.status !== 429)) {
+    // Revert the optimistic vote on hard failure.
+    helpfulVotes.delete(String(id));
+    helpfulOverrides.delete(String(id));
+    saveVotes();
+    renderReviews();
+    showToast('Couldn’t save your vote. Please try again.', 'error');
+    return;
+  }
+
+  if (res.status === 429) {
+    helpfulVotes.delete(String(id));
+    helpfulOverrides.delete(String(id));
+    saveVotes();
+    renderReviews();
+    showToast('Too many votes right now — try again later.', 'error');
+    return;
+  }
+
+  // Reconcile with the authoritative count (stays voted on already:true).
+  if (typeof body.helpful_count === 'number') {
+    helpfulOverrides.set(String(id), body.helpful_count);
+    renderReviews();
+  }
+}
+
+document.getElementById('showAllBtn').addEventListener('click', () => {
+  visibleCount = Infinity;
+  renderReviews();
+});
+
+/* ------------------------------------------------------------------ *
+ * Sidebar                                                            *
+ * ------------------------------------------------------------------ */
+function renderBreakdown() {
+  const card = document.getElementById('breakdownCard');
+  if (!meta.categoryScores) { card.hidden = true; return; }
+  const rows = meta.categoryScores.map(([label, score]) => `
+    <div class="bd-row">
+      <span class="bd-label">${escHtml(label)}</span>
+      <div class="bd-track"><div class="bd-fill" style="width:${(score / 5 * 100).toFixed(0)}%"></div></div>
+      <span class="bd-score">${score.toFixed(1)}</span>
+    </div>`).join('');
+  const recs = reviews.filter(r => r.rating >= 4).length;
+  const pct = reviews.length ? Math.round(recs / reviews.length * 100) : null;
+  const shortName = dorm.name.replace(/ Hall$/, '');
+  card.hidden = false;
+  card.innerHTML = `
+    <div class="td-card-title">Rating breakdown</div>
+    <div class="bd-rows">${rows}</div>
+    ${pct !== null ? `<div class="bd-foot">${pct}% of residents would recommend ${escHtml(shortName)} to an incoming freshman.</div>` : ''}`;
+}
+
+function compareRowHTML(d, price, current) {
+  const r = nearbyRatings[d.id];
+  const rating = r && r.count ? `${r.avg.toFixed(1)} ★` : '— ★';
+  return `
+    <div class="cmp-row ${current ? 'current' : ''}" ${current ? '' : `onclick="location.href='dorm-reviews.html?dorm=${d.id}'"`}>
+      <span class="cmp-name">${escHtml(d.name)}</span>
+      <span class="cmp-rating">${rating}</span>
+      <span class="cmp-price">${escHtml(price || '')}</span>
+    </div>`;
+}
+
+function renderCompare() {
+  const card = document.getElementById('compareCard');
+  const nearby = (meta.nearby || dorms.filter(d => d.area === dorm.area && d.id !== dorm.id && d.campus === 'on').slice(0, 3).map(d => ({ id: d.id })))
+    .map(n => ({ dorm: dorms.find(d => d.id === n.id), price: n.price }))
+    .filter(n => n.dorm);
+  if (!nearby.length) { card.hidden = true; return; }
+  card.hidden = false;
+  card.innerHTML = `
+    <div class="td-card-title" style="margin-bottom:12px">Compare nearby</div>
+    <div class="cmp-rows">
+      ${compareRowHTML(dorm, meta.priceShort, true)}
+      ${nearby.map(n => compareRowHTML(n.dorm, n.price, false)).join('')}
+    </div>
+    <a class="cmp-foot" href="index.html">Compare side by side →</a>`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Data loading (real model: reviews live in Supabase; rating + count *
+ * are always derived, never stored)                                  *
+ * ------------------------------------------------------------------ */
+async function loadReviews() {
+  const nearbyIds = (meta.nearby || []).map(n => n.id);
+  const ids = [dorm.id, ...nearbyIds];
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .in('dormId', ids)
+    .order('created_at', { ascending: false });
+
+  if (error || !data) {
+    console.error('Error loading reviews:', error);
+    document.getElementById('reviewsList').innerHTML =
+      '<p class="td-empty">Couldn’t load reviews right now. Please try again later.</p>';
+    return;
+  }
+
+  reviews = data.filter(r => r.dormId === dorm.id);
+  nearbyRatings = {};
+  ids.forEach(id => {
+    const rs = data.filter(r => r.dormId === id);
+    nearbyRatings[id] = {
+      count: rs.length,
+      avg: rs.length ? rs.reduce((s, r) => s + r.rating, 0) / rs.length : 0
+    };
+  });
+
+  renderHeader();
+  renderFilters();
+  renderReviews();
+  renderBreakdown();
+  renderCompare();
+}
+
+/* ------------------------------------------------------------------ *
+ * Write-a-review form (same backend flow as the old detail page:     *
+ * hCaptcha + Supabase edge function; RLS blocks direct writes)       *
+ * ------------------------------------------------------------------ */
+const SITEKEY = '48ce88c8-9f00-47ee-a3f6-900c5abe7686';
+const ANON_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxYmZpd2l4bHFzbmpzbXdpcnRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Mjc2OTEsImV4cCI6MjA5MTUwMzY5MX0.Qy2_QBt4l2uRPiLQIKAaao4gNwZf0bkniUob9EtBXMY';
+const SUBMIT_URL = 'https://qqbfiwixlqsnjsmwirtf.supabase.co/functions/v1/submit-review';
+
+let formRating = 0;
+let formYear = '';
+let formCaptchaId = null;
+
+function academicYears(count) {
+  const now = new Date();
+  const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
+  const arr = [];
+  for (let y = startYear; y > startYear - count; y--) arr.push(`${y}-${y + 1}`);
+  return arr;
+}
+
+function renderFormStars() {
+  document.getElementById('formStars').innerHTML = [1, 2, 3, 4, 5].map(n =>
+    `<span class="${n <= formRating ? 'filled' : ''}" data-n="${n}">★</span>`).join('');
+  document.querySelectorAll('#formStars span').forEach(s =>
+    s.addEventListener('click', () => { formRating = +s.dataset.n; renderFormStars(); }));
+}
+
+function renderFormYears() {
+  document.getElementById('formYears').innerHTML = academicYears(11).map(y =>
+    `<button type="button" class="td-year ${formYear === y ? 'active' : ''}" data-y="${y}">${y}</button>`).join('');
+  document.querySelectorAll('#formYears .td-year').forEach(b =>
+    b.addEventListener('click', () => { formYear = b.dataset.y; renderFormYears(); }));
+}
+
+function openForm() {
+  const form = document.getElementById('reviewForm');
+  form.hidden = false;
+  renderFormStars();
+  renderFormYears();
+  if (formCaptchaId === null && typeof hcaptcha !== 'undefined') {
+    formCaptchaId = hcaptcha.render('formCaptcha', {
+      sitekey: SITEKEY,
+      theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+    });
+  }
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeForm() {
+  formRating = 0; formYear = '';
+  document.getElementById('formName').value = '';
+  document.getElementById('formText').value = '';
+  document.getElementById('charCount').textContent = '0 / 2000';
+  if (formCaptchaId !== null && typeof hcaptcha !== 'undefined') hcaptcha.reset(formCaptchaId);
+  document.getElementById('reviewForm').hidden = true;
+}
+
+async function submitReview() {
+  const name = document.getElementById('formName').value.trim() || 'Anonymous Terp';
+  const text = document.getElementById('formText').value.trim();
+
+  if (!formYear) return showToast('Please select the year you lived there.', 'error');
+  if (formRating === 0) return showToast('Please select a star rating before submitting.', 'error');
+  if (!text) return showToast('Please write something before submitting.', 'error');
+  if (name.length > 100) return showToast('Name is too long (max 100 characters).', 'error');
+  if (text.length > 2000) return showToast('Review is too long (max 2000 characters).', 'error');
+
+  const captchaToken = (typeof hcaptcha !== 'undefined' && formCaptchaId !== null)
+    ? hcaptcha.getResponse(formCaptchaId) : '';
+  if (!captchaToken) return showToast('Please complete the captcha before submitting.', 'error');
+
+  let res;
+  try {
+    res = await fetch(SUBMIT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ANON_JWT}` },
+      body: JSON.stringify({ dormId: dorm.id, name, rating: formRating, text, year: formYear, captchaToken })
+    });
+  } catch (err) {
+    console.error('[submit-review] Network error:', err);
+    return showToast('Network error. Please try again.', 'error');
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    console.error('[submit-review] Failed:', res.status, body);
+    return showToast(body.error || 'Failed to submit review. Please try again later.', 'error');
+  }
+
+  closeForm();
+  showToast('Review submitted successfully! Thanks for contributing.', 'success');
+  loadReviews();
+}
+
+let _toastTimer = null;
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `td-toast show${type === 'error' ? ' error' : ''}`;
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+document.getElementById('writeReviewLink').addEventListener('click', openForm);
+document.getElementById('formCancel').addEventListener('click', closeForm);
+document.getElementById('formSubmit').addEventListener('click', submitReview);
+document.getElementById('formText').addEventListener('input', function () {
+  document.getElementById('charCount').textContent = `${this.value.length} / 2000`;
+});
+
+window.openLightbox = function (src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('active');
+};
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
+});
+
+renderGallery();
+renderHeader();
+renderFilters();
+renderReviews();
+renderBreakdown();
+renderCompare();
+loadReviews();
+</script>
+
+</body>
+</html>

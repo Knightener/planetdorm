@@ -6,21 +6,19 @@
 <title>Terms and Conditions – PlanetDorm</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script>
+// v2 theme model: light is the default; dark is opt-in via data-theme="dark".
 (function(){
-  var saved = localStorage.getItem('pd-theme');
-  if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-    document.documentElement.dataset.theme = 'light';
-  }
+  var saved = localStorage.getItem('pd2-theme');
+  var dark = saved ? saved === 'dark'
+    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (dark) document.documentElement.dataset.theme = 'dark';
 })();
 function toggleTheme(){
   var root = document.documentElement;
-  if (root.dataset.theme === 'light') {
-    delete root.dataset.theme;
-    localStorage.setItem('pd-theme', 'dark');
-  } else {
-    root.dataset.theme = 'light';
-    localStorage.setItem('pd-theme', 'light');
-  }
+  var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  if (next === 'dark') root.dataset.theme = 'dark';
+  else delete root.dataset.theme;
+  localStorage.setItem('pd2-theme', next);
 }
 </script>
 <link rel="stylesheet" href="styles.css">
@@ -29,14 +27,10 @@ function toggleTheme(){
     max-width: 860px;
     margin: 40px auto 60px;
     padding: 32px 36px 48px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-  }
-
-  [data-theme="light"] .legal-container {
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: none;
   }
 
   @media(max-width: 768px) {
@@ -102,7 +96,7 @@ function toggleTheme(){
 
 <nav>
   <div class="nav-inner">
-    <div class="logo" onclick="location.href='index.html'">Planet<span style="color:#EAA000">Dorm</span></div>
+    <div class="logo" onclick="location.href='index.html'">Planet<span style="color:var(--logo-gold)">Dorm</span></div>
     <div class="nav-right">
       <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode">
         <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -115,6 +109,12 @@ function toggleTheme(){
         <button onclick="location.href='index.html'" data-section="home">On-campus</button>
         <button onclick="location.href='index.html#map'" data-section="map">Map</button>
         <button class="active" onclick="location.href='about.html'">About</button>
+        <button class="nav-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span class="label-light">Light mode</span>
+          <span class="label-dark">Dark mode</span>
+        </button>
       </div>
     </div>
   </div>

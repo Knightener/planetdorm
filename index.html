@@ -6,24 +6,26 @@
 <title>PlanetDorm</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script>
+// v2 theme model: light is the default (no attribute); dark is opt-in via
+// data-theme="dark". Persisted in localStorage under "pd2-theme".
 (function(){
-  var saved = localStorage.getItem('pd-theme');
-  if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-    document.documentElement.dataset.theme = 'light';
-  }
+  var saved = localStorage.getItem('pd2-theme');
+  var dark = saved ? saved === 'dark'
+    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (dark) document.documentElement.dataset.theme = 'dark';
 })();
 function toggleTheme(){
   var root = document.documentElement;
-  if (root.dataset.theme === 'light') {
-    delete root.dataset.theme;
-    localStorage.setItem('pd-theme', 'dark');
-  } else {
-    root.dataset.theme = 'light';
-    localStorage.setItem('pd-theme', 'light');
-  }
+  var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  if (next === 'dark') root.dataset.theme = 'dark';
+  else delete root.dataset.theme;
+  localStorage.setItem('pd2-theme', next);
   if (window.refreshMapTheme) window.refreshMapTheme();
 }
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -31,139 +33,82 @@ function toggleTheme(){
 <body>
 <nav>
   <div class="nav-inner">
-    <div class="logo" onclick="showSection('home')">Planet<span style="color:#ffd200">Dorm</span></div>
+    <div class="logo" onclick="showSection('home')">Planet<span>Dorm</span></div>
     <div class="nav-right">
-      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode">
-        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
-        <span></span><span></span><span></span>
-      </button>
       <div class="nav-links" id="navLinks">
         <button class="active" onclick="showSection('home');closeNav()" data-section="home">On-campus</button>
         <button onclick="showSection('map');closeNav()" data-section="map">Map</button>
         <button onclick="location.href='about.html'">About</button>
-        <button class="nav-theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode">
+        <button class="nav-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
           <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           <span class="label-light">Light mode</span>
           <span class="label-dark">Dark mode</span>
         </button>
       </div>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </nav>
 
 <div class="hero" id="heroSection">
-  <h1>Find a residence hall</h1>
-  <p>before you move in...</p>
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search dorms..." oninput="filterDorms()">
-
-  </div>
+  <h1>Find a residence hall before you move in<span class="dot">.</span></h1>
+  <p>Honest reviews of every University of Maryland residence hall, written by the Terps who lived there.</p>
+  <input type="text" id="searchInput" class="hero-search" placeholder="Search halls..." oninput="filterDorms()">
 </div>
 
 <div class="section active" id="section-home">
-  <div class="filter-row">
-    <div class="filter-bar" id="filterBar">
-      <div class="filter-dropdown" id="campusDropdown">
-        <button class="filter-dropdown-btn" id="campusDropdownBtn" onclick="toggleCampusDropdown()">Filter</button>
-        <div class="filter-dropdown-panel" id="campusDropdownPanel">
-          <button class="dropdown-all-btn active" id="dropdownAllBtn" onclick="setAllFilter()">All residences</button>
-          <div class="dropdown-sections">
-            <div class="dropdown-col">
-              <p class="dropdown-section-label">Campus</p>
-              <label class="dropdown-check-item"><input type="checkbox" value="north" onchange="toggleCampusFilter(this)"> North Campus</label>
-              <label class="dropdown-check-item"><input type="checkbox" value="south" onchange="toggleCampusFilter(this)"> South Campus</label>
-              <label class="dropdown-check-item"><input type="checkbox" value="commons" onchange="toggleCampusFilter(this)"> The Commons</label>
-            </div>
-            <div class="dropdown-col">
-              <p class="dropdown-section-label">Room Type</p>
-              <label class="dropdown-check-item"><input type="checkbox" value="traditional" onchange="toggleRoomTypeFilter(this)"> Traditional</label>
-              <label class="dropdown-check-item"><input type="checkbox" value="semi-suite" onchange="toggleRoomTypeFilter(this)"> Semi-Suite</label>
-              <label class="dropdown-check-item"><input type="checkbox" value="suite" onchange="toggleRoomTypeFilter(this)"> Suite</label>
-              <label class="dropdown-check-item"><input type="checkbox" value="apartment" onchange="toggleRoomTypeFilter(this)"> Apartment</label>
-            </div>
-            <div class="dropdown-col">
-              <p class="dropdown-section-label">Features</p>
-              <label class="dropdown-check-item"><input type="checkbox" value="ac" onchange="toggleFeatureFilter(this)"> A/C</label>
-              <label class="dropdown-check-item"><input type="checkbox" value="laundry" onchange="toggleFeatureFilter(this)"> In-hall Laundry</label>
-              <label class="dropdown-check-item"><input type="checkbox" value="llp" onchange="toggleFeatureFilter(this)"> Honors / LLP</label>
-            </div>
-          </div>
-        </div>
+  <div class="filter-band" id="filterBand">
+    <div class="filter-line">
+      <span class="filter-label">Campus</span>
+      <div class="chip-group">
+        <button class="chip" data-group="campus" data-value="north" onclick="toggleChip(this)">North Campus</button>
+        <button class="chip" data-group="campus" data-value="south" onclick="toggleChip(this)">South Campus</button>
+        <button class="chip" data-group="campus" data-value="commons" onclick="toggleChip(this)">The Commons</button>
       </div>
     </div>
-    <div class="filter-dropdown sort-dropdown" id="sortDropdown">
-      <button class="filter-dropdown-btn" id="sortDropdownBtn" onclick="toggleSortDropdown('sortDropdownPanel')">Sort: Default</button>
-      <div class="filter-dropdown-panel sort-dropdown-panel" id="sortDropdownPanel">
-        <button class="dropdown-all-btn active" onclick="selectSort(this,'default','on')">Default</button>
-        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-desc','on')">Rating: High to Low</button>
-        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-asc','on')">Rating: Low to High</button>
+    <div class="filter-line">
+      <span class="filter-label">Rooms</span>
+      <div class="chip-group">
+        <button class="chip" data-group="room" data-value="traditional" onclick="toggleChip(this)">Traditional</button>
+        <button class="chip" data-group="room" data-value="semi-suite" onclick="toggleChip(this)">Semi-Suite</button>
+        <button class="chip" data-group="room" data-value="suite" onclick="toggleChip(this)">Suite</button>
+        <button class="chip" data-group="room" data-value="apartment" onclick="toggleChip(this)">Apartment</button>
+      </div>
+    </div>
+    <div class="filter-line">
+      <span class="filter-label">Features</span>
+      <div class="chip-group">
+        <button class="chip" data-group="feature" data-value="ac" onclick="toggleChip(this)">A/C</button>
+        <button class="chip" data-group="feature" data-value="laundry" onclick="toggleChip(this)">In-hall Laundry</button>
+        <button class="chip" data-group="feature" data-value="llp" onclick="toggleChip(this)">Honors / LLP</button>
+        <button class="clear-all" id="clearAllBtn" onclick="setAllFilter()" hidden>Clear all</button>
       </div>
     </div>
   </div>
-  <div id="reviewsLoading" class="reviews-loading"><img src="logo-animated.svg" class="reviews-loading-icon" alt=""></div>
-  <div class="dorm-grid" id="dormGrid"></div>
-</div>
 
-<div class="section" id="section-offcampus">
-  <div class="filter-row">
-    <div class="filter-bar" id="offCampusFilterBar">
-      <button class="active" onclick="setOffCampusFilter('all',this)">All</button>
-      <button onclick="setOffCampusFilter('colpark',this)">College Park</button>
-      <button onclick="setOffCampusFilter('hyattsville',this)">Hyattsville</button>
-      <button onclick="setOffCampusFilter('greenbelt',this)">Greenbelt</button>
-      <button onclick="setOffCampusFilter('riverdale',this)">Riverdale Park</button>
-    </div>
-    <div class="filter-dropdown sort-dropdown" id="sortDropdownOff">
-      <button class="filter-dropdown-btn" id="sortDropdownOffBtn" onclick="toggleSortDropdown('sortDropdownOffPanel')">Sort: Default</button>
-      <div class="filter-dropdown-panel sort-dropdown-panel" id="sortDropdownOffPanel">
-        <button class="dropdown-all-btn active" onclick="selectSort(this,'default','off')">Default</button>
-        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-desc','off')">Rating: High to Low</button>
-        <button class="dropdown-all-btn" onclick="selectSort(this,'rating-asc','off')">Rating: Low to High</button>
-      </div>
+  <div class="count-sort-row">
+    <span class="count-label" id="countLabel"></span>
+    <div class="sort-row">
+      <span class="sort-tag">Sort</span>
+      <button class="sort-opt active" data-sort="default" onclick="selectSort('default')">Default</button>
+      <button class="sort-opt" data-sort="rating-desc" onclick="selectSort('rating-desc')">Highest rated</button>
+      <button class="sort-opt" data-sort="rating-asc" onclick="selectSort('rating-asc')">Lowest rated</button>
     </div>
   </div>
-  <div class="dorm-grid" id="offCampusDormGrid"></div>
+
+  <div id="reviewsLoading" class="reviews-loading"><img src="logo-animated.svg" class="reviews-loading-icon" alt=""></div>
+  <div class="dorm-list" id="dormGrid"></div>
 </div>
 
 <div class="section detail-view" id="section-detail">
   <div id="detailContent"></div>
-  <div id="inlineReviewForm" class="review-form" style="display:none">
-    <h3>Write a Review</h3>
-    <div class="modal-row">
-      <div>
-        <label for="reviewName">Your Name</label>
-        <input type="text" id="reviewName" placeholder="Anonymous Terp" maxlength="100">
-      </div>
-      <div>
-        <p class="review-form-label">Rating</p>
-        <div class="star-input" id="starInput" role="group" aria-label="Star rating">
-          <span onclick="setRating(1)">&#9733;</span>
-          <span onclick="setRating(2)">&#9733;</span>
-          <span onclick="setRating(3)">&#9733;</span>
-          <span onclick="setRating(4)">&#9733;</span>
-          <span onclick="setRating(5)">&#9733;</span>
-        </div>
-      </div>
-    </div>
-    <p class="review-form-label">Year Lived There</p>
-    <div id="yearPicker" class="year-picker" role="group" aria-label="Year lived there"></div>
-    <label for="reviewText">Your Review</label>
-    <div class="textarea-wrap">
-      <textarea id="reviewText" placeholder="What was your experience like?" maxlength="2000"></textarea>
-      <span class="char-count" id="charCount">0 / 2000</span>
-    </div>
-    <div class="captcha-wrap">
-      <div class="h-captcha" data-sitekey="48ce88c8-9f00-47ee-a3f6-900c5abe7686" data-theme="dark"></div>
-    </div>
-    <div class="btn-row">
-      <button class="cancel-btn" onclick="closeInlineForm()">Cancel</button>
-      <button class="submit-btn" onclick="submitReview()">Submit Review</button>
-    </div>
-  </div>
 </div>
 
 <div class="section" id="section-map">
@@ -195,29 +140,26 @@ function toggleTheme(){
   </div>
 </div>
 
-<p id="siteDisclaimer" style="text-align:center; font-size: 0.75rem; color: var(--text-dim); margin: 16px 0 20px;">This website is not affiliated with the University of Maryland.</p>
+<p id="siteDisclaimer" class="site-disclaimer">This website is not affiliated with the University of Maryland.</p>
 
 <div id="toast" class="toast"></div>
 
 <div id="maintenanceOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;">
   <img src="logo-animated.svg" alt="PlanetDorm" style="width:80px;margin-bottom:1.5rem;">
-  <h1 style="color:#EAA000;font-family:'DM Serif Display',serif;margin-bottom:0.75rem;">We'll be right back...</h1>
-  <p style="color:var(--text-dim);font-size:1.1rem;max-width:400px;">Our review server is temporarily down. We will be back up soon!</p>
+  <h1 style="color:var(--logo-gold);font-weight:800;margin-bottom:0.75rem;">We'll be right back...</h1>
+  <p style="color:var(--dim);font-size:1.1rem;max-width:400px;">Our review server is temporarily down. We will be back up soon!</p>
 </div>
+
+<!-- Invisible hCaptcha host for the quick-post strip (rendered on demand). -->
+<div id="quickCaptcha" style="position:fixed;width:0;height:0;overflow:hidden;left:0;bottom:0"></div>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-  <button class="lightbox-nav prev" onclick="event.stopPropagation();navLightbox(-1)">&#8249;</button>
-  <img id="lightboxImg" src="">
-  <button class="lightbox-nav next" onclick="event.stopPropagation();navLightbox(1)">&#8250;</button>
+  <img id="lightboxImg" src="" alt="">
 </div>
 
-<script>
-  document.querySelector('.h-captcha').setAttribute('data-theme', document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
-</script>
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <script type="module" src="script.js"></script>
 
 </body>
 </html>
- 
