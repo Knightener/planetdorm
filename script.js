@@ -727,7 +727,7 @@ function createCampusMap(container, center, zoom) {
     pitch: 50, bearing: -17, minZoom: 14, maxZoom: 19,
     maxBounds: CAMPUS_BOUNDS, attributionControl: false
   });
-  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-left');
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
   const attribEl = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
   if (attribEl) attribEl.classList.remove('maplibregl-compact-show');

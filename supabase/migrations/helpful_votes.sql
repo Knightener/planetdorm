@@ -39,5 +39,17 @@ drop trigger if exists on_helpful_vote on review_votes;
 create trigger on_helpful_vote after insert on review_votes
 for each row execute function bump_helpful();
 
+-- Removing a vote decrements the count (clamped at 0 so it can't go negative).
+create or replace function drop_helpful() returns trigger
+language plpgsql security definer as $$
+begin
+  update reviews set helpful_count = greatest(helpful_count - 1, 0) where id = old.review_id;
+  return old;
+end $$;
+
+drop trigger if exists on_helpful_unvote on review_votes;
+create trigger on_helpful_unvote after delete on review_votes
+for each row execute function drop_helpful();
+
 -- Used by the vote-helpful edge function for per-IP rate limiting.
 create index if not exists review_votes_ip_time_idx on review_votes (ip_hash, created_at);

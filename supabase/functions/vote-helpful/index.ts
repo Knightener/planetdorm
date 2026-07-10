@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     return json({ error: 'Invalid JSON' }, 400)
   }
 
-  const { reviewId, clientId } = body
+  const { reviewId, clientId, action } = body
 
   // reviewId must be a positive integer; clientId a UUID-ish string the page
   // generated once and keeps in localStorage.
@@ -57,6 +57,8 @@ Deno.serve(async (req) => {
   if (typeof clientId !== 'string' || clientId.length < 16 || clientId.length > 64) {
     return json({ error: 'Invalid client id' }, 400)
   }
+  // action defaults to 'add' for backward compatibility; 'remove' unvotes.
+  const act = action === 'remove' ? 'remove' : 'add'
 
   // Voter identity = salted hash of (clientId + IP). The salt keeps hashes
   // unforgeable; including clientId means dorm-mates behind the same campus
@@ -67,6 +69,26 @@ Deno.serve(async (req) => {
   const ip_hash = await sha256(`${VOTE_SALT}:ip:${ip}`)
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+  // Removing a vote: delete this voter's row (the DELETE trigger decrements
+  // helpful_count). Not rate-limited — it can't inflate counts.
+  if (act === 'remove') {
+    const { error } = await supabase
+      .from('review_votes')
+      .delete()
+      .eq('review_id', reviewId)
+      .eq('voter_hash', voter_hash)
+    if (error) {
+      console.error('[vote-helpful] delete error:', error.code, error.message)
+      return json({ error: 'Failed to remove vote' }, 500)
+    }
+    const { data: row } = await supabase
+      .from('reviews')
+      .select('helpful_count')
+      .eq('id', reviewId)
+      .single()
+    return json({ success: true, removed: true, helpful_count: row?.helpful_count ?? null })
+  }
 
   // Per-IP rate limit.
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
