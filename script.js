@@ -121,14 +121,17 @@ function ratingTier(rating) {
   return 'rating-diamond';
 }
 
-function dormCardHTML(d) {
+// forMap: sidebar cards select the dorm on the map (click handled in JS) and
+// expose a "View Dorm" button that opens the detail page.
+function dormCardHTML(d, forMap = false) {
   return `
-    <div class="dorm-card" onclick="showDetail('${d.id}')">
+    <div class="dorm-card" data-id="${d.id}"${forMap ? '' : ` onclick="showDetail('${d.id}')"`}>
       <div class="dorm-card-img" style="${d.imgs[0] ? `background-image:url('${d.imgs[0]}')` : ''}"></div>
       <div class="dorm-card-body">
         <h3>${d.name}</h3>
         <div class="meta"><span>${d.type}</span><span class="badge-inline ${d.reviews === 0 ? 'no-reviews' : ratingTier(d.rating)}">${d.reviews === 0 ? '0 reviews' : `${d.rating.toFixed(1)} ★ · ${d.reviews} ${d.reviews === 1 ? 'review' : 'reviews'}`}</span></div>
         <div class="tag-row">${d.tags.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>
+        ${forMap ? `<button class="view-dorm-btn" onclick="event.stopPropagation();showDetail('${d.id}')">View Dorm</button>` : ''}
       </div>
     </div>
   `;
@@ -189,7 +192,7 @@ function renderDorms(campus = 'on') {
     }
     return offCampusFilter === 'all' || d.area === offCampusFilter;
   });
-  document.getElementById(gridId).innerHTML = applySorting(filtered, sort).map(dormCardHTML).join('');
+  document.getElementById(gridId).innerHTML = applySorting(filtered, sort).map(d => dormCardHTML(d)).join('');
 }
 
 // campus is passed from the HTML onchange so each sort dropdown only affects its own grid.
@@ -327,7 +330,6 @@ function showDetail(id) {
   `;
 
   if (d.lat && d.lng) {
-    // MapLibre uses [lng, lat] order (opposite of Leaflet's [lat, lng]).
     detailMap = createCampusMap('detailMapFrame', [d.lng, d.lat], 16.5);
     detailMap.on('load', () => {
       new maplibregl.Marker({ color: '#EAA000' })
@@ -336,7 +338,7 @@ function showDetail(id) {
         .addTo(detailMap)
         .togglePopup();
     });
-    // The container is hidden until the detail view opens; resize once visible.
+    // Resize once the detail view (and its container) becomes visible.
     setTimeout(() => detailMap.resize(), 100);
   }
 }
@@ -379,48 +381,78 @@ function showSection(name) {
 
 let campusMap = null;
 let detailMap = null;
-let campusMarkers = [];
-// Every live MapLibre map, so the theme toggle can restyle all of them at once.
-let activeMaps = [];
+// Markers keyed by dorm id so the sidebar and map can highlight each other.
+let campusMarkerById = {};
+let mapDorms = [];
+let mapCampusFilter = 'all';
 
-// Keep the viewport on and around UMD's campus. MapLibre bounds are
-// [[west, south], [east, north]] in [lng, lat] order.
+// Campus bounds in MapLibre's [[west, south], [east, north]] ([lng, lat]) order.
 const CAMPUS_BOUNDS = [[-76.975, 38.970], [-76.915, 39.005]];
 
-// OpenFreeMap vector styles (free, no API key). Light/dark to match the site
-// theme; both get real 3D building extrusions added on top.
+// Colourful base with full POI/landmark labels and 3D buildings, for both themes.
+// Dark mode keeps this style but recolours it dark via applyDarkTheme().
 function mapStyleUrl() {
-  return document.documentElement.dataset.theme === 'light'
-    ? 'https://tiles.openfreemap.org/styles/liberty'
-    : 'https://tiles.openfreemap.org/styles/dark';
+  return 'https://tiles.openfreemap.org/styles/liberty';
 }
 
-// Extrude the OpenMapTiles `building` layer into 3D. Inserted just below the
-// first text label so street/place names stay readable on top of buildings.
-function add3dBuildings(map) {
-  if (map.getLayer('3d-buildings')) return;
-  let labelLayerId;
-  for (const l of map.getStyle().layers) {
-    if (l.type === 'symbol' && l.layout && l.layout['text-field']) { labelLayerId = l.id; break; }
-  }
-  const dark = document.documentElement.dataset.theme !== 'light';
-  map.addLayer({
-    id: '3d-buildings',
-    source: 'openmaptiles',
-    'source-layer': 'building',
-    type: 'fill-extrusion',
-    minzoom: 14,
-    paint: {
-      'fill-extrusion-color': dark ? '#3a3f4a' : '#d9d0c3',
-      // Grow buildings from flat to full height as you zoom in, for a smooth reveal.
-      'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['get', 'render_height']],
-      'fill-extrusion-base': ['get', 'render_min_height'],
-      'fill-extrusion-opacity': 0.9
+function isDarkTheme() {
+  return document.documentElement.dataset.theme !== 'light';
+}
+
+// Recolour the (light) Liberty style into a dark theme: dark base + water + roads
+// + buildings, while keeping parks green, POI icons colourful, and labels legible.
+function applyDarkTheme(map) {
+  const set = (id, prop, val) => { try { map.setPaintProperty(id, prop, val); } catch (e) {} };
+  for (const layer of map.getStyle().layers) {
+    const id = layer.id;
+    switch (layer.type) {
+      case 'background':
+        set(id, 'background-color', '#0f1116');
+        break;
+      case 'raster':
+        // Low-zoom shaded relief would glow light on a dark map — hide it.
+        set(id, 'raster-opacity', 0);
+        break;
+      case 'fill':
+        if (/wood|grass|park|forest/.test(id)) {
+          set(id, 'fill-color', '#16311f');
+          set(id, 'fill-opacity', 0.55);
+        } else if (id === 'water') {
+          set(id, 'fill-color', '#16203c');
+        } else if (id === 'building') {
+          set(id, 'fill-color', '#191c24');
+        } else {
+          set(id, 'fill-color', '#14161c');
+        }
+        break;
+      case 'fill-extrusion':
+        set(id, 'fill-extrusion-color', '#232733');
+        set(id, 'fill-extrusion-opacity', 0.92);
+        break;
+      case 'line':
+        if (/waterway/.test(id)) set(id, 'line-color', '#22304f');
+        else if (/rail/.test(id)) set(id, 'line-color', '#2b2f39');
+        else if (/casing/.test(id)) set(id, 'line-color', '#0d0f14');
+        else if (/motorway/.test(id)) set(id, 'line-color', '#5c5138');
+        else if (/boundary/.test(id)) set(id, 'line-color', '#3a3e48');
+        else if (/park_outline/.test(id)) set(id, 'line-color', '#1f3a28');
+        else set(id, 'line-color', '#3a3f4b');
+        break;
+      case 'symbol':
+        // Keep water names bluish; everything else light-grey on a dark halo.
+        set(id, 'text-color', /water_name|waterway/.test(id) ? '#8098d0' : '#c7ccd6');
+        set(id, 'text-halo-color', '#0b0d11');
+        set(id, 'text-halo-width', 1.2);
+        break;
     }
-  }, labelLayerId);
+  }
 }
 
-// Factory: a pitched campus map, locked to campus bounds, with 3D buildings.
+function applyMapTheme(map) {
+  if (isDarkTheme()) applyDarkTheme(map);
+  // Light theme uses Liberty's own (light) colours — nothing to override.
+}
+
 function createCampusMap(container, center, zoom) {
   const map = new maplibregl.Map({
     container,
@@ -431,55 +463,249 @@ function createCampusMap(container, center, zoom) {
     bearing: -17,
     minZoom: 14,
     maxZoom: 19,
-    maxBounds: CAMPUS_BOUNDS
+    maxBounds: CAMPUS_BOUNDS,
+    // Replace the default expanded credits with a collapsed (i) button.
+    attributionControl: false
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-left');
-  map.on('load', () => add3dBuildings(map));
-  activeMaps.push(map);
-  map.on('remove', () => { activeMaps = activeMaps.filter(m => m !== map); });
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+  // MapLibre's compact attribution actually starts EXPANDED and only minimizes
+  // after the first map interaction — collapse it to the (i) button immediately.
+  const attribEl = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+  if (attribEl) attribEl.classList.remove('maplibregl-compact-show');
+  // The Liberty style references POI sprite icons that aren't in our sprite sheet.
+  // Register a blank placeholder for any missing image to silence console warnings.
+  map.on('styleimagemissing', (e) => {
+    if (map.hasImage(e.id)) return;
+    map.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+  });
+  // Fires on first load and again after every setStyle() (theme toggle).
+  map.on('style.load', () => applyMapTheme(map));
   return map;
 }
 
-// Live theme switching: swap the base style and re-add 3D buildings. Markers
-// are DOM overlays and survive setStyle, so they don't need re-adding.
+// On theme toggle, reload the style; the style.load handler re-applies the theme.
+// Custom HTML markers are DOM elements, so they survive setStyle().
 window.refreshMapTheme = function () {
-  activeMaps.forEach(map => {
-    map.setStyle(mapStyleUrl());
-    map.once('styledata', () => add3dBuildings(map));
-  });
+  [campusMap, detailMap].forEach(m => { if (m) m.setStyle(mapStyleUrl()); });
 };
+
+// Highlight a marker + its sidebar card together (on hover from either side).
+function setMapActive(id, on) {
+  const entry = campusMarkerById[id];
+  if (entry) entry.el.classList.toggle('marker-active', on);
+  const card = document.querySelector(`#mapSidebarList .dorm-card[data-id="${id}"]`);
+  if (card) card.classList.toggle('marker-active', on);
+}
+
+// Persistently highlight the selected dorm (marker + sidebar card) until another is picked.
+let selectedMapId = null;
+function selectMapDorm(id) {
+  if (selectedMapId && selectedMapId !== id) {
+    const prev = campusMarkerById[selectedMapId];
+    if (prev) prev.el.classList.remove('marker-selected');
+    const prevCard = document.querySelector(`#mapSidebarList .dorm-card[data-id="${selectedMapId}"]`);
+    if (prevCard) prevCard.classList.remove('marker-selected');
+  }
+  selectedMapId = id;
+  const entry = campusMarkerById[id];
+  if (entry) entry.el.classList.add('marker-selected');
+  const card = document.querySelector(`#mapSidebarList .dorm-card[data-id="${id}"]`);
+  if (card) card.classList.add('marker-selected');
+}
 
 function addCampusMarkers(dormList) {
   dormList.forEach(d => {
-    const popup = new maplibregl.Popup({ offset: 28 }).setHTML(`
-      <strong>${d.name}</strong><br>
-      ${d.rating > 0 ? `<span class="${ratingTier(d.rating)}">${d.rating.toFixed(1)}★</span> · ` + d.reviews + ' review' + (d.reviews !== 1 ? 's' : '') : 'No reviews yet :('}<br>
-      <a href="#" onclick="showDetail('${d.id}');return false;">View reviews</a>
-    `);
-    const marker = new maplibregl.Marker({ color: '#EAA000' })
+    const el = document.createElement('div');
+    el.className = 'map-marker';
+    el.innerHTML = `
+      <div class="map-marker-pill">
+        <span class="map-marker-name">${d.name}</span>
+        ${d.reviews > 0 ? `<span class="map-marker-sub">${d.rating.toFixed(1)} ★</span>` : ''}
+      </div>`;
+    el.addEventListener('mouseenter', () => setMapActive(d.id, true));
+    el.addEventListener('mouseleave', () => setMapActive(d.id, false));
+    // Clicking a pill zooms the map to the dorm, scrolls its card into view, and selects it.
+    el.addEventListener('click', () => {
+      campusMap.flyTo({ center: [d.lng, d.lat], zoom: 17.5, pitch: 50, bearing: -17, duration: 900 });
+      selectMapDorm(d.id);
+      const card = document.querySelector(`#mapSidebarList .dorm-card[data-id="${d.id}"]`);
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat([d.lng, d.lat])
-      .setPopup(popup)
       .addTo(campusMap);
-    campusMarkers.push(marker);
+    campusMarkerById[d.id] = { marker, el };
+  });
+}
+
+function clearCampusMarkers() {
+  Object.values(campusMarkerById).forEach(({ marker }) => marker.remove());
+  campusMarkerById = {};
+}
+
+// Populate the map sidebar; a query narrows both the list and the visible markers.
+function renderMapSidebar(query = '') {
+  const q = query.trim().toLowerCase();
+  const shown = mapDorms.filter(d =>
+    (mapCampusFilter === 'all' || d.area === mapCampusFilter) && matchesSearch(d, q));
+  const shownIds = new Set(shown.map(d => d.id));
+
+  const list = document.getElementById('mapSidebarList');
+  list.innerHTML = shown.length
+    ? shown.map(d => dormCardHTML(d, true)).join('')
+    : '<p class="no-reviews" style="padding:20px 4px">No housing matches your search.</p>';
+
+  document.getElementById('mapResultCount').innerHTML =
+    `Showing <strong>${shown.length}</strong> result${shown.length === 1 ? '' : 's'}`;
+
+  const dormById = Object.fromEntries(shown.map(d => [d.id, d]));
+
+  list.querySelectorAll('.dorm-card').forEach(card => {
+    const id = card.dataset.id;
+    // Hover a card -> highlight its marker (and vice versa).
+    card.addEventListener('mouseenter', () => setMapActive(id, true));
+    card.addEventListener('mouseleave', () => setMapActive(id, false));
+    // Click a card -> fly the map to that dorm and select it (View Dorm opens the page).
+    card.addEventListener('click', () => {
+      const d = dormById[id];
+      if (d) campusMap.flyTo({ center: [d.lng, d.lat], zoom: 17.5, pitch: 50, bearing: -17, duration: 900 });
+      selectMapDorm(id);
+    });
+    if (id === selectedMapId) card.classList.add('marker-selected');
+  });
+
+  // Hide markers filtered out of the list.
+  Object.entries(campusMarkerById).forEach(([id, { el }]) => {
+    el.style.display = shownIds.has(id) ? '' : 'none';
+  });
+}
+
+function filterMapSidebar() {
+  renderMapSidebar(document.getElementById('mapSearchInput').value);
+}
+
+function setMapCampusFilter(area, btn) {
+  mapCampusFilter = area;
+  document.querySelectorAll('#mapCampusFilter button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterMapSidebar();
+  zoomMapToCampus(area);
+}
+
+// Fly/fit the map to the selected campus. "all" returns to the full-campus view.
+function zoomMapToCampus(area) {
+  if (!campusMap) return;
+  if (area === 'all') {
+    campusMap.flyTo({ center: [-76.9440, 38.9875], zoom: 14.5, pitch: 50, bearing: -17 });
+    return;
+  }
+  const inArea = mapDorms.filter(d => d.area === area);
+  if (!inArea.length) return;
+  const bounds = new maplibregl.LngLatBounds();
+  inArea.forEach(d => bounds.extend([d.lng, d.lat]));
+  campusMap.fitBounds(bounds, { padding: 80, maxZoom: 16.5, pitch: 50, bearing: -17, duration: 900 });
+}
+
+function toggleMapSidebar() {
+  document.getElementById('mapSplit').classList.toggle('sidebar-collapsed');
+  // Give the map its new width after the sidebar finishes animating.
+  setTimeout(() => campusMap && campusMap.resize(), 300);
+}
+
+// Size the map view to exactly fill the space below the nav, so the page itself
+// never scrolls (only the sidebar list does).
+function fitMapHeight() {
+  const split = document.getElementById('mapSplit');
+  const nav = document.querySelector('nav');
+  if (!split || !nav) return;
+  split.style.height = (window.innerHeight - nav.offsetHeight) + 'px';
+  if (campusMap) campusMap.resize();
+  if (mapSheetReady && sheetMedia.matches) {
+    setSheetOpen(document.getElementById('mapSidebar').classList.contains('sheet-open'));
+  }
+}
+
+// --- Mobile bottom sheet: drag the handle to pull the housing list up/down. ---
+const sheetMedia = window.matchMedia('(max-width: 760px)');
+
+function sheetPeekOffset(sheet) {
+  return Math.max(0, sheet.offsetHeight - 168); // leaves the handle + header peeking
+}
+
+function setSheetOpen(open) {
+  const sheet = document.getElementById('mapSidebar');
+  if (!sheet) return;
+  sheet.classList.toggle('sheet-open', open);
+  sheet.style.transform = sheetMedia.matches
+    ? `translateY(${open ? 0 : sheetPeekOffset(sheet)}px)`
+    : '';
+}
+
+let mapSheetReady = false;
+function initMapSheet() {
+  const sheet = document.getElementById('mapSidebar');
+  const handle = document.getElementById('mapSheetHandle');
+  if (!sheet || !handle) return;
+
+  // Reset to peek whenever the map opens (and on first setup).
+  setSheetOpen(false);
+  // Keep the transform correct if the viewport crosses the mobile breakpoint.
+  if (!mapSheetReady) sheetMedia.addEventListener('change', () => setSheetOpen(sheet.classList.contains('sheet-open')));
+
+  if (mapSheetReady) return;
+  mapSheetReady = true;
+
+  let startY = null, startT = 0;
+  const currentT = () => {
+    const m = /translateY\(([-\d.]+)px\)/.exec(sheet.style.transform);
+    return m ? parseFloat(m[1]) : sheetPeekOffset(sheet);
+  };
+
+  handle.addEventListener('pointerdown', e => {
+    if (!sheetMedia.matches) return;
+    startY = e.clientY;
+    startT = currentT();
+    sheet.classList.add('sheet-dragging');
+    handle.setPointerCapture(e.pointerId);
+  });
+  handle.addEventListener('pointermove', e => {
+    if (startY === null) return;
+    const t = Math.max(0, Math.min(sheetPeekOffset(sheet), startT + (e.clientY - startY)));
+    sheet.style.transform = `translateY(${t}px)`;
+  });
+  handle.addEventListener('pointerup', e => {
+    if (startY === null) return;
+    sheet.classList.remove('sheet-dragging');
+    const moved = Math.abs(e.clientY - startY);
+    // A tap toggles; a drag snaps to whichever end is closer.
+    if (moved < 6) setSheetOpen(!sheet.classList.contains('sheet-open'));
+    else setSheetOpen(currentT() < sheetPeekOffset(sheet) / 2);
+    startY = null;
   });
 }
 
 function initMap() {
-  const onCampusDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
+  mapDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
 
   if (!campusMap) {
     campusMap = createCampusMap('mapFrame', [-76.9440, 38.9875], 14.5);
-    campusMap.on('load', () => addCampusMarkers(onCampusDorms));
+    campusMap.on('load', () => {
+      addCampusMarkers(mapDorms);
+      renderMapSidebar(document.getElementById('mapSearchInput').value);
+    });
   } else {
-    // Re-entering the map tab: rebuild markers on the existing map.
-    campusMarkers.forEach(m => m.remove());
-    campusMarkers = [];
-    addCampusMarkers(onCampusDorms);
+    clearCampusMarkers();
+    addCampusMarkers(mapDorms);
+    renderMapSidebar(document.getElementById('mapSearchInput').value);
   }
 
-  // The map tab is hidden until selected; resize once its container is visible.
-  setTimeout(() => campusMap.resize(), 100);
+  // Resize once the map tab (and its container) becomes visible.
+  setTimeout(() => { fitMapHeight(); initMapSheet(); }, 100);
 }
+
+// Keep the map view fitted to the viewport as it changes size.
+window.addEventListener('resize', () => { if (currentSection === 'map') fitMapHeight(); });
 
 function openLightbox(imgs, idx) {
   lightboxImages = imgs;
@@ -661,6 +887,9 @@ window.closeLightbox = closeLightbox;
 window.navLightbox = navLightbox;
 window.showSection = showSection;
 window.setSort = setSort;
+window.filterMapSidebar = filterMapSidebar;
+window.toggleMapSidebar = toggleMapSidebar;
+window.setMapCampusFilter = setMapCampusFilter;
 
 document.addEventListener('click', e => {
   document.querySelectorAll('.filter-dropdown').forEach(dropdown => {

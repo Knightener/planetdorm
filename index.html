@@ -44,6 +44,12 @@ function toggleTheme(){
         <button class="active" onclick="showSection('home');closeNav()" data-section="home">On-campus</button>
         <button onclick="showSection('map');closeNav()" data-section="map">Map</button>
         <button onclick="location.href='about.html'">About</button>
+        <button class="nav-theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span class="label-light">Light mode</span>
+          <span class="label-dark">Dark mode</span>
+        </button>
       </div>
     </div>
   </div>
@@ -161,8 +167,31 @@ function toggleTheme(){
 </div>
 
 <div class="section" id="section-map">
-  <div class="map-container">
-    <div id="mapFrame"></div>
+  <div class="map-split" id="mapSplit">
+    <aside class="map-sidebar" id="mapSidebar">
+      <div class="map-sheet-handle" id="mapSheetHandle"><span></span></div>
+      <div class="map-sidebar-head">
+        <h2>Housing Overview</h2>
+        <div class="map-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="mapSearchInput" placeholder="Search by name or type" oninput="filterMapSidebar()">
+        </div>
+        <div class="map-campus-filter" id="mapCampusFilter">
+          <button class="active" data-campus="all" onclick="setMapCampusFilter('all',this)">All campus</button>
+          <button data-campus="north" onclick="setMapCampusFilter('north',this)">North</button>
+          <button data-campus="south" onclick="setMapCampusFilter('south',this)">South</button>
+          <button data-campus="commons" onclick="setMapCampusFilter('commons',this)">Commons</button>
+        </div>
+        <p class="map-result-count" id="mapResultCount"></p>
+      </div>
+      <div class="map-sidebar-list" id="mapSidebarList"></div>
+    </aside>
+    <button class="map-sidebar-toggle" id="mapSidebarToggle" onclick="toggleMapSidebar()" aria-label="Toggle housing list">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="map-container">
+      <div id="mapFrame"></div>
+    </div>
   </div>
 </div>
 

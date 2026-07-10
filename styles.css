@@ -49,6 +49,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 
@@ -663,17 +664,364 @@ nav {
     margin: 0;
 }
 
+/* Split view: scrollable housing list on the left, map filling the right. */
+.map-split {
+    display: flex;
+    height: calc(100dvh - 60px);
+    border-top: 1px solid var(--border);
+    position: relative;
+}
+
+.map-sidebar {
+    width: 380px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+    transition: width .28s ease, opacity .2s ease;
+}
+
+/* Collapsed state hides the list so the map can span the full width. */
+.map-split.sidebar-collapsed .map-sidebar {
+    width: 0;
+    opacity: 0;
+    border-right: none;
+}
+
+.map-sidebar-head {
+    padding: 20px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    flex: none;
+}
+
+.map-sidebar-head h2 {
+    font-family: 'DM Serif Display', serif;
+    color: var(--red);
+    font-size: 1.6rem;
+    margin: 0 0 14px;
+    white-space: nowrap;
+}
+
+.map-search {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-dim);
+}
+
+.map-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text);
+    font: inherit;
+    font-size: .92rem;
+    width: 100%;
+}
+
+.map-result-count {
+    margin: 12px 0 0;
+    font-size: .82rem;
+    color: var(--text-dim);
+}
+
+.map-result-count strong {
+    color: var(--text);
+}
+
+.map-sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    /* Thin, unobtrusive scrollbar (Firefox). */
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface3) transparent;
+}
+/* Thin, unobtrusive scrollbar (WebKit/Chromium). */
+.map-sidebar-list::-webkit-scrollbar {
+    width: 6px;
+}
+.map-sidebar-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.map-sidebar-list::-webkit-scrollbar-thumb {
+    background: var(--surface3);
+    border-radius: 999px;
+}
+.map-sidebar-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-dim);
+}
+
+/* Dark map: give the sidebar + cards a cohesive dark palette so cards read as
+   cards (default black-on-black surfaces would blend into the background). */
+.map-sidebar {
+    background: #0f1116;
+}
+.map-sidebar-list .dorm-card {
+    background: #171a21;
+    border-color: #2a2e38;
+}
+.map-sidebar-list .dorm-card:hover {
+    border-color: var(--red);
+}
+:root[data-theme="light"] .map-sidebar {
+    background: var(--bg);
+}
+:root[data-theme="light"] .map-sidebar-list .dorm-card {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+/* Campus filter chips. */
+.map-campus-filter {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+.map-campus-filter button {
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font: inherit;
+    font-size: .82rem;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.map-campus-filter button:hover { border-color: var(--red); }
+.map-campus-filter button.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+}
+
+/* Drag handle for the mobile bottom sheet (hidden on desktop). */
+.map-sheet-handle { display: none; }
+
+/* Highlight the card whose marker is hovered (and vice versa). */
+.map-sidebar-list .dorm-card {
+    flex: none;
+    transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+    scroll-margin-top: 14px;
+}
+.map-sidebar-list .dorm-card.marker-active,
+.map-sidebar-list .dorm-card.marker-selected {
+    border-color: #EAA000;
+    box-shadow: 0 0 0 2px rgba(234, 160, 0, .55), 0 8px 22px rgba(0, 0, 0, .28);
+    transform: translateY(-2px);
+}
+
+/* "View Dorm" action on map-sidebar cards */
+.view-dorm-btn {
+    margin-top: 14px;
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font: 600 .85rem var(--font);
+    cursor: pointer;
+    transition: background .18s;
+}
+
+.view-dorm-btn:hover {
+    background: var(--red-dark);
+}
+
+/* Floating collapse/expand handle straddling the sidebar edge. */
+.map-sidebar-toggle {
+    position: absolute;
+    top: 18px;
+    left: 380px;
+    transform: translateX(-50%);
+    z-index: 5;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--nav-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .25);
+    transition: left .28s ease;
+}
+.map-split.sidebar-collapsed .map-sidebar-toggle {
+    left: 8px;
+    transform: none;
+}
+.map-split.sidebar-collapsed .map-sidebar-toggle svg {
+    transform: rotate(180deg);
+}
+
 .map-container {
     background: var(--surface);
-    border-top: 1px solid var(--border);
     overflow: hidden;
     position: relative;
-    height: calc(100dvh - 60px);
+    flex: 1;
+    min-width: 0;
 }
 
 #mapFrame {
     width: 100%;
     height: 100%;
+}
+
+/* Labeled marker pill — the reference's price tag, showing name + rating here. */
+.map-marker {
+    cursor: pointer;
+}
+/* Dark by default (matches the dark map); light overrides below. */
+.map-marker-pill {
+    background: #1b1e26;
+    color: #e7e9ef;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 8px;
+    padding: 4px 9px;
+    font-size: .72rem;
+    line-height: 1.25;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 3px 9px rgba(0, 0, 0, .45);
+    position: relative;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+/* Little pointer triangle beneath the pill. */
+.map-marker-pill::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1b1e26;
+    margin-top: -1px;
+}
+.map-marker-name {
+    display: block;
+    font-weight: 700;
+}
+.map-marker-sub {
+    display: block;
+    font-size: .68rem;
+    color: #e0a83a;
+    font-weight: 600;
+}
+:root[data-theme="light"] .map-marker-pill {
+    background: #fff;
+    color: #1b1b1b;
+    border-color: rgba(0, 0, 0, .14);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, .28);
+}
+:root[data-theme="light"] .map-marker-pill::after {
+    border-top-color: #fff;
+}
+:root[data-theme="light"] .map-marker-sub {
+    color: #b8860b;
+}
+.map-marker.marker-active,
+.map-marker.marker-selected { z-index: 10; }
+.map-marker.marker-active .map-marker-pill,
+.map-marker.marker-selected .map-marker-pill {
+    transform: scale(1.08);
+    border-color: #EAA000;
+    box-shadow: 0 0 0 2px #EAA000, 0 6px 16px rgba(0, 0, 0, .35);
+}
+
+/* --- Dark-theme MapLibre controls (default theme = dark). These out-specify
+   maplibre-gl.css, which loads after styles.css. Light theme keeps defaults. --- */
+:root:not([data-theme="light"]) .maplibregl-ctrl-group {
+    background: #14161c;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .14);
+}
+:root:not([data-theme="light"]) .maplibregl-ctrl-group button + button {
+    border-top-color: rgba(255, 255, 255, .14);
+}
+:root:not([data-theme="light"]) .maplibregl-ctrl-group button:hover {
+    background: rgba(255, 255, 255, .08);
+}
+/* Icons are dark PNG/SVG glyphs — invert them to light for the dark UI. */
+:root:not([data-theme="light"]) .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: invert(1) brightness(1.05);
+}
+/* Dark credits pill (both collapsed + expanded) with a legible light (i) icon. */
+:root:not([data-theme="light"]) .maplibregl-ctrl-attrib.maplibregl-compact {
+    background-color: #14161c;
+}
+:root:not([data-theme="light"]) .maplibregl-ctrl-attrib.maplibregl-compact,
+:root:not([data-theme="light"]) .maplibregl-ctrl-attrib.maplibregl-compact a {
+    color: #c2c7d1;
+}
+/* The (i) glyph is a dark SVG — invert it to light so it shows on the dark pill. */
+:root:not([data-theme="light"]) .maplibregl-ctrl-attrib-button {
+    background-color: transparent;
+    filter: invert(1);
+}
+
+@media (max-width: 760px) {
+    /* Map fills the screen; the housing list becomes a pull-up bottom sheet. */
+    .map-split {
+        display: block;
+        position: relative;
+        height: calc(100dvh - 60px);
+    }
+    .map-container {
+        position: absolute;
+        inset: 0;
+    }
+    .map-sidebar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 82dvh;
+        opacity: 1;
+        border-right: none;
+        border: 1px solid var(--border);
+        border-radius: 18px 18px 0 0;
+        box-shadow: 0 -10px 34px rgba(0, 0, 0, .4);
+        transition: transform .3s cubic-bezier(.32, .72, 0, 1);
+        will-change: transform;
+        z-index: 6;
+    }
+    /* JS sets the exact peek translate; this is the pre-JS fallback. */
+    .map-sidebar:not(.sheet-open) {
+        transform: translateY(calc(82dvh - 168px));
+    }
+    .map-sidebar.sheet-dragging { transition: none; }
+
+    .map-sheet-handle {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 0 6px;
+        cursor: grab;
+        touch-action: none;
+    }
+    .map-sheet-handle span {
+        width: 40px;
+        height: 5px;
+        border-radius: 999px;
+        background: var(--surface3);
+    }
+    .map-sidebar-head { padding-top: 4px; }
+    .map-sidebar-toggle { display: none; }
+    .map-split.sidebar-collapsed .map-sidebar { width: 100%; }
 }
 
 
@@ -691,20 +1039,20 @@ nav {
     height: 100%;
 }
 
-/* Backdrop shown while the vector tiles stream in. The dark/light OpenFreeMap
-   styles handle the actual map colours, so no tile filtering is needed. */
+/* Backdrop while vector tiles stream in — matches each theme's map base so
+   there's no flash. Dark mode is now a real dark vector style (see applyDarkTheme),
+   not a CSS invert, so POI icons and park greens keep their colours. */
 .maplibregl-map {
-    background: #14161a;
+    background: #0f1116;
     font: inherit;
 }
 
 [data-theme="light"] .maplibregl-map {
-    background: #e6e2da;
+    background: #f8f4f0;
 }
 
-/* Theme MapLibre's UI to match the site. Selectors are scoped under
-   .maplibregl-popup / -ctrl-group to out-specify maplibre-gl.css, which loads
-   after this file and would otherwise win on source order (white popups). */
+/* Theme MapLibre's UI. Scoped under .maplibregl-popup / -ctrl-group to
+   out-specify maplibre-gl.css, which loads after this file. */
 .maplibregl-popup {
     max-width: 240px !important;
 }
@@ -753,8 +1101,7 @@ nav {
     color: var(--text);
 }
 
-/* The popup tip is a CSS-border triangle; colour the edge facing the content.
-   The anchor class sits on .maplibregl-popup itself. */
+/* Colour the popup tip's edge facing the content, per anchor direction. */
 .maplibregl-popup.maplibregl-popup-anchor-top .maplibregl-popup-tip,
 .maplibregl-popup.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
 .maplibregl-popup.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
@@ -1097,6 +1444,37 @@ nav {
     display: block;
 }
 
+/* In-menu theme toggle (mobile only; hidden on desktop) */
+.nav-theme-toggle {
+    display: none;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-theme-toggle .icon-moon {
+    display: none;
+}
+
+.nav-theme-toggle .label-dark {
+    display: none;
+}
+
+[data-theme="light"] .nav-theme-toggle .icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .nav-theme-toggle .icon-moon {
+    display: block;
+}
+
+[data-theme="light"] .nav-theme-toggle .label-light {
+    display: none;
+}
+
+[data-theme="light"] .nav-theme-toggle .label-dark {
+    display: inline;
+}
+
 /* Light-mode adjustments for effects tuned to the dark theme */
 [data-theme="light"] .hero::before {
     opacity: .3;
@@ -1136,6 +1514,21 @@ nav {
     height: 3px;
     background: var(--text);
     border-radius: 2px;
+    transition: transform .25s, opacity .2s;
+    transform-origin: center;
+}
+
+/* Hamburger morphs into an X when the menu is open */
+.nav-toggle.open span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.nav-toggle.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle.open span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
 }
 
 /* RESPONSIVE */
@@ -1150,26 +1543,30 @@ nav {
 
     .nav-toggle {
         display: flex;
+        position: relative;
+        z-index: 1000;
     }
 
     .nav-inner {
         flex-direction: row-reverse;
     }
 
+    /* Hide the top-bar toggle; it moves into the menu */
+    .nav-right > .theme-toggle {
+        display: none;
+    }
+
+    /* Full-screen mobile menu */
     .nav-links {
         display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
+        position: fixed;
+        inset: 0;
         background: var(--nav-bg);
-        border: 1px solid var(--border);
-        border-top: none;
-        border-radius: 0 0 8px 8px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         flex-direction: column;
-        gap: 0;
-        padding: 4px 0 8px;
-        min-width: 160px;
+        gap: 4px;
+        padding: 80px 16px 32px;
+        z-index: 999;
+        overflow-y: auto;
     }
 
     .nav-links.open {
@@ -1179,7 +1576,17 @@ nav {
     .nav-links button {
         width: 100%;
         text-align: left;
-        padding: 14px 24px;
+        padding: 16px 20px;
+        font-size: 1.1rem;
+        border-radius: 8px;
+    }
+
+    .nav-theme-toggle {
+        display: flex;
+        margin-top: auto;
+        border-top: 1px solid var(--border);
+        border-radius: 0;
+        padding-top: 24px;
     }
 
     .detail-view.active {
