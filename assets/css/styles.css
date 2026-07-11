@@ -167,13 +167,25 @@ nav {
 :root[data-theme="dark"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.6); }
 :root[data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; transform: none; }
 
-/* In-menu theme toggle (mobile only). */
-.nav-theme-toggle { display: none; align-items: center; gap: 12px; }
-.nav-theme-toggle .icon-moon,
+/* In-menu theme toggle (mobile only). Both icons share one grid cell so
+   they rotate/fade over each other like the top-bar toggle; only the
+   label swaps instantly. */
+.nav-theme-toggle {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  grid-template-columns: 18px 1fr;
+}
+.nav-theme-toggle svg {
+  grid-area: 1 / 1;
+  transition: transform 0.4s ease, opacity 0.25s ease;
+}
+.nav-theme-toggle span { grid-area: 1 / 2; }
+.nav-theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+:root[data-theme="dark"] .nav-theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.6); }
+:root[data-theme="dark"] .nav-theme-toggle .icon-moon { opacity: 1; transform: none; }
 .nav-theme-toggle .label-dark { display: none; }
-:root[data-theme="dark"] .nav-theme-toggle .icon-sun,
 :root[data-theme="dark"] .nav-theme-toggle .label-light { display: none; }
-:root[data-theme="dark"] .nav-theme-toggle .icon-moon { display: block; }
 :root[data-theme="dark"] .nav-theme-toggle .label-dark { display: inline; }
 
 /* Hamburger. */
@@ -249,9 +261,11 @@ nav {
   max-width: 34em;
 }
 
+/* Collapsed to the width of the text at rest; grows to fill the hero
+   on focus (like the dorm-page search). */
 .hero-search {
-  width: 100%;
-  max-width: 400px;
+  width: 400px;
+  max-width: 100%;
   background: none;
   border: none;
   border-bottom: 2px solid var(--ink);
@@ -260,10 +274,18 @@ nav {
   font-size: 1.15rem;
   font-weight: 500;
   outline: none;
-  transition: border-color 0.15s;
+  transition: width 0.35s ease, border-color 0.15s;
 }
 
 .hero-search:focus { border-bottom-color: var(--red); }
+/* Stay expanded while typing and whenever text remains in the field
+   (.has-text is toggled in script.js; :placeholder-shown is unreliable
+   here because the typewriter placeholder empties out each cycle). */
+.hero-search:focus, .hero-search.has-text { width: 100%; }
+
+@media (max-width: 768px) {
+  .hero-search { width: 100%; }
+}
 
 /* ---------------- SECTIONS ---------------- */
 .section {
@@ -302,8 +324,9 @@ nav {
 
 .filter-row-left {
   display: flex;
-  align-items: baseline;
-  gap: 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .filter-toggle svg { transition: transform 0.3s ease; }
@@ -407,7 +430,11 @@ nav {
   font-size: 0.88rem;
   color: var(--dim);
   font-weight: 600;
+  /* Only shown while the filter band is expanded. */
+  display: none;
 }
+
+.filter-toggle.open + .count-label { display: inline; }
 
 .sort-row {
   display: flex;
@@ -442,6 +469,25 @@ nav {
   border-bottom-color: var(--red);
 }
 
+/* Mobile-only replacement for the sort text buttons. */
+.sort-select {
+  display: none;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 30px 6px 14px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
 /* ---------------- DIRECTORY LIST ---------------- */
 .dorm-list {
   display: flex;
@@ -451,7 +497,7 @@ nav {
 
 .dorm-row {
   display: grid;
-  grid-template-columns: 104px 1fr auto;
+  grid-template-columns: 104px 1fr auto auto;
   gap: 24px;
   align-items: center;
   padding: 20px 8px;
@@ -461,6 +507,22 @@ nav {
 }
 
 .dorm-row:hover { background: var(--hover); }
+
+/* Heart button for saving halls (browse rows + detail header). */
+.save-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  color: var(--dim);
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+}
+.save-btn svg { fill: none; }
+.save-btn:hover { color: var(--red); transform: scale(1.1); }
+.save-btn.saved { color: var(--red); }
+.save-btn.saved svg { fill: currentColor; }
 
 .dorm-row .thumb {
   width: 104px;
@@ -1048,7 +1110,6 @@ nav {
   color: var(--dim);
   margin: 0;
   padding: 20px 24px 28px;
-  border-top: 1px solid var(--line);
 }
 
 /* ---------------- TOAST ---------------- */
@@ -1118,7 +1179,7 @@ nav {
 }
 
 .map-sidebar {
-  width: 380px;
+  width: 420px;
   flex: none;
   display: flex;
   flex-direction: column;
@@ -1142,12 +1203,14 @@ nav {
 
 .map-sidebar-head h2 {
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--ink);
-  font-size: 1.35rem;
+  font-size: 1.7rem;
   margin: 0 0 14px;
   white-space: nowrap;
 }
+
+.map-sidebar-head h2 .dot { color: var(--red); }
 
 .map-search {
   display: flex;
@@ -1233,6 +1296,23 @@ nav {
   transform: translateY(-2px);
 }
 
+/* Open button: only visible on the selected card. */
+.map-card .map-card-open {
+  display: none;
+  border: none;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  padding: 7px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.map-card .map-card-open:hover { background: var(--red-dark); }
+.map-card.marker-selected { grid-template-columns: 88px 1fr auto; }
+.map-card.marker-selected .map-card-open { display: inline-block; }
+
 .map-campus-filter {
   display: flex;
   gap: 8px;
@@ -1297,12 +1377,25 @@ nav {
 
 /* Marker pills. */
 .map-marker { cursor: pointer; }
+.map-labels-hidden .map-marker { display: none; }
+.maplibregl-ctrl-group button.map-labels-toggle {
+  /* Text button: override MapLibre's fixed-square button sizing. */
+  width: auto;
+  height: 32px;
+  padding: 0 14px;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .map-marker-pill {
   background: var(--field);
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 4px 9px;
+  font-family: var(--font); /* MapLibre sets Helvetica on the map container */
   font-size: 0.72rem;
   line-height: 1.25;
   text-align: center;
@@ -1400,6 +1493,14 @@ nav {
 
   .filter-label { width: 100%; }
 
+  /* Sort collapses into a dropdown that stays on the same line as the
+     "Filter by..." toggle instead of wrapping below it. */
+  .count-sort-row { flex-wrap: nowrap; }
+  .filter-row-left { min-width: 0; }
+  .count-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sort-opt { display: none; }
+  .sort-select { display: block; flex-shrink: 0; }
+
   .nav-toggle { display: flex; position: relative; z-index: 1000; }
   .nav-right { gap: 14px; }
   .nav-right > .theme-toggle { display: none; }
@@ -1425,7 +1526,7 @@ nav {
     border-bottom: none;
   }
   .nav-links button.active { border-bottom: none; color: var(--red); }
-  .nav-theme-toggle { display: flex; margin-top: auto; border-top: 1px solid var(--line); padding-top: 24px; }
+  .nav-theme-toggle { display: grid; margin-top: auto; border-top: 1px solid var(--line); padding-top: 24px; }
 
   .map-split { height: calc(100dvh - 60px); display: block; position: relative; }
   .map-container { position: absolute; inset: 0; }

@@ -37,6 +37,7 @@ function toggleTheme(){
     <div class="nav-links" id="navLinks">
       <button class="active" onclick="showSection('home');closeNav()" data-section="home">On-campus</button>
       <button onclick="showSection('map');closeNav()" data-section="map">Map</button>
+      <button onclick="location.href='my-dorms.html'">My Dorms</button>
       <button onclick="location.href='about.html'">About</button>
       <button class="nav-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
         <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -59,7 +60,7 @@ function toggleTheme(){
 
 <div class="hero" id="heroSection">
   <div class="hero-main">
-    <h1>Find a residence hall before you move in<span class="dot">.</span></h1>
+    <h1>Welcome to PlanetDorm<span class="dot">.</span></h1>
     <p>Honest reviews of every University of Maryland residence hall, written by the Terps who lived there.</p>
     <input type="text" id="searchInput" class="hero-search" placeholder="Search halls..." oninput="filterDorms()">
   </div>
@@ -79,6 +80,11 @@ function toggleTheme(){
       <button class="sort-opt active" data-sort="default" onclick="selectSort('default')">Default</button>
       <button class="sort-opt" data-sort="rating-desc" onclick="selectSort('rating-desc')">Highest rated</button>
       <button class="sort-opt" data-sort="rating-asc" onclick="selectSort('rating-asc')">Lowest rated</button>
+      <select class="sort-select" id="sortSelect" aria-label="Sort halls" onchange="selectSort(this.value)">
+        <option value="default">Default</option>
+        <option value="rating-desc">Highest rated</option>
+        <option value="rating-asc">Lowest rated</option>
+      </select>
     </div>
   </div>
 
@@ -110,6 +116,12 @@ function toggleTheme(){
           </div>
         </div>
         <div class="filter-line">
+          <span class="filter-label">Saved</span>
+          <div class="chip-group">
+            <button class="chip" data-group="saved" data-value="only" onclick="toggleChip(this)">♥ Saved halls</button>
+          </div>
+        </div>
+        <div class="filter-line">
           <span class="filter-label">Features</span>
           <div class="chip-group">
             <button class="chip" data-group="feature" data-value="ac" onclick="toggleChip(this)">A/C</button>
@@ -135,7 +147,7 @@ function toggleTheme(){
     <aside class="map-sidebar" id="mapSidebar">
       <div class="map-sheet-handle" id="mapSheetHandle"><span></span></div>
       <div class="map-sidebar-head">
-        <h2>Housing Overview</h2>
+        <h2>Choose a dorm<span class="dot">.</span></h2>
         <div class="map-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" id="mapSearchInput" placeholder="Search by name or type" oninput="filterMapSidebar()">

@@ -101,7 +101,37 @@ let campusFilters = new Set();
 let roomTypeFilters = new Set();
 let bathroomFilters = new Set();
 let featureFilters = new Set();
+let savedFilters = new Set();
 let onCampusSort = 'default';
+
+/* Saved halls — device-local, like theme/filters/helpful votes. */
+const SAVED_KEY = 'pd-saved';
+let savedDorms = new Set();
+try { savedDorms = new Set(JSON.parse(localStorage.getItem(SAVED_KEY)) || []); } catch { /* corrupt entry — start clean */ }
+
+const HEART_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+function saveBtnHTML(id) {
+  const on = savedDorms.has(id);
+  return `<button class="save-btn${on ? ' saved' : ''}" data-id="${id}"
+    aria-label="${on ? 'Remove from saved' : 'Save this hall'}" aria-pressed="${on}"
+    onclick="toggleSaved('${id}', event)">${HEART_SVG}</button>`;
+}
+
+function toggleSaved(id, ev) {
+  ev?.stopPropagation();
+  if (savedDorms.has(id)) savedDorms.delete(id);
+  else savedDorms.add(id);
+  localStorage.setItem(SAVED_KEY, JSON.stringify([...savedDorms]));
+  const on = savedDorms.has(id);
+  document.querySelectorAll(`.save-btn[data-id="${id}"]`).forEach(b => {
+    b.classList.toggle('saved', on);
+    b.setAttribute('aria-pressed', String(on));
+    b.setAttribute('aria-label', on ? 'Remove from saved' : 'Save this hall');
+  });
+  // Un-saving while "Saved only" is active should drop the row immediately.
+  if (savedFilters.size) renderDorms();
+}
 let reviewSort = 'newest';
 let currentSection = 'home';
 let currentDorm = null;
@@ -221,6 +251,7 @@ function passesFeatureFilter(d) {
 function passesFilters(d) {
   const q = document.getElementById('searchInput').value.toLowerCase();
   if (!matchesSearch(d, q)) return false;
+  if (savedFilters.size && !savedDorms.has(d.id)) return false;
   if (campusFilters.size && !campusFilters.has(d.area)) return false;
   if (!passesRoomTypeFilter(d)) return false;
   if (!passesBathroomFilter(d)) return false;
@@ -258,6 +289,7 @@ function dormRowHTML(d) {
         <div class="num">${ratingHtml}</div>
         <div class="cnt">${cnt}</div>
       </div>
+      ${saveBtnHTML(d.id)}
     </div>`;
 }
 
@@ -275,7 +307,7 @@ function renderDorms() {
 function filterDorms() { renderDorms(); }
 
 function toggleChip(btn) {
-  const set = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters }[btn.dataset.group];
+  const set = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters, saved: savedFilters }[btn.dataset.group];
   const v = btn.dataset.value;
   if (set.has(v)) { set.delete(v); btn.classList.remove('active'); }
   else { set.add(v); btn.classList.add('active'); }
@@ -285,7 +317,7 @@ function toggleChip(btn) {
 }
 
 function updateClearAll() {
-  const any = campusFilters.size || roomTypeFilters.size || bathroomFilters.size || featureFilters.size;
+  const any = campusFilters.size || roomTypeFilters.size || bathroomFilters.size || featureFilters.size || savedFilters.size;
   document.getElementById('clearAllBtn').hidden = !any;
 }
 
@@ -294,6 +326,7 @@ function setAllFilter() {
   roomTypeFilters.clear();
   bathroomFilters.clear();
   featureFilters.clear();
+  savedFilters.clear();
   document.querySelectorAll('.filter-band .chip.active').forEach(c => c.classList.remove('active'));
   saveFilters();
   updateClearAll();
@@ -304,7 +337,7 @@ const FILTERS_KEY = 'pd-filters';
 
 function saveFilters() {
   localStorage.setItem(FILTERS_KEY, JSON.stringify({
-    campus: [...campusFilters], room: [...roomTypeFilters], bath: [...bathroomFilters], feature: [...featureFilters]
+    campus: [...campusFilters], room: [...roomTypeFilters], bath: [...bathroomFilters], feature: [...featureFilters], saved: [...savedFilters]
   }));
 }
 
@@ -312,7 +345,7 @@ function restoreFilters() {
   let saved;
   try { saved = JSON.parse(localStorage.getItem(FILTERS_KEY)); } catch { /* corrupt entry — start clean */ }
   if (!saved) return;
-  const sets = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters };
+  const sets = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters, saved: savedFilters };
   document.querySelectorAll('.filter-band .chip').forEach(chip => {
     if ((saved[chip.dataset.group] || []).includes(chip.dataset.value)) {
       sets[chip.dataset.group].add(chip.dataset.value);
@@ -321,7 +354,7 @@ function restoreFilters() {
   });
   updateClearAll();
   // Filters carried over from the last visit shouldn't be invisible.
-  if (campusFilters.size + roomTypeFilters.size + bathroomFilters.size + featureFilters.size) {
+  if (campusFilters.size + roomTypeFilters.size + bathroomFilters.size + featureFilters.size + savedFilters.size) {
     document.getElementById('filterBand').classList.add('open');
     document.getElementById('filterToggle').classList.add('open');
   }
@@ -330,6 +363,7 @@ function restoreFilters() {
 function selectSort(val) {
   onCampusSort = val;
   document.querySelectorAll('.sort-opt').forEach(b => b.classList.toggle('active', b.dataset.sort === val));
+  document.getElementById('sortSelect').value = val;
   renderDorms();
 }
 
@@ -750,6 +784,7 @@ function showSection(name) {
 let campusMap = null;
 let detailMap = null;
 let campusMarkerById = {};
+let dormRoofHeight = {}; // dormId -> roof height in meters, from the base map's buildings
 let mapDorms = [];
 let mapCampusFilter = 'all';
 
@@ -956,6 +991,7 @@ function refreshDormGeometry(map) {
       if (seen.has(key)) continue;
       seen.add(key);
       const h = Number(f.properties?.render_height) || 14;
+      dormRoofHeight[s.id] = Math.max(dormRoofHeight[s.id] || 0, h);
       out.push({
         type: 'Feature',
         properties: {
@@ -1061,6 +1097,20 @@ function createCampusMap(container, center, zoom) {
     maxBounds: CAMPUS_BOUNDS, attributionControl: false
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+  // Second compass click (view already straightened) restores the rotation it
+  // had before the first click. MapLibre's own handler runs first per click;
+  // its straightening ease is animated, so getBearing/getPitch here still read
+  // the pre-reset values. Center/zoom are left alone.
+  const compassBtn = map.getContainer().querySelector('.maplibregl-ctrl-compass');
+  let savedRotation = null;
+  compassBtn?.addEventListener('click', () => {
+    const bearing = map.getBearing(), pitch = map.getPitch();
+    if (Math.abs(bearing) > 0.1 || pitch > 0.1) {
+      savedRotation = { bearing, pitch };
+      return;
+    }
+    map.easeTo({ bearing: savedRotation?.bearing ?? -17, pitch: savedRotation?.pitch ?? 50, duration: 900 });
+  });
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
   const attribEl = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
   if (attribEl) attribEl.classList.remove('maplibregl-compact-show');
@@ -1099,6 +1149,26 @@ function selectMapDorm(id) {
   document.querySelector(`#mapSidebarList .map-card[data-id="${id}"]`)?.classList.add('marker-selected');
 }
 
+// Custom control (bottom-left) that toggles the dorm marker pills.
+// Works via a class on the map container so it applies to markers
+// added or re-added later.
+function addLabelsToggle(map) {
+  const container = document.createElement('div');
+  container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'map-labels-toggle';
+  btn.textContent = 'Hide Labels';
+  btn.setAttribute('aria-pressed', 'false');
+  btn.addEventListener('click', () => {
+    const hidden = map.getContainer().classList.toggle('map-labels-hidden');
+    btn.textContent = hidden ? 'Show labels' : 'Hide Labels';
+    btn.setAttribute('aria-pressed', String(hidden));
+  });
+  container.appendChild(btn);
+  map.addControl({ onAdd: () => container, onRemove: () => container.remove() }, 'bottom-left');
+}
+
 function addCampusMarkers(dormList) {
   dormList.forEach(d => {
     const el = document.createElement('div');
@@ -1125,6 +1195,24 @@ function clearCampusMarkers() {
   campusMarkerById = {};
 }
 
+// MapLibre markers have no altitude support, so lift each pill to its dorm's
+// roof by hand: project the roof point (ground point + building height) with
+// the map's own 3D matrix and apply the pixel delta as the marker offset.
+// transform.coordinatePoint(coord, elevationMeters) is what MapLibre itself
+// uses to place markers on terrain; version is pinned to 4.7.1.
+function liftMarkersToRoofs() {
+  const t = campusMap?.transform;
+  if (!t?.coordinatePoint) return;
+  for (const [id, { marker }] of Object.entries(campusMarkerById)) {
+    const h = dormRoofHeight[id];
+    if (!h) continue;
+    const ll = marker.getLngLat();
+    const ground = campusMap.project(ll);
+    const roof = t.coordinatePoint(maplibregl.MercatorCoordinate.fromLngLat(ll), h + 1.2);
+    marker.setOffset([roof.x - ground.x, roof.y - ground.y]);
+  }
+}
+
 function mapCardHTML(d) {
   const none = d.reviews === 0;
   const rating = none
@@ -1138,6 +1226,7 @@ function mapCardHTML(d) {
         <div class="map-card-meta">${escHtml(d.type)} · ${escHtml(areaLabel(d.area))}</div>
         <div class="map-card-rating">${rating}</div>
       </div>
+      <button class="map-card-open" type="button">Open</button>
     </div>`;
 }
 
@@ -1158,8 +1247,18 @@ function renderMapSidebar(query = '') {
     const id = card.dataset.id;
     card.addEventListener('mouseenter', () => setMapActive(id, true));
     card.addEventListener('mouseleave', () => setMapActive(id, false));
-    // Click a sidebar card -> open its detail page.
-    card.addEventListener('click', () => showDetail(id));
+    // Click a sidebar card -> fly to the dorm on the map and select it;
+    // the Open button on the selected card goes to the detail page.
+    card.addEventListener('click', () => {
+      const d = mapDorms.find(x => x.id === id);
+      if (!d) return;
+      campusMap.flyTo({ center: [d.lng, d.lat], zoom: 17.5, pitch: 50, bearing: -17, duration: 900 });
+      selectMapDorm(id);
+    });
+    card.querySelector('.map-card-open').addEventListener('click', e => {
+      e.stopPropagation();
+      showDetail(id);
+    });
     if (id === selectedMapId) card.classList.add('marker-selected');
   });
 
@@ -1260,6 +1359,10 @@ function initMap() {
   mapDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
   if (!campusMap) {
     campusMap = createCampusMap('mapFrame', [-76.9440, 38.9875], 14.5);
+    addLabelsToggle(campusMap);
+    // 'render' fires every drawn frame, so the pills track the roofs through
+    // pans, zooms, and pitch changes (and pick up heights as tiles load).
+    campusMap.on('render', liftMarkersToRoofs);
     window.__campusMap = campusMap; // console/debug access
     wireDormBuildingEvents(campusMap);
     campusMap.on('load', () => {
@@ -1309,20 +1412,22 @@ function closeNav() {
 function startPlaceholderTypewriter() {
   const el = document.getElementById('searchInput');
   const phrases = ['Search halls...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
-  let i = 0, j = 0, del = false, pause = 0;
-  setInterval(() => {
-    if (document.activeElement === el || el.value) return;
-    if (pause-- > 0) return;
-    del ? j-- : j++;
-    el.placeholder = phrases[i].slice(0, j);
-    if (!del && j === phrases[i].length) { del = true; pause = 18; }
-    if (del && j === 0) { del = false; i = (i + 1) % phrases.length; pause = 4; }
-  }, 100);
+  let i = 0, j = 0, del = false;
+  (function tick() {
+    let delay = del ? 35 : 60 + Math.random() * 40;
+    if (document.activeElement !== el && !el.value) {
+      del ? j-- : j++;
+      el.placeholder = phrases[i].slice(0, j);
+      if (!del && j === phrases[i].length) { del = true; delay = 1800; }
+      if (del && j === 0) { del = false; i = (i + 1) % phrases.length; delay = 400; }
+    }
+    setTimeout(tick, delay);
+  })();
 }
 
 // Expose handlers for inline onclick attributes (ES module scope isn't global).
 Object.assign(window, {
-  showSection, showDetail, backToList,
+  showSection, showDetail, backToList, toggleSaved,
   filterDorms, toggleChip, setAllFilter, selectSort,
   setReviewSort, openForm, closeForm, formSetRating, formSetYear, submitReview,
   quickSetRating, quickSetYear, quickSubmit,
@@ -1343,4 +1448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAllReviews();
   setupReviewsListener();
   startPlaceholderTypewriter();
+  // Keep the hero search expanded while it holds text (see .has-text CSS).
+  const heroSearch = document.getElementById('searchInput');
+  heroSearch.addEventListener('input', () => heroSearch.classList.toggle('has-text', !!heroSearch.value));
 });

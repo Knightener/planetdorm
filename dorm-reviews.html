@@ -153,24 +153,45 @@ nav {
   background: none;
   border: none;
   padding: 0;
-  display: flex;
-  align-items: center;
+  position: relative;
+  width: 16px;
+  height: 16px;
   color: var(--dim);
   cursor: pointer;
   transition: color 0.15s;
 }
 
 .theme-toggle:hover { color: var(--ink); }
-.theme-toggle .icon-moon { display: none; }
-:root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
-:root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
 
-.nav-theme-toggle { display: none; align-items: center; gap: 12px; }
-.nav-theme-toggle .icon-moon,
+.theme-toggle svg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.4s ease, opacity 0.25s ease;
+}
+
+.theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+:root[data-theme="dark"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.6); }
+:root[data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; transform: none; }
+
+/* In-menu theme toggle (mobile only). Both icons share one grid cell so
+   they rotate/fade over each other like the top-bar toggle; only the
+   label swaps instantly. */
+.nav-theme-toggle {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  grid-template-columns: 18px 1fr;
+}
+.nav-theme-toggle svg {
+  grid-area: 1 / 1;
+  transition: transform 0.4s ease, opacity 0.25s ease;
+}
+.nav-theme-toggle span { grid-area: 1 / 2; }
+.nav-theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+:root[data-theme="dark"] .nav-theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.6); }
+:root[data-theme="dark"] .nav-theme-toggle .icon-moon { opacity: 1; transform: none; }
 .nav-theme-toggle .label-dark { display: none; }
-:root[data-theme="dark"] .nav-theme-toggle .icon-sun,
 :root[data-theme="dark"] .nav-theme-toggle .label-light { display: none; }
-:root[data-theme="dark"] .nav-theme-toggle .icon-moon { display: block; }
 :root[data-theme="dark"] .nav-theme-toggle .label-dark { display: inline; }
 
 .nav-toggle {
@@ -229,6 +250,71 @@ nav {
 }
 
 /* ---------------- GALLERY ---------------- */
+/* ---------------- HALL SEARCH ---------------- */
+.td-search-row { padding: 20px 32px 0; }
+
+.td-search { position: relative; }
+
+/* Same underline treatment as the home hero search. Collapsed to the
+   width of the text at rest; grows to the full page width on focus. */
+.td-search input {
+  width: 11em;
+  max-width: 100%;
+  padding: 10px 0;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--td-ink);
+  border-radius: 0;
+  color: var(--td-ink);
+  outline: none;
+  transition: width 0.35s ease, border-color 0.15s;
+}
+
+.td-search input:focus,
+.td-search input:not(:placeholder-shown) { width: 100%; }
+
+.td-search input::placeholder { color: var(--td-muted); }
+.td-search input:focus { border-bottom-color: var(--td-red); }
+
+.td-search-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.td-search-menu::-webkit-scrollbar { width: 8px; }
+.td-search-menu::-webkit-scrollbar-thumb {
+  background: var(--td-border2);
+  border-radius: 999px;
+}
+
+.td-search-menu button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 22px 10px 14px;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--td-ink);
+}
+
+.td-search-menu button:hover { background: var(--td-track); }
+.td-search-menu .area { color: var(--td-muted); font-size: 12px; white-space: nowrap; }
+
 .td-gallery {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
@@ -282,7 +368,26 @@ nav {
   text-transform: uppercase;
 }
 
-.td-subline { margin-top: 6px; font-size: 14px; color: var(--td-muted); }
+/* Save (heart) pill next to the title. */
+.td-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--td-border2);
+  border-radius: 999px;
+  padding: 4px 12px;
+  color: var(--td-secondary);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.td-save svg { fill: none; }
+.td-save:hover { color: var(--td-red); border-color: var(--td-red); }
+.td-save.saved { color: var(--td-red); border-color: var(--td-red); }
+.td-save.saved svg { fill: currentColor; }
+
 
 .td-amenities { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 
@@ -295,6 +400,13 @@ nav {
   padding: 6px 12px;
   border-radius: 999px;
 }
+
+/* Color-coded features, same scheme as the v1 tags: green for perks,
+   red for drawbacks, orange for honors/LLPs. Neutral info stays gray. */
+.td-amenity.good { color: var(--td-pos); background: var(--td-pos-bg); border-color: transparent; }
+.td-amenity.bad { color: var(--td-red); background: var(--td-red-tint); border-color: transparent; }
+.td-amenity.honors { color: var(--td-neg); background: var(--td-neg-bg); border-color: transparent; }
+:root[data-theme="dark"] .td-amenity.bad { color: #f4657a; }
 
 .td-score { text-align: right; flex: none; }
 
@@ -481,34 +593,35 @@ nav {
   line-height: 1.5;
 }
 
-.cmp-rows { display: flex; flex-direction: column; gap: 2px; }
-
-.cmp-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s;
+/* At-a-glance facts card. */
+.glance-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--td-secondary);
+  margin-bottom: 12px;
 }
 
-.cmp-row:hover { background: var(--td-track); }
-.cmp-row.current { background: var(--td-gold-tint); cursor: default; }
+.glance-rows { display: flex; flex-direction: column; gap: 10px; }
 
-.cmp-name { flex: 1; font-size: 13.5px; color: var(--td-secondary); min-width: 0; }
-.cmp-row.current .cmp-name { font-weight: 700; color: var(--td-ink); }
-.cmp-rating { font-size: 12.5px; font-weight: 700; color: var(--td-ink); white-space: nowrap; }
-.cmp-price { font-size: 12px; color: var(--td-muted); white-space: nowrap; }
+.glance-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
 
-.cmp-foot {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
-  text-align: center;
+.glance-label { font-size: 14px; color: var(--td-muted); flex-shrink: 0; }
+.glance-value { font-size: 14.5px; color: var(--td-ink); text-align: right; }
+
+.glance-foot {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--td-track);
   font-size: 12.5px;
-  font-weight: 700;
-  color: var(--td-red);
+  color: var(--td-muted);
+  line-height: 1.5;
 }
 
 .td-write-btn {
@@ -660,22 +773,6 @@ nav {
   filter: invert(0.92) hue-rotate(180deg) saturate(0.7) brightness(0.95);
 }
 
-/* Label pill overlaid on the map; clicks fall through to the frame. */
-.td-map-open {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  z-index: 2;
-  pointer-events: none;
-  background: var(--td-card);
-  color: var(--td-ink);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 5px 11px;
-  border-radius: 999px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-}
-
 /* ---------------- RESPONSIVE ---------------- */
 @media (max-width: 1024px) {
   .td-body { grid-template-columns: 1fr; }
@@ -683,18 +780,22 @@ nav {
      sits directly under the last review. */
   .td-write-btn { order: 1; }
   #breakdownCard { order: 2; }
-  #compareCard { order: 3; }
+  #glanceCard { order: 3; }
   #mapCard { order: 4; }
 }
 
 @media (max-width: 640px) {
+  .td-search-row { padding: 16px 20px 0; }
+  .td-search input { width: 100%; }
+  /* Contained 2-col grid: full-width hero photo, tiles below — nothing
+     overflows the viewport. */
   .td-gallery {
-    display: flex;
-    overflow-x: auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: 90px;
     padding: 16px 20px 0;
-    scroll-snap-type: x mandatory;
   }
-  .td-gallery .cell { flex: none; width: 240px; height: 150px; scroll-snap-align: start; }
+  .td-gallery .cell.hero { grid-column: 1 / -1; }
 
   .td-header { flex-direction: column; gap: 14px; padding: 20px 20px 8px; }
   .td-score { text-align: left; }
@@ -713,6 +814,7 @@ nav {
     <div class="nav-links" id="navLinks">
       <button class="active" onclick="location.href='index.html'">On-campus</button>
       <button onclick="location.href='index.html#map'">Map</button>
+      <button onclick="location.href='my-dorms.html'">My Dorms</button>
       <button onclick="location.href='about.html'">About</button>
       <button class="nav-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
         <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -734,6 +836,13 @@ nav {
 </nav>
 
 <div class="td-page">
+
+  <div class="td-search-row">
+    <div class="td-search">
+      <input type="text" id="dormSearch" placeholder="Search halls..." autocomplete="off" aria-label="Search halls">
+      <div class="td-search-menu" id="dormSearchMenu" hidden></div>
+    </div>
+  </div>
 
   <div class="td-gallery" id="gallery"></div>
 
@@ -768,11 +877,9 @@ nav {
       <div class="td-card" id="breakdownCard" hidden></div>
       <div class="td-card" id="mapCard" hidden>
         <div class="td-card-title">Location</div>
-        <div class="td-map-frame" id="mapPreview" onclick="location.href='index.html#map'" role="link" aria-label="Open the campus map" title="Open the campus map">
-          <span class="td-map-open">Open campus map</span>
-        </div>
+        <div class="td-map-frame" id="mapPreview" onclick="location.href='index.html#map'" role="link" aria-label="Open the campus map" title="Open the campus map"></div>
       </div>
-      <div class="td-card" id="compareCard" hidden></div>
+      <div class="td-card" id="glanceCard" hidden></div>
       <button class="td-write-btn" id="writeReviewLink">Write a review</button>
     </div>
   </div>
@@ -826,10 +933,27 @@ const meta = DORM_META[dorm.id] || {};
 const INITIAL_VISIBLE = 5;
 let reviews = [];                 // this dorm's reviews (Supabase)
 let reviewsLoaded = false;        // suppresses the empty state until the first fetch settles
-let nearbyRatings = {};           // dormId -> { avg, count }
 let filters = { sort: 'helpful', yearLived: null, stars: 0 };
 let visibleCount = INITIAL_VISIBLE;
 let helpfulVotes = new Set(JSON.parse(localStorage.getItem('td-helpful') || '[]'));
+// Saved halls — shared with the index page's list via the same key.
+let savedDorms = new Set(JSON.parse(localStorage.getItem('pd-saved') || '[]'));
+
+function toggleSaved() {
+  if (savedDorms.has(dorm.id)) savedDorms.delete(dorm.id);
+  else savedDorms.add(dorm.id);
+  localStorage.setItem('pd-saved', JSON.stringify([...savedDorms]));
+  updateSaveBtn();
+}
+
+function updateSaveBtn() {
+  const btn = document.getElementById('saveDormBtn');
+  if (!btn) return;
+  const on = savedDorms.has(dorm.id);
+  btn.classList.toggle('saved', on);
+  btn.setAttribute('aria-pressed', String(on));
+  btn.querySelector('span').textContent = on ? 'Saved' : 'Save';
+}
 
 function escHtml(str) {
   return String(str)
@@ -865,26 +989,46 @@ function helpfulCount(r) {
 /* ------------------------------------------------------------------ *
  * Static sections (gallery + header shell)                           *
  * ------------------------------------------------------------------ */
+// Placeholder cells ([ room ], [ lounge ], …) are gone until we have real
+// photos: show just the exterior shot, or hide the gallery entirely.
 function renderGallery() {
   const img = dorm.imgs?.[0] || '';
-  const labels = meta.galleryLabels || ['[ room ]', '[ lounge ]', '[ bathroom ]', '[ photos ]'];
-  const hero = img
-    ? `<div class="cell hero photo" style="background-image:url('${img}')" onclick="openLightbox('${img.replace(/'/g, "\\'")}')" role="img" aria-label="${escHtml(dorm.name)}"></div>`
-    : `<div class="cell hero">[ exterior photo ]</div>`;
-  document.getElementById('gallery').innerHTML =
-    hero + labels.map(l => `<div class="cell">${escHtml(l)}</div>`).join('');
+  const gallery = document.getElementById('gallery');
+  if (!img) { gallery.hidden = true; return; }
+  gallery.innerHTML =
+    `<div class="cell hero photo" style="background-image:url('${img}')" onclick="openLightbox('${img.replace(/'/g, "\\'")}')" role="img" aria-label="${escHtml(dorm.name)}"></div>`;
 }
 
-function fallbackSubline() {
-  const dining = (dorm.dining || '').replace(' Dining Hall', '');
-  return [dorm.type, dining && `Near ${dining}`, `Built ${dorm.built}`]
-    .filter(Boolean).join(' · ');
+// "Community & single all-gender bathrooms" becomes one chip per type.
+function bathroomAmenities() {
+  const str = dorm.bathrooms || '';
+  const out = [];
+  if (/community/i.test(str)) out.push({ t: 'Community bathrooms' });
+  if (/single/i.test(str)) out.push({ t: 'Single all-gender bathrooms' });
+  return out.length ? out : (str ? [{ t: str }] : []);
+}
+
+// Shared bathrooms get two toilets/showers, private singles get one.
+function withBathroomEmoji(label) {
+  if (/^community bath/i.test(label)) return `🚽🚽🚿🚿 ${label}`;
+  if (/^single all-gender/i.test(label)) return `🚽🚿 ${label}`;
+  return label;
 }
 
 function fallbackAmenities() {
-  const out = [dorm.ac ? '❄ AC' : null, dorm.bathrooms || null];
-  dorm.tags?.forEach(t => { if (t.t !== 'A/C') out.push(t.t); });
+  const out = [dorm.ac ? { t: '❄ AC', c: 'good' } : null, ...bathroomAmenities()];
+  dorm.tags?.forEach(t => { if (t.t !== 'A/C') out.push(t); });
   return out.filter(Boolean);
+}
+
+// Category for a feature chip: data.js tags carry it as `c`; editorial
+// amenity strings (DORM_META) are classified by wording.
+function amenityClass(label, c) {
+  if (c) return ['good', 'bad', 'honors'].includes(c) ? c : '';
+  if (/^no /i.test(label)) return 'bad';
+  if (/llp|honors|scholars|gemstone/i.test(label)) return 'honors';
+  if (/a\/c|❄|laundry|elevator/i.test(label)) return 'good';
+  return '';
 }
 
 function renderHeader() {
@@ -898,17 +1042,24 @@ function renderHeader() {
       <div class="td-title-row">
         <h1>${escHtml(dorm.name)}</h1>
         <span class="td-badge">${escHtml(areaBadge(dorm))}</span>
+        <button id="saveDormBtn" class="td-save" type="button" aria-pressed="false" onclick="toggleSaved()">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span>Save</span>
+        </button>
       </div>
-      <div class="td-subline">${escHtml(meta.subline || fallbackSubline())}</div>
-      <div class="td-amenities">${amenities.map(a => `<span class="td-amenity">${escHtml(a)}</span>`).join('')}</div>
+      <div class="td-amenities">${amenities.map(a => {
+        const label = a.t || a;
+        return `<span class="td-amenity ${amenityClass(label, a.c)}">${escHtml(withBathroomEmoji(label))}</span>`;
+      }).join('')}</div>
     </div>
     <div class="td-score">
-      <div class="td-score-row">
-        <span class="td-score-num">${count ? avg.toFixed(1) : '—'}</span>
+      ${count ? `<div class="td-score-row">
+        <span class="td-score-num">${avg.toFixed(1)}</span>
         <span class="td-score-stars">${starsHTML(avg, 20)}</span>
-      </div>
+      </div>` : ''}
       <div class="td-score-meta">${count} review${count === 1 ? '' : 's'}${priceHtml}</div>
     </div>`;
+  updateSaveBtn();
   document.title = `${dorm.name} — Dorm Reviews`;
 }
 
@@ -1166,31 +1317,29 @@ function renderMapPreview() {
   new maplibregl.Marker({ color: '#E21833' }).setLngLat([dorm.lng, dorm.lat]).addTo(map);
 }
 
-function compareRowHTML(d, price, current) {
-  const r = nearbyRatings[d.id];
-  const rating = r && r.count ? `${r.avg.toFixed(1)} ★` : '— ★';
-  return `
-    <div class="cmp-row ${current ? 'current' : ''}" ${current ? '' : `onclick="location.href='dorm-reviews.html?dorm=${d.id}'"`}>
-      <span class="cmp-name">${escHtml(d.name)}</span>
-      <span class="cmp-rating">${rating}</span>
-      <span class="cmp-price">${escHtml(price || '')}</span>
-    </div>`;
-}
-
-function renderCompare() {
-  const card = document.getElementById('compareCard');
-  const nearby = (meta.nearby || dorms.filter(d => d.area === dorm.area && d.id !== dorm.id && d.campus === 'on').slice(0, 3).map(d => ({ id: d.id })))
-    .map(n => ({ dorm: dorms.find(d => d.id === n.id), price: n.price }))
-    .filter(n => n.dorm);
-  if (!nearby.length) { card.hidden = true; return; }
+// "At a glance" facts card. Carries the info that used to live in the
+// subline under the dorm name (type, dining, built) as label/value rows;
+// an editorial subline (DORM_META) becomes the card's footnote.
+function renderGlance() {
+  const card = document.getElementById('glanceCard');
+  const dining = (dorm.dining || '').replace(' Dining Hall', '');
+  const rows = [
+    ['Building Type', dorm.type],
+    ['Dining', dining],
+    ['Built', dorm.built]
+  ].filter(([, v]) => v);
+  if (!rows.length && !meta.subline) { card.hidden = true; return; }
   card.hidden = false;
   card.innerHTML = `
-    <div class="td-card-title" style="margin-bottom:12px">Compare nearby</div>
-    <div class="cmp-rows">
-      ${compareRowHTML(dorm, meta.priceShort, true)}
-      ${nearby.map(n => compareRowHTML(n.dorm, n.price, false)).join('')}
+    <div class="glance-title">At a glance</div>
+    <div class="glance-rows">
+      ${rows.map(([k, v]) => `
+        <div class="glance-row">
+          <span class="glance-label">${k}</span>
+          <span class="glance-value">${escHtml(String(v))}</span>
+        </div>`).join('')}
     </div>
-    <a class="cmp-foot" href="index.html">Compare side by side →</a>`;
+    ${meta.subline ? `<div class="glance-foot">${escHtml(meta.subline)}</div>` : ''}`;
 }
 
 /* ------------------------------------------------------------------ *
@@ -1198,12 +1347,10 @@ function renderCompare() {
  * are always derived, never stored)                                  *
  * ------------------------------------------------------------------ */
 async function loadReviews() {
-  const nearbyIds = (meta.nearby || []).map(n => n.id);
-  const ids = [dorm.id, ...nearbyIds];
   const { data, error } = await supabase
     .from('reviews')
     .select('*')
-    .in('dormId', ids)
+    .eq('dormId', dorm.id)
     .order('created_at', { ascending: false });
 
   reviewsLoaded = true;
@@ -1216,21 +1363,12 @@ async function loadReviews() {
     return;
   }
 
-  reviews = data.filter(r => r.dormId === dorm.id);
-  nearbyRatings = {};
-  ids.forEach(id => {
-    const rs = data.filter(r => r.dormId === id);
-    nearbyRatings[id] = {
-      count: rs.length,
-      avg: rs.length ? rs.reduce((s, r) => s + r.rating, 0) / rs.length : 0
-    };
-  });
+  reviews = data;
 
   renderHeader();
   renderFilters();
   renderReviews();
   renderBreakdown();
-  renderCompare();
 }
 
 /* ------------------------------------------------------------------ *
@@ -1351,13 +1489,46 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
 });
 
+/* Hall search above the gallery: type-ahead over all on-campus halls,
+ * pick one to jump to its page. */
+const searchInput = document.getElementById('dormSearch');
+const searchMenu = document.getElementById('dormSearchMenu');
+
+function renderSearchMenu() {
+  const q = searchInput.value.trim().toLowerCase();
+  const matches = q
+    ? dorms.filter(d => d.campus === 'on' && d.name.toLowerCase().includes(q)).slice(0, 8)
+    : [];
+  if (!matches.length) { searchMenu.hidden = true; searchMenu.innerHTML = ''; return; }
+  searchMenu.innerHTML = matches.map(d => `
+    <button type="button" data-id="${d.id}">
+      <span>${escHtml(d.name)}</span>
+      <span class="area">${escHtml(areaBadge(d))}</span>
+    </button>`).join('');
+  searchMenu.hidden = false;
+}
+
+searchInput.addEventListener('input', renderSearchMenu);
+searchInput.addEventListener('focus', renderSearchMenu);
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchMenu.querySelector('button')?.click();
+  if (e.key === 'Escape') searchMenu.hidden = true;
+});
+searchMenu.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (btn) location.href = `dorm-reviews.html?dorm=${encodeURIComponent(btn.dataset.id)}`;
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.td-search')) searchMenu.hidden = true;
+});
+
 renderGallery();
 renderHeader();
 renderFilters();
 renderReviews();
 renderBreakdown();
 renderMapPreview();
-renderCompare();
+renderGlance();
 loadReviews();
 </script>
 
