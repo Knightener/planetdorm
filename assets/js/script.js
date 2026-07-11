@@ -773,6 +773,7 @@ function applyDarkTheme(map) {
         else set(id, 'fill-color', '#14161c');
         break;
       case 'fill-extrusion':
+        if (id === DORM_LAYER) break; // dorm buildings keep their own colors
         set(id, 'fill-extrusion-color', '#232733');
         set(id, 'fill-extrusion-opacity', 0.92);
         break;
@@ -796,6 +797,250 @@ function applyDarkTheme(map) {
 
 function applyMapTheme(map) { if (isDarkTheme()) applyDarkTheme(map); }
 
+/* ------------------------------------------------------------------ *
+ * Dorm building footprints (3D extrusions, one per dorm)             *
+ * ------------------------------------------------------------------ */
+const DORM_SRC = 'dorm-buildings';
+const DORM_LAYER = 'dorm-buildings-3d';
+
+const DORM_AREA_COLORS = {
+  light: { north: '#e21833', south: '#e8a000', commons: '#2f6fd0',
+           northHi: '#ff4d61', southHi: '#ffc233', commonsHi: '#5b96f0' },
+  dark:  { north: '#ff5468', south: '#ffc233', commons: '#5b96f0',
+           northHi: '#ff8b99', southHi: '#ffd876', commonsHi: '#8fb8f7' }
+};
+
+let dormGeojsonPromise = null;
+function loadDormGeojson() {
+  // Fetched once, enriched with each dorm's campus area for data-driven colors.
+  if (!dormGeojsonPromise) {
+    dormGeojsonPromise = fetch('assets/data/dorm-buildings.geojson')
+      .then(r => r.json())
+      .then(gj => {
+        const areaById = Object.fromEntries(dorms.map(d => [d.id, d.area]));
+        gj.features.forEach(f => { f.properties.area = areaById[f.properties.dormId] || 'north'; });
+        return gj;
+      })
+      .catch(() => null);
+  }
+  return dormGeojsonPromise;
+}
+
+// Grow a polygon ring outward (default ~8 m) so tile-quantized building
+// geometry still tests as inside the footprint mask.
+function bufferRing(ring, e = 0.00008) {
+  const cx = ring.reduce((s, p) => s + p[0], 0) / ring.length;
+  const cy = ring.reduce((s, p) => s + p[1], 0) / ring.length;
+  return ring.map(([x, y]) => {
+    const dx = x - cx, dy = y - cy, len = Math.hypot(dx, dy) || 1;
+    return [x + dx / len * e, y + dy / len * e];
+  });
+}
+
+// One buffered MultiPolygon mask per dorm, built once from the GeoJSON.
+let dormShapes = null;
+async function loadDormShapes() {
+  const gj = await loadDormGeojson();
+  if (gj && !dormShapes) {
+    const byId = {};
+    for (const f of gj.features) {
+      const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+      const rec = byId[f.properties.dormId] || (byId[f.properties.dormId] = { area: f.properties.area, polys: [] });
+      rec.polys.push(...polys.map(poly => poly.map(r => bufferRing(r))));
+    }
+    dormShapes = Object.entries(byId).map(([id, v]) => {
+      let minX = 180, minY = 90, maxX = -180, maxY = -90;
+      for (const poly of v.polys) for (const [x, y] of poly[0]) {
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
+      return { id, area: v.area, bbox: [minX, minY, maxX, maxY],
+               geom: { type: 'MultiPolygon', coordinates: v.polys } };
+    });
+  }
+  return dormShapes;
+}
+
+function dormBuildingPaint() {
+  const c = DORM_AREA_COLORS[isDarkTheme() ? 'dark' : 'light'];
+  const byArea = (n, s, co) => ['match', ['get', 'area'], 'south', s, 'commons', co, n];
+  return {
+    'fill-extrusion-color': [
+      'case',
+      ['boolean', ['feature-state', 'selected'], false], byArea(c.northHi, c.southHi, c.commonsHi),
+      ['boolean', ['feature-state', 'hover'], false], byArea(c.northHi, c.southHi, c.commonsHi),
+      byArea(c.north, c.south, c.commons)
+    ],
+    'fill-extrusion-height': ['get', 'render_height'],
+    'fill-extrusion-base': ['get', 'render_min_height'],
+    'fill-extrusion-opacity': 1
+  };
+}
+
+// True outward offset: each vertex moves along the average of its two edges'
+// outward normals. Correct at concave corners, where a radial-from-centroid
+// nudge points the wrong way. Assumes GeoJSON winding (outer CCW, holes CW),
+// which also makes holes shrink — i.e. the solid always grows.
+function offsetRing(ring, meters) {
+  const kx = Math.cos(38.99 * Math.PI / 180); // lon compression at campus latitude
+  const e = meters / 111320;
+  const pts = ring.map(([x, y]) => [x * kx, y]);
+  const n = pts.length - 1; // last vertex duplicates the first
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const p = pts[i], prev = pts[(i - 1 + n) % n], next = pts[(i + 1) % n];
+    const norm = ([ax, ay], [bx, by]) => {
+      const dx = bx - ax, dy = by - ay, l = Math.hypot(dx, dy) || 1;
+      return [dy / l, -dx / l];
+    };
+    const [n1x, n1y] = norm(prev, p), [n2x, n2y] = norm(p, next);
+    let mx = n1x + n2x, my = n1y + n2y;
+    const ml = Math.hypot(mx, my) || 1;
+    out.push([(p[0] + mx / ml * e) / kx, p[1] + my / ml * e]);
+  }
+  out.push(out[0]);
+  return out;
+}
+
+function ringCentroid(ring) {
+  let x = 0, y = 0;
+  for (const p of ring) { x += p[0]; y += p[1]; }
+  return [x / ring.length, y / ring.length];
+}
+
+function pointInRing(pt, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [x1, y1] = ring[i], [x2, y2] = ring[j];
+    if ((y1 > pt[1]) !== (y2 > pt[1]) && pt[0] < (x2 - x1) * (pt[1] - y1) / (y2 - y1) + x1) inside = !inside;
+  }
+  return inside;
+}
+
+function pointInShape(pt, s) {
+  const [minX, minY, maxX, maxY] = s.bbox;
+  if (pt[0] < minX || pt[0] > maxX || pt[1] < minY || pt[1] > maxY) return false;
+  return s.geom.coordinates.some(poly => pointInRing(pt, poly[0]));
+}
+
+// A tile building belongs to a dorm when most of its vertices fall inside the
+// dorm's (buffered) footprint mask. Vertex-majority handles concave L/U-shaped
+// halls (whose centroid lies outside the building) and rejects mere neighbors,
+// which share at best a few boundary vertices.
+function dormForPoly(ring) {
+  for (const s of dormShapes) {
+    let inside = 0;
+    for (const p of ring) if (pointInShape(p, s)) inside++;
+    if (inside > ring.length / 2) return s;
+  }
+  return null;
+}
+
+// Pull the base map's own building geometry (with its render_height) out of the
+// loaded vector tiles and keep the features that fall inside a dorm footprint.
+// This guarantees our colored extrusions match the gray base buildings exactly.
+function refreshDormGeometry(map) {
+  const src = map.getSource?.(DORM_SRC);
+  const base = map.getStyle()?.layers.find(l => l.type === 'fill-extrusion' && l.id !== DORM_LAYER);
+  if (!src || !base || !dormShapes) return;
+  const feats = map.querySourceFeatures(base.source, { sourceLayer: base['source-layer'] });
+  const out = [], seen = new Set();
+  for (const f of feats) {
+    const g = f.geometry;
+    const polys = g?.type === 'Polygon' ? [g.coordinates] : g?.type === 'MultiPolygon' ? g.coordinates : [];
+    for (const poly of polys) {
+      const s = dormForPoly(poly[0]);
+      if (!s) continue;
+      const c = ringCentroid(poly[0]);
+      const key = s.id + ':' + c[0].toFixed(6) + ',' + c[1].toFixed(6);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const h = Number(f.properties?.render_height) || 14;
+      out.push({
+        type: 'Feature',
+        properties: {
+          dormId: s.id, area: s.area,
+          // Deliberate roof-cap style: a 1.2 m colored slab sitting on top of
+          // the gray base building (slightly oversized so its rim is visible),
+          // rather than recoloring the walls — consistent on every GPU.
+          render_height: h + 1.2,
+          render_min_height: h
+        },
+        geometry: { type: 'Polygon', coordinates: poly.map(r => offsetRing(r, 0.6)) }
+      });
+    }
+  }
+  // Tiles reload as you pan/zoom; only push data when the picked set changed.
+  const sig = [...seen].sort().join('|');
+  if (map.__dormSig !== sig && out.length) {
+    map.__dormSig = sig;
+    src.setData({ type: 'FeatureCollection', features: out });
+    if (map === campusMap && selectedMapId) setDormBuildingState(map, selectedMapId, { selected: true });
+  }
+}
+
+async function addDormBuildings(map) {
+  const shapes = await loadDormShapes();
+  if (!shapes || !map.getStyle()) return;
+  try {
+    if (!map.getSource(DORM_SRC)) {
+      map.addSource(DORM_SRC, {
+        type: 'geojson', promoteId: 'dormId',
+        data: { type: 'FeatureCollection', features: [] }
+      });
+    }
+    if (!map.getLayer(DORM_LAYER)) {
+      map.__dormSig = null;
+      map.addLayer({ id: DORM_LAYER, type: 'fill-extrusion', source: DORM_SRC, paint: dormBuildingPaint() });
+      if (map === campusMap && dormLayerFilter) map.setFilter(DORM_LAYER, dormLayerFilter);
+    } else {
+      const paint = dormBuildingPaint();
+      for (const [k, v] of Object.entries(paint)) map.setPaintProperty(DORM_LAYER, k, v);
+    }
+    if (!map.__dormIdleHooked) {
+      map.__dormIdleHooked = true;
+      // 'idle' fires whenever tiles finish (re)loading — keep geometry current.
+      map.on('idle', () => refreshDormGeometry(map));
+    }
+    refreshDormGeometry(map);
+  } catch (e) {
+    // Usually a style reload racing the fetch — the next style.load re-adds.
+    console.warn('dorm buildings layer:', e);
+  }
+}
+
+function setDormBuildingState(map, id, state) {
+  if (map && map.getSource(DORM_SRC)) map.setFeatureState({ source: DORM_SRC, id }, state);
+}
+
+let dormLayerFilter = null;
+
+// Click/hover on the extruded buildings themselves (campus map only).
+function wireDormBuildingEvents(map) {
+  let hoverId = null;
+  map.on('mousemove', DORM_LAYER, e => {
+    const id = e.features[0]?.properties.dormId;
+    if (id === hoverId) return;
+    if (hoverId) setMapActive(hoverId, false);
+    hoverId = id || null;
+    if (hoverId) setMapActive(hoverId, true);
+    map.getCanvas().style.cursor = hoverId ? 'pointer' : '';
+  });
+  map.on('mouseleave', DORM_LAYER, () => {
+    if (hoverId) setMapActive(hoverId, false);
+    hoverId = null;
+    map.getCanvas().style.cursor = '';
+  });
+  map.on('click', DORM_LAYER, e => {
+    const id = e.features[0]?.properties.dormId;
+    const d = id && mapDorms.find(x => x.id === id);
+    if (!d) return;
+    map.flyTo({ center: [d.lng, d.lat], zoom: 17.5, pitch: 50, bearing: -17, duration: 900 });
+    selectMapDorm(d.id);
+    document.querySelector(`#mapSidebarList .map-card[data-id="${d.id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
 // Robustly (re)apply the current theme after a style loads. 'style.load' is the
 // primary signal (fires on the initial style and after every setStyle), but it
 // is occasionally missed — which left the map on its light base while the rest
@@ -803,7 +1048,7 @@ function applyMapTheme(map) { if (isDarkTheme()) applyDarkTheme(map); }
 // 'styledataloading' rearms the guard whenever a new style starts loading.
 function hookMapTheme(map) {
   let applied = false;
-  const apply = () => { applied = true; applyMapTheme(map); };
+  const apply = () => { applied = true; applyMapTheme(map); addDormBuildings(map); };
   map.on('styledataloading', () => { applied = false; });
   map.on('style.load', apply);
   map.on('styledata', () => { if (!applied && map.isStyleLoaded()) apply(); });
@@ -838,6 +1083,7 @@ window.refreshMapTheme = function () {
 function setMapActive(id, on) {
   campusMarkerById[id]?.el.classList.toggle('marker-active', on);
   document.querySelector(`#mapSidebarList .map-card[data-id="${id}"]`)?.classList.toggle('marker-active', on);
+  setDormBuildingState(campusMap, id, { hover: on });
 }
 
 let selectedMapId = null;
@@ -845,8 +1091,10 @@ function selectMapDorm(id) {
   if (selectedMapId && selectedMapId !== id) {
     campusMarkerById[selectedMapId]?.el.classList.remove('marker-selected');
     document.querySelector(`#mapSidebarList .map-card[data-id="${selectedMapId}"]`)?.classList.remove('marker-selected');
+    setDormBuildingState(campusMap, selectedMapId, { selected: false });
   }
   selectedMapId = id;
+  setDormBuildingState(campusMap, id, { selected: true });
   campusMarkerById[id]?.el.classList.add('marker-selected');
   document.querySelector(`#mapSidebarList .map-card[data-id="${id}"]`)?.classList.add('marker-selected');
 }
@@ -918,6 +1166,10 @@ function renderMapSidebar(query = '') {
   Object.entries(campusMarkerById).forEach(([id, { el }]) => {
     el.style.display = shownIds.has(id) ? '' : 'none';
   });
+
+  // Keep the 3D dorm buildings in sync with the sidebar filter/search.
+  dormLayerFilter = ['in', ['get', 'dormId'], ['literal', [...shownIds]]];
+  if (campusMap?.getLayer(DORM_LAYER)) campusMap.setFilter(DORM_LAYER, dormLayerFilter);
 }
 
 function filterMapSidebar() { renderMapSidebar(document.getElementById('mapSearchInput').value); }
@@ -1008,6 +1260,8 @@ function initMap() {
   mapDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
   if (!campusMap) {
     campusMap = createCampusMap('mapFrame', [-76.9440, 38.9875], 14.5);
+    window.__campusMap = campusMap; // console/debug access
+    wireDormBuildingEvents(campusMap);
     campusMap.on('load', () => {
       addCampusMarkers(mapDorms);
       renderMapSidebar(document.getElementById('mapSearchInput').value);
