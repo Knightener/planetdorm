@@ -79,7 +79,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.td-page { max-width: 1180px; margin: 0 auto; }
+.td-page { width: 100%; }
 
 button { font: inherit; background: none; border: none; cursor: pointer; }
 a { color: var(--td-ink); text-decoration: none; }
@@ -329,6 +329,8 @@ nav {
 
 .td-chip {
   position: relative;
+  cursor: pointer;
+  user-select: none;
   font-size: 12.5px;
   font-weight: 600;
   color: var(--td-secondary);
@@ -418,6 +420,8 @@ nav {
 
 .rev-foot { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
 
+.rev-posted { font-size: 12px; color: var(--td-muted); }
+
 .rev-tag { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
 .rev-tag.pos { color: var(--td-pos); background: var(--td-pos-bg); }
 .rev-tag.neg { color: var(--td-neg); background: var(--td-neg-bg); }
@@ -435,6 +439,11 @@ nav {
 .rev-helpful.voted:hover { color: var(--td-neg); }
 
 .td-empty { color: var(--td-muted); font-size: 14px; padding: 8px 2px; }
+
+/* Loading spinner — same animated logo as the home page. */
+.reviews-loading { display: none; align-items: center; justify-content: center; padding: 40px; }
+.reviews-loading.visible { display: flex; }
+.reviews-loading-icon { width: 56px; height: 48px; }
 
 /* Show-all ghost button. */
 .td-show-all {
@@ -633,6 +642,40 @@ nav {
   font-size: 2rem;
 }
 
+/* ---------------- LOCATION MAP PREVIEW ---------------- */
+.td-map-frame {
+  position: relative;
+  height: 180px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--td-track);
+}
+
+.td-map-frame .maplibregl-canvas { cursor: pointer; }
+
+/* Rough dark-mode look for the light map tiles; the marker is a DOM
+   overlay, so filtering only the canvas leaves it red. */
+:root[data-theme="dark"] .td-map-frame canvas {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.7) brightness(0.95);
+}
+
+/* Label pill overlaid on the map; clicks fall through to the frame. */
+.td-map-open {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--td-card);
+  color: var(--td-ink);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
 /* ---------------- RESPONSIVE ---------------- */
 @media (max-width: 1024px) {
   .td-body { grid-template-columns: 1fr; }
@@ -641,6 +684,7 @@ nav {
   .td-write-btn { order: 1; }
   #breakdownCard { order: 2; }
   #compareCard { order: 3; }
+  #mapCard { order: 4; }
 }
 
 @media (max-width: 640px) {
@@ -658,6 +702,8 @@ nav {
   .td-body { padding: 16px 20px 28px; }
 }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 </head>
 <body>
 
@@ -713,12 +759,19 @@ nav {
         </div>
       </div>
       <div class="td-filters" id="filterRow"></div>
+      <div id="reviewsLoading" class="reviews-loading visible"><img src="assets/img/logo-animated.svg" class="reviews-loading-icon" alt=""></div>
       <div id="reviewsList" class="td-reviews" style="padding:0"></div>
       <button class="td-show-all" id="showAllBtn" hidden></button>
     </div>
 
     <div class="td-sidebar">
       <div class="td-card" id="breakdownCard" hidden></div>
+      <div class="td-card" id="mapCard" hidden>
+        <div class="td-card-title">Location</div>
+        <div class="td-map-frame" id="mapPreview" onclick="location.href='index.html#map'" role="link" aria-label="Open the campus map" title="Open the campus map">
+          <span class="td-map-open">Open campus map</span>
+        </div>
+      </div>
       <div class="td-card" id="compareCard" hidden></div>
       <button class="td-write-btn" id="writeReviewLink">Write a review</button>
     </div>
@@ -746,7 +799,7 @@ import { dorms } from './assets/js/data.js';
  * ------------------------------------------------------------------ */
 const DORM_META = {
   laplata: {
-    subline: 'Denton Community · 5 min to Eppley · 8 min to Stamp · Traditional-style, air-conditioned',
+    subline: 'Denton Community · 5 min to Eppley · 8 min to Stamp · Traditional-style',
     amenities: ['❄ AC', 'Elevator', 'Community bathrooms', 'Laundry each floor', 'Freshman-heavy'],
     price: '$4,706', priceShort: '$4.7k', priceRoom: 'double',
     categoryScores: [
@@ -772,8 +825,9 @@ const meta = DORM_META[dorm.id] || {};
  * ------------------------------------------------------------------ */
 const INITIAL_VISIBLE = 5;
 let reviews = [];                 // this dorm's reviews (Supabase)
+let reviewsLoaded = false;        // suppresses the empty state until the first fetch settles
 let nearbyRatings = {};           // dormId -> { avg, count }
-let filters = { sort: 'helpful', roomType: null, yearLived: null, minRating: 0 };
+let filters = { sort: 'helpful', yearLived: null, stars: 0 };
 let visibleCount = INITIAL_VISIBLE;
 let helpfulVotes = new Set(JSON.parse(localStorage.getItem('td-helpful') || '[]'));
 
@@ -788,10 +842,10 @@ function starsHTML(rating, size) {
   return `<span style="font-size:${size}px;letter-spacing:${size >= 20 ? 2 : 1}px;color:var(--td-star)">${'★'.repeat(full)}<span class="star-empty">${'★'.repeat(5 - full)}</span></span>`;
 }
 
-// "2024-2025" -> "2024–25"
+// "2024-2025" -> "2024-25"
 function periodLabel(year) {
   const m = /^(\d{4})-(\d{4})$/.exec(year || '');
-  return m ? `${m[1]}–${m[2].slice(2)}` : (year || '');
+  return m ? `${m[1]}-${m[2].slice(2)}` : (year || '');
 }
 
 function areaBadge(d) {
@@ -823,12 +877,12 @@ function renderGallery() {
 
 function fallbackSubline() {
   const dining = (dorm.dining || '').replace(' Dining Hall', '');
-  return [dorm.type, dining && `Near ${dining}`, `Built ${dorm.built}`, dorm.ac ? 'air-conditioned' : 'no A/C']
+  return [dorm.type, dining && `Near ${dining}`, `Built ${dorm.built}`]
     .filter(Boolean).join(' · ');
 }
 
 function fallbackAmenities() {
-  const out = [dorm.ac ? '❄ AC' : null];
+  const out = [dorm.ac ? '❄ AC' : null, dorm.bathrooms || null];
   dorm.tags?.forEach(t => { if (t.t !== 'A/C') out.push(t.t); });
   return out.filter(Boolean);
 }
@@ -867,9 +921,8 @@ function distinct(list, key) {
 
 function filteredReviews() {
   let out = reviews.filter(r =>
-    (!filters.roomType || r.roomType === filters.roomType) &&
     (!filters.yearLived || r.year === filters.yearLived) &&
-    r.rating >= filters.minRating
+    (!filters.stars || r.rating === filters.stars)
   );
   if (filters.sort === 'helpful') {
     out = [...out].sort((a, b) =>
@@ -887,16 +940,23 @@ function menuHTML(id, items, selected, allLabel) {
   return `<div class="td-menu" id="${id}">${rows.join('')}</div>`;
 }
 
+function starsMenuHTML() {
+  const rows = [`<button data-val="" class="${filters.stars ? '' : 'selected'}">All ratings</button>`]
+    .concat([5, 4, 3, 2, 1].map(n =>
+      `<button data-val="${n}" class="${filters.stars === n ? 'selected' : ''}">${n} ★</button>`));
+  return `<div class="td-menu" id="starsMenu">${rows.join('')}</div>`;
+}
+
+// Dropdown chips are <div>s, not <button>s: the menu itself contains buttons,
+// and nested buttons are invalid HTML — the parser splits them apart.
 function renderFilters() {
   const years = distinct(reviews, 'year').sort().reverse();
-  const roomTypes = distinct(reviews, 'roomType');
   const row = document.getElementById('filterRow');
   row.innerHTML = `
     <button class="td-chip ${filters.sort === 'helpful' ? 'active' : ''}" data-act="sort-helpful">Most helpful</button>
     <button class="td-chip ${filters.sort === 'newest' ? 'active' : ''}" data-act="sort-newest">Newest</button>
-    <button class="td-chip ${filters.roomType ? 'active' : ''}" data-act="menu-room">Room type ▾${menuHTML('roomMenu', roomTypes, filters.roomType, 'All room types')}</button>
-    <button class="td-chip ${filters.yearLived ? 'active' : ''}" data-act="menu-year">Year lived ▾${menuHTML('yearMenu', years, filters.yearLived, 'All years')}</button>
-    <button class="td-chip ${filters.minRating ? 'active' : ''}" data-act="min-rating">★ 4+</button>`;
+    <div class="td-chip ${filters.yearLived ? 'active' : ''}" data-act="menu-year">${filters.yearLived ? escHtml(periodLabel(filters.yearLived)) : 'Year lived'} ▾${menuHTML('yearMenu', years, filters.yearLived, 'All years')}</div>
+    <div class="td-chip ${filters.stars ? 'active' : ''}" data-act="menu-stars">${filters.stars ? `${filters.stars} ★` : 'Rating'} ▾${starsMenuHTML()}</div>`;
 
   row.querySelectorAll('.td-chip').forEach(chip => {
     chip.addEventListener('click', e => {
@@ -904,16 +964,13 @@ function renderFilters() {
       const act = chip.dataset.act;
       if (menuBtn) {
         const val = menuBtn.dataset.val || null;
-        if (act === 'menu-room') filters.roomType = val;
         if (act === 'menu-year') filters.yearLived = val;
+        if (act === 'menu-stars') filters.stars = val ? +val : 0;
         applyFilters();
         return;
       }
       if (act === 'sort-helpful' || act === 'sort-newest') {
         filters.sort = act === 'sort-helpful' ? 'helpful' : 'newest';
-        applyFilters();
-      } else if (act === 'min-rating') {
-        filters.minRating = filters.minRating ? 0 : 4;
         applyFilters();
       } else {
         const menu = chip.querySelector('.td-menu');
@@ -943,6 +1000,9 @@ function reviewCardHTML(r, i) {
   const name = r.name || 'Anonymous Terp';
   const initial = (name.trim()[0] || 'A').toUpperCase();
   const sub = [r.classYear, r.major].filter(Boolean).join(', ');
+  const posted = r.created_at
+    ? new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    : '';
   const metaBits = [
     r.year ? `Lived here ${periodLabel(r.year)}` : null,
     r.roomType || null,
@@ -963,6 +1023,7 @@ function reviewCardHTML(r, i) {
       </div>
       <p class="rev-body">${escHtml(r.text)}</p>
       <div class="rev-foot">
+        ${posted ? `<span class="rev-posted">Posted ${posted}</span>` : ''}
         ${tags}
         <button class="rev-helpful ${voted ? 'voted' : ''}" data-id="${escHtml(String(r.id))}" title="${voted ? 'Click to remove your helpful vote' : 'Mark this review helpful'}">👍 Helpful (${helpfulCount(r)})</button>
       </div>
@@ -976,7 +1037,9 @@ function renderReviews() {
 
   list.innerHTML = shown.length
     ? shown.map(reviewCardHTML).join('')
-    : `<p class="td-empty">${reviews.length ? 'No reviews match these filters.' : 'No reviews yet — be the first to write one.'}</p>`;
+    : reviewsLoaded
+      ? `<p class="td-empty">${reviews.length ? 'No reviews match these filters.' : 'No reviews yet!'}</p>`
+      : '';
 
   const btn = document.getElementById('showAllBtn');
   btn.hidden = all.length <= visibleCount;
@@ -1084,6 +1147,25 @@ function renderBreakdown() {
     ${pct !== null ? `<div class="bd-foot">${pct}% of residents would recommend ${escHtml(shortName)} to an incoming freshman.</div>` : ''}`;
 }
 
+// Static mini-map of the dorm's location. Built once — unlike the other
+// sidebar cards it doesn't depend on review data, so no re-render needed.
+function renderMapPreview() {
+  const card = document.getElementById('mapCard');
+  if (!dorm.lat || !dorm.lng || typeof maplibregl === 'undefined') { card.hidden = true; return; }
+  card.hidden = false;
+  const map = new maplibregl.Map({
+    container: 'mapPreview',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
+    center: [dorm.lng, dorm.lat],
+    zoom: 15.6,
+    pitch: 50,
+    bearing: -17,
+    interactive: false,
+    attributionControl: false
+  });
+  new maplibregl.Marker({ color: '#E21833' }).setLngLat([dorm.lng, dorm.lat]).addTo(map);
+}
+
 function compareRowHTML(d, price, current) {
   const r = nearbyRatings[d.id];
   const rating = r && r.count ? `${r.avg.toFixed(1)} ★` : '— ★';
@@ -1123,6 +1205,9 @@ async function loadReviews() {
     .select('*')
     .in('dormId', ids)
     .order('created_at', { ascending: false });
+
+  reviewsLoaded = true;
+  document.getElementById('reviewsLoading').classList.remove('visible');
 
   if (error || !data) {
     console.error('Error loading reviews:', error);
@@ -1271,6 +1356,7 @@ renderHeader();
 renderFilters();
 renderReviews();
 renderBreakdown();
+renderMapPreview();
 renderCompare();
 loadReviews();
 </script>

@@ -63,45 +63,62 @@ function toggleTheme(){
     <p>Honest reviews of every University of Maryland residence hall, written by the Terps who lived there.</p>
     <input type="text" id="searchInput" class="hero-search" placeholder="Search halls..." oninput="filterDorms()">
   </div>
-  <div class="filter-band" id="filterBand">
-    <span class="filter-band-title">Filter by...</span>
-    <div class="filter-line">
-      <span class="filter-label">Campus</span>
-      <div class="chip-group">
-        <button class="chip" data-group="campus" data-value="north" onclick="toggleChip(this)">North Campus</button>
-        <button class="chip" data-group="campus" data-value="south" onclick="toggleChip(this)">South Campus</button>
-        <button class="chip" data-group="campus" data-value="commons" onclick="toggleChip(this)">The Commons</button>
-      </div>
-    </div>
-    <div class="filter-line">
-      <span class="filter-label">Rooms</span>
-      <div class="chip-group">
-        <button class="chip" data-group="room" data-value="traditional" onclick="toggleChip(this)">Traditional</button>
-        <button class="chip" data-group="room" data-value="semi-suite" onclick="toggleChip(this)">Semi-Suite</button>
-        <button class="chip" data-group="room" data-value="suite" onclick="toggleChip(this)">Suite</button>
-        <button class="chip" data-group="room" data-value="apartment" onclick="toggleChip(this)">Apartment</button>
-      </div>
-    </div>
-    <div class="filter-line">
-      <span class="filter-label">Features</span>
-      <div class="chip-group">
-        <button class="chip" data-group="feature" data-value="ac" onclick="toggleChip(this)">A/C</button>
-        <button class="chip" data-group="feature" data-value="laundry" onclick="toggleChip(this)">In-hall Laundry</button>
-        <button class="chip" data-group="feature" data-value="llp" onclick="toggleChip(this)">Honors / LLP</button>
-        <button class="clear-all" id="clearAllBtn" onclick="setAllFilter()" hidden>Clear all</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="section active" id="section-home">
   <div class="count-sort-row">
-    <span class="count-label" id="countLabel"></span>
+    <div class="filter-row-left">
+      <button class="filter-toggle" id="filterToggle" onclick="document.getElementById('filterBand').classList.toggle('open');this.classList.toggle('open')">
+        Filter by...
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <span class="count-label" id="countEcho"></span>
+    </div>
     <div class="sort-row">
       <span class="sort-tag">Sort</span>
       <button class="sort-opt active" data-sort="default" onclick="selectSort('default')">Default</button>
       <button class="sort-opt" data-sort="rating-desc" onclick="selectSort('rating-desc')">Highest rated</button>
       <button class="sort-opt" data-sort="rating-asc" onclick="selectSort('rating-asc')">Lowest rated</button>
+    </div>
+  </div>
+
+  <div class="filter-band" id="filterBand">
+    <div class="filter-band-body">
+      <div class="filter-band-inner">
+        <div class="filter-line">
+          <span class="filter-label">Campus</span>
+          <div class="chip-group">
+            <button class="chip" data-group="campus" data-value="north" onclick="toggleChip(this)">North Campus</button>
+            <button class="chip" data-group="campus" data-value="south" onclick="toggleChip(this)">South Campus</button>
+            <button class="chip" data-group="campus" data-value="commons" onclick="toggleChip(this)">The Commons</button>
+          </div>
+        </div>
+        <div class="filter-line">
+          <span class="filter-label">Rooms</span>
+          <div class="chip-group">
+            <button class="chip" data-group="room" data-value="traditional" onclick="toggleChip(this)">Traditional</button>
+            <button class="chip" data-group="room" data-value="semi-suite" onclick="toggleChip(this)">Semi-Suite</button>
+            <button class="chip" data-group="room" data-value="suite" onclick="toggleChip(this)">Suite</button>
+            <button class="chip" data-group="room" data-value="apartment" onclick="toggleChip(this)">Apartment</button>
+          </div>
+        </div>
+        <div class="filter-line">
+          <span class="filter-label">Bathrooms</span>
+          <div class="chip-group">
+            <button class="chip" data-group="bath" data-value="community" onclick="toggleChip(this)">Community</button>
+            <button class="chip" data-group="bath" data-value="single" onclick="toggleChip(this)">Single all-gender</button>
+          </div>
+        </div>
+        <div class="filter-line">
+          <span class="filter-label">Features</span>
+          <div class="chip-group">
+            <button class="chip" data-group="feature" data-value="ac" onclick="toggleChip(this)">A/C</button>
+            <button class="chip" data-group="feature" data-value="laundry" onclick="toggleChip(this)">In-hall Laundry</button>
+            <button class="chip" data-group="feature" data-value="llp" onclick="toggleChip(this)">Honors / LLP</button>
+            <button class="clear-all" id="clearAllBtn" onclick="setAllFilter()" hidden>Clear all</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -99,6 +99,7 @@ function escHtml(str) {
  * ------------------------------------------------------------------ */
 let campusFilters = new Set();
 let roomTypeFilters = new Set();
+let bathroomFilters = new Set();
 let featureFilters = new Set();
 let onCampusSort = 'default';
 let reviewSort = 'newest';
@@ -201,6 +202,15 @@ function passesRoomTypeFilter(d) {
   return false;
 }
 
+// OR within the group: a hall passes if its bathrooms include any selected type.
+function passesBathroomFilter(d) {
+  if (bathroomFilters.size === 0) return true;
+  const b = d.bathrooms || '';
+  if (bathroomFilters.has('community') && /community/i.test(b)) return true;
+  if (bathroomFilters.has('single') && /single all-gender/i.test(b)) return true;
+  return false;
+}
+
 function passesFeatureFilter(d) {
   if (featureFilters.has('ac') && !d.ac) return false;
   if (featureFilters.has('laundry') && !d.tags.some(t => t.t === 'In-hall Laundry')) return false;
@@ -213,6 +223,7 @@ function passesFilters(d) {
   if (!matchesSearch(d, q)) return false;
   if (campusFilters.size && !campusFilters.has(d.area)) return false;
   if (!passesRoomTypeFilter(d)) return false;
+  if (!passesBathroomFilter(d)) return false;
   if (!passesFeatureFilter(d)) return false;
   return true;
 }
@@ -257,33 +268,63 @@ function renderDorms() {
   grid.innerHTML = filtered.length
     ? filtered.map(dormRowHTML).join('')
     : '<p class="no-results">No halls match your filters.</p>';
-  document.getElementById('countLabel').textContent =
-    `${filtered.length} ${filtered.length === 1 ? 'hall' : 'halls'}`;
+  document.getElementById('countEcho').textContent =
+    `${filtered.length}/${onCampus.length} halls`;
 }
 
 function filterDorms() { renderDorms(); }
 
 function toggleChip(btn) {
-  const set = { campus: campusFilters, room: roomTypeFilters, feature: featureFilters }[btn.dataset.group];
+  const set = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters }[btn.dataset.group];
   const v = btn.dataset.value;
   if (set.has(v)) { set.delete(v); btn.classList.remove('active'); }
   else { set.add(v); btn.classList.add('active'); }
+  saveFilters();
   updateClearAll();
   renderDorms();
 }
 
 function updateClearAll() {
-  const any = campusFilters.size || roomTypeFilters.size || featureFilters.size;
+  const any = campusFilters.size || roomTypeFilters.size || bathroomFilters.size || featureFilters.size;
   document.getElementById('clearAllBtn').hidden = !any;
 }
 
 function setAllFilter() {
   campusFilters.clear();
   roomTypeFilters.clear();
+  bathroomFilters.clear();
   featureFilters.clear();
   document.querySelectorAll('.filter-band .chip.active').forEach(c => c.classList.remove('active'));
+  saveFilters();
   updateClearAll();
   renderDorms();
+}
+
+const FILTERS_KEY = 'pd-filters';
+
+function saveFilters() {
+  localStorage.setItem(FILTERS_KEY, JSON.stringify({
+    campus: [...campusFilters], room: [...roomTypeFilters], bath: [...bathroomFilters], feature: [...featureFilters]
+  }));
+}
+
+function restoreFilters() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(FILTERS_KEY)); } catch { /* corrupt entry — start clean */ }
+  if (!saved) return;
+  const sets = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters };
+  document.querySelectorAll('.filter-band .chip').forEach(chip => {
+    if ((saved[chip.dataset.group] || []).includes(chip.dataset.value)) {
+      sets[chip.dataset.group].add(chip.dataset.value);
+      chip.classList.add('active');
+    }
+  });
+  updateClearAll();
+  // Filters carried over from the last visit shouldn't be invisible.
+  if (campusFilters.size + roomTypeFilters.size + bathroomFilters.size + featureFilters.size) {
+    document.getElementById('filterBand').classList.add('open');
+    document.getElementById('filterToggle').classList.add('open');
+  }
 }
 
 function selectSort(val) {
@@ -340,7 +381,7 @@ function checklistHTML(d) {
     row('A/C', d.ac ? '✓' : '✕', d.ac ? 'var(--green)' : 'var(--red)'),
     row('In-hall laundry', laundry ? '✓' : '✕', laundry ? 'var(--green)' : 'var(--red)')
   ];
-  d.tags.filter(t => t.t !== 'A/C' && t.t !== 'In-hall Laundry')
+  d.tags.filter(t => t.t !== 'A/C' && t.t !== 'In-hall Laundry' && t.t !== 'No A/C' && t.t !== 'No In-hall Laundry')
     .forEach(t => rows.push(row(t.t, '✓', 'var(--green)')));
   rows.push(row('Rooms', d.roomTypes, 'var(--dim)'));
   rows.push(row('Dining', (d.dining || '—').replace(' Dining Hall', ''), 'var(--dim)'));
@@ -1040,7 +1081,10 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
 
 document.addEventListener('DOMContentLoaded', () => {
   dorms.forEach(d => { d.reviewList = []; });
+  restoreFilters();
   renderDorms();
+  // Other pages link to index.html#map — honor the hash on arrival.
+  if (location.hash === '#map') showSection('map');
   showReviewsLoading();
   loadAllReviews();
   setupReviewsListener();

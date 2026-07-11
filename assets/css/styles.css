@@ -141,22 +141,31 @@ nav {
   border-bottom-color: var(--red);
 }
 
-/* Icon theme toggle in the top bar. */
+/* Icon theme toggle in the top bar. Both icons stay in the DOM, stacked;
+   switching themes rotates/fades one out and the other in. */
 .theme-toggle {
   background: none;
   border: none;
   padding: 0;
-  display: flex;
-  align-items: center;
+  position: relative;
+  width: 16px;
+  height: 16px;
   color: var(--dim);
   cursor: pointer;
   transition: color 0.15s;
 }
 
 .theme-toggle:hover { color: var(--ink); }
-.theme-toggle .icon-moon { display: none; }
-:root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
-:root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+.theme-toggle svg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.4s ease, opacity 0.25s ease;
+}
+
+.theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+:root[data-theme="dark"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.6); }
+:root[data-theme="dark"] .theme-toggle .icon-moon { opacity: 1; transform: none; }
 
 /* In-menu theme toggle (mobile only). */
 .nav-theme-toggle { display: none; align-items: center; gap: 12px; }
@@ -198,15 +207,28 @@ nav {
   width: 100%;
   padding: 88px 48px 56px;
   border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: 32px 48px;
+  position: relative;
+  overflow: hidden;
 }
 
-.hero-main {
-  flex: 1 1 320px;
-  min-width: 0;
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("../img/flag-800.png");
+  background-size: cover;
+  background-position: center;
+  filter: blur(6px);
+  opacity: 0.28;
+  transform: scale(1.05);
+  z-index: 0;
+}
+
+:root[data-theme="dark"] .hero::before { opacity: 0.45; }
+
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .hero h1 {
@@ -256,26 +278,68 @@ nav {
 
 /* ---------------- FILTER BAND ---------------- */
 .filter-band {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 0 1 auto;
-  min-width: 0;
-  margin-left: auto;
+  width: 100%;
 }
 
-.filter-band-title {
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  color: var(--red);
   font-size: 0.82rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  margin-bottom: 2px;
+}
+
+@media (hover: hover) {
+  .filter-toggle:hover { text-decoration: underline; text-underline-offset: 3px; }
+}
+
+.filter-row-left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.filter-toggle svg { transition: transform 0.3s ease; }
+.filter-toggle.open svg { transform: rotate(180deg); }
+
+.filter-band-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+
+.filter-band.open .filter-band-body { grid-template-rows: 1fr; }
+
+.filter-band-inner {
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(-8px);
+  /* Padding lives only in the open state: it can't shrink with the 0fr
+     row, so it would hold the collapsed band ~34px open. */
+  transition: opacity 0.25s ease, transform 0.35s ease, padding 0.35s ease;
+}
+
+.filter-band.open .filter-band-inner {
+  opacity: 1;
+  transform: none;
+  padding: 14px 8px 20px;
 }
 
 .filter-line {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 10px 22px;
   flex-wrap: wrap;
 }
 
@@ -285,7 +349,7 @@ nav {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--dim);
-  width: 76px;
+  width: 90px;
   flex-shrink: 0;
 }
 
@@ -328,13 +392,15 @@ nav {
 }
 
 /* ---------------- COUNT + SORT ---------------- */
+/* 8px side padding matches .dorm-row so the toggle lines up with the
+   thumbnails and the sort options with the ratings column. */
 .count-sort-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 24px 0 8px;
+  padding: 24px 8px 8px;
 }
 
 .count-label {
@@ -1333,7 +1399,6 @@ nav {
   #section-detail { padding: 24px 20px 60px; }
 
   .filter-label { width: 100%; }
-  .filter-band { margin-left: 0; }
 
   .nav-toggle { display: flex; position: relative; z-index: 1000; }
   .nav-right { gap: 14px; }
