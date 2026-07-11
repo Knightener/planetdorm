@@ -6,9 +6,9 @@ Reviews for University of Maryland residence halls. Browse every on-campus dorm,
 
 ## Architecture
 
-- **Frontend** — vanilla HTML/CSS/JS with no build step, served from GitHub Pages; [MapLibre GL](https://maplibre.org/) powers the 3D campus map
-- **Backend** — [Supabase](https://supabase.com/) (Postgres + Edge Functions): reviews and helpful votes are stored in Postgres, and Edge Functions (`supabase/functions/`) handle review submission (hCaptcha-verified, server-side validation) and rate-limited helpful voting
-- **Data** — the dorm dataset (names, areas, coordinates, photos) ships with the frontend in `assets/js/data.js`; user-generated reviews live in the database
+- **Frontend** - vanilla HTML/CSS/JS with no build step, served from GitHub Pages; [MapLibre GL](https://maplibre.org/) powers the 3D campus map
+- **Backend** - [Supabase](https://supabase.com/) (Postgres + Edge Functions): reviews and helpful votes are stored in Postgres, and Edge Functions (`supabase/functions/`) handle review submission (hCaptcha-verified, server-side validation) and rate-limited helpful voting
+- **Data** - the dorm dataset (names, areas, coordinates, photos) ships with the frontend in `assets/js/data.js`; user-generated reviews live in the database
 
 ## Structure
 
