@@ -137,12 +137,59 @@ function reviewWord(n) { return `${n} ${n === 1 ? 'review' : 'reviews'}`; }
 /* ------------------------------------------------------------------ *
  * Home — directory list                                              *
  * ------------------------------------------------------------------ */
+// Lowercase, strip accents/apostrophes, turn all other punctuation into
+// spaces, and alias "saint" to "st" so "St Mary Hall" finds "St. Mary's Hall".
+function normalizeSearchText(s) {
+  return s
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/['’`]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\bsaint\b/g, 'st')
+    .trim();
+}
+
+// True if a and b differ by at most one typo (insert, delete, or substitute).
+function within1Edit(a, b) {
+  if (a === b) return true;
+  const [s, l] = a.length <= b.length ? [a, b] : [b, a];
+  if (l.length - s.length > 1) return false;
+  let i = 0, j = 0, edits = 0;
+  while (i < s.length && j < l.length) {
+    if (s[i] === l[j]) { i++; j++; continue; }
+    if (++edits > 1) return false;
+    if (s.length === l.length) i++;
+    j++;
+  }
+  return edits + (l.length - j) + (s.length - i) <= 1;
+}
+
+function tokenMatches(target, qt) {
+  if (target.startsWith(qt)) return true;
+  if (qt.length >= 3 && target.includes(qt)) return true;
+  if (qt.length >= 4) {
+    if (within1Edit(qt, target)) return true;
+    // Also allow one typo against a prefix of the target ("marry" ~ "mary|s").
+    for (const n of [qt.length - 1, qt.length, qt.length + 1]) {
+      if (n > 0 && n < target.length && within1Edit(qt, target.slice(0, n))) return true;
+    }
+  }
+  return false;
+}
+
 function matchesSearch(d, q) {
-  if (!q) return true;
-  return d.name.toLowerCase().includes(q) ||
-    d.area.toLowerCase().includes(q) ||
-    (d.type && d.type.toLowerCase().includes(q)) ||
-    (d.tags && d.tags.some(t => t.t.toLowerCase().includes(q)));
+  const query = normalizeSearchText(q || '');
+  if (!query) return true;
+  const haystack = normalizeSearchText([
+    d.name, d.area, areaLabel(d.area), d.type || '',
+    ...(d.tags || []).map(t => t.t)
+  ].join(' '));
+  const tokens = haystack.split(' ');
+  const qTokens = query.split(' ');
+  // Every query word must (loosely) match some word of the hall's info, in
+  // any order; failing that, try the query as one run-on string ("belair").
+  return qTokens.every(qt => tokens.some(ht => tokenMatches(ht, qt))) ||
+    tokens.join('').includes(qTokens.join(''));
 }
 
 function passesRoomTypeFilter(d) {

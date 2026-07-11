@@ -58,13 +58,13 @@ function toggleTheme(){
 </nav>
 
 <div class="hero" id="heroSection">
-  <h1>Find a residence hall before you move in<span class="dot">.</span></h1>
-  <p>Honest reviews of every University of Maryland residence hall, written by the Terps who lived there.</p>
-  <input type="text" id="searchInput" class="hero-search" placeholder="Search halls..." oninput="filterDorms()">
-</div>
-
-<div class="section active" id="section-home">
+  <div class="hero-main">
+    <h1>Find a residence hall before you move in<span class="dot">.</span></h1>
+    <p>Honest reviews of every University of Maryland residence hall, written by the Terps who lived there.</p>
+    <input type="text" id="searchInput" class="hero-search" placeholder="Search halls..." oninput="filterDorms()">
+  </div>
   <div class="filter-band" id="filterBand">
+    <span class="filter-band-title">Filter by...</span>
     <div class="filter-line">
       <span class="filter-label">Campus</span>
       <div class="chip-group">
@@ -92,7 +92,9 @@ function toggleTheme(){
       </div>
     </div>
   </div>
+</div>
 
+<div class="section active" id="section-home">
   <div class="count-sort-row">
     <span class="count-label" id="countLabel"></span>
     <div class="sort-row">

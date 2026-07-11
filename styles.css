@@ -198,6 +198,15 @@ nav {
   width: 100%;
   padding: 88px 48px 56px;
   border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 32px 48px;
+}
+
+.hero-main {
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .hero h1 {
@@ -220,7 +229,7 @@ nav {
 
 .hero-search {
   width: 100%;
-  max-width: 440px;
+  max-width: 400px;
   background: none;
   border: none;
   border-bottom: 2px solid var(--ink);
@@ -249,9 +258,18 @@ nav {
 .filter-band {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 28px 0;
-  border-bottom: 1px solid var(--line);
+  gap: 12px;
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.filter-band-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 2px;
 }
 
 .filter-line {
@@ -1315,6 +1333,7 @@ nav {
   #section-detail { padding: 24px 20px 60px; }
 
   .filter-label { width: 100%; }
+  .filter-band { margin-left: 0; }
 
   .nav-toggle { display: flex; position: relative; z-index: 1000; }
   .nav-right { gap: 14px; }

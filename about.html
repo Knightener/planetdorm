@@ -23,49 +23,82 @@ function toggleTheme(){
 </script>
 <link rel="stylesheet" href="styles.css">
 <style>
-  body {
-    background-image: linear-gradient(rgba(250,249,247,0.86), rgba(250,249,247,0.86)), url("flag-800.png");
+  /* Matches the index hero: same padding, type scale, and hairline border. */
+  .about-hero {
+    padding: 88px 48px 48px;
+    border-bottom: 1px solid var(--line);
+    text-align: center;
   }
 
-  [data-theme="dark"] body {
-    background-image: linear-gradient(rgba(19,18,21,0.62), rgba(19,18,21,0.62)), url("flag-800.png");
+  .about-hero h1 {
+    font-weight: 800;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 auto 14px;
+    max-width: 18em;
   }
 
-  .about-container {
-    margin: 40px 24px 60px;
-    padding: 32px 36px 48px;
-    background: var(--field);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    box-shadow: none;
+  .about-hero h1 .dot { color: var(--red); }
+
+  .about-hero p {
+    color: var(--dim);
+    font-size: 1.02rem;
+    line-height: 1.7;
+    margin: 0 auto;
+    max-width: 44em;
   }
 
-  @media(max-width: 768px) {
-    .about-container {
-      margin: 16px;
-      padding: 20px 18px 32px;
-    }
+  .about-body {
+    padding: 0 48px 64px;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
   }
 
-  .about-container h1 {
-    font-family: var(--font);
-    font-size: 2.4rem;
-    color: var(--text);
-    margin-bottom: 16px;
+  .about-block {
+    padding: 36px 0;
+    border-bottom: 1px solid var(--line);
   }
 
-  .about-container h2 {
-    font-family: var(--font);
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--gold);
-    margin: 40px 0 10px;
+  .about-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--dim);
+    margin-bottom: 12px;
   }
 
-  .about-container p {
-    color: var(--text-dim);
+  .about-block p {
+    color: var(--ink);
+    font-size: 0.98rem;
     line-height: 1.75;
-    font-size: 1rem;
+    margin: 0 auto;
+    max-width: 60em;
+  }
+
+  .about-block p + p { margin-top: 12px; }
+
+  .about-block a {
+    color: var(--red);
+    font-weight: 600;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .about-footer {
+    text-align: center;
+    color: var(--dim);
+    font-size: 0.85rem;
+    padding: 36px 24px 0;
+  }
+
+  @media (max-width: 768px) {
+    .about-hero { padding: 56px 20px 36px; }
+    .about-body { padding: 0 20px 48px; }
+    .about-block { padding: 28px 0; }
   }
 </style>
 </head>
@@ -73,7 +106,7 @@ function toggleTheme(){
 
 <nav>
   <div class="nav-inner">
-    <div class="logo" onclick="location.href='index.html'">Planet<span style="color:var(--logo-gold)">Dorm</span></div>
+    <div class="logo" onclick="location.href='index.html'">Planet<span>Dorm</span></div>
     <div class="nav-links" id="navLinks">
       <button onclick="location.href='index.html'" data-section="home">On-campus</button>
       <button onclick="location.href='index.html#map'" data-section="map">Map</button>
@@ -97,32 +130,40 @@ function toggleTheme(){
   </div>
 </nav>
 
-<div class="about-container">
-  <h1>About PlanetDorm</h1>
-  <p>We made PlanetDorm for UMD students just like you! We found there weren't a lot of reviews for UMD dorms and we wanted to change that, 
-    so that incoming and returning students would know exactly what it's like to live there before they actually move in. what began as
-    a simple idea sprouted into a feature-packed website designed to simplify the dorm locating process.
-     We hope you find our website useful!
-  </p>
-
-<h2>Future updates:</h2>
-<p>We plan to add many more features in the future, such as off-campus housing, a suggestion submission feature,
-   google maps reviews integration, and more enhanced descriptions on dorm types.</p>
-
-  <h2>Have a suggestion or any feedback on the website?:</h2>
-  <p>Send us an email at alekandayad@gmail.com</p>
-
-  <h2>Legal</h2>
-  <p>Reviews you submit are public. To learn how we handle your information, read our <a href="privacy.html" style="color:var(--gold)">Privacy Notice</a>. By using the site, you agree to our <a href="terms.html" style="color:var(--gold)">Terms and Conditions</a>.</p>
-
+<div class="about-hero">
+  <h1>Made by Terps, for Terps<span class="dot">.</span></h1>
+  <p>We made PlanetDorm for UMD students just like you! We found there weren't a lot of reviews for UMD dorms
+    and we wanted to change that, so that incoming and returning students would know exactly what it's like to
+    live there before they actually move in. What began as a simple idea sprouted into a feature-packed website
+    designed to simplify the dorm locating process. We hope you find our website useful!</p>
 </div>
 
-<p style="text-align:center; font-size: 0.75rem; color: var(--text-dim); margin: 8px 0 4px;">This website is not affiliated with the University of Maryland.</p>
+<div class="about-body">
+  <div class="about-block">
+    <span class="about-label">Future updates</span>
+    <p>We plan to add many more features in the future, such as off-campus housing, a suggestion submission
+      feature, Google Maps reviews integration, and more enhanced descriptions on dorm types.</p>
+  </div>
 
-<footer style="text-align:center; padding: 20px; color: var(--text); font-size: 1rem;">
-  Made with ❤️ by Alek and Ayad, two current students at UMD.
-  <br> Version 0.1
-</footer>
+  <div class="about-block">
+    <span class="about-label">Suggestions &amp; feedback</span>
+    <p>Have a suggestion or any feedback on the website? Send us an email at
+      <a href="mailto:alekandayad@gmail.com">alekandayad@gmail.com</a>.</p>
+  </div>
+
+  <div class="about-block">
+    <span class="about-label">Legal</span>
+    <p>Reviews you submit are public. To learn how we handle your information, read our
+      <a href="privacy.html">Privacy Notice</a>. By using the site, you agree to our
+      <a href="terms.html">Terms and Conditions</a>.</p>
+  </div>
+
+  <footer class="about-footer">
+    Made with ❤️ by Alek and Ayad, two current students at UMD. · Version 0.1
+  </footer>
+</div>
+
+<p class="site-disclaimer">This website is not affiliated with the University of Maryland.</p>
 
 </body>
 </html>
