@@ -247,37 +247,100 @@ nav {
   }
   .nav-links button.active { border-bottom: none; color: var(--red); }
   .nav-theme-toggle { display: flex; margin-top: auto; border-top: 1px solid var(--line); padding-top: 24px; }
+
+  /* Search collapses back into the nav-right icon with an inline input;
+     the desktop logo-side icon and under-nav bar go away. */
+  .nav-search { display: flex; }
+  .nav-search.open input { width: 140px; }
+  .nav-search-btn-desktop { display: none; }
+  .nav-search-bar { display: none; }
 }
 
-/* ---------------- GALLERY ---------------- */
-/* ---------------- HALL SEARCH ---------------- */
-.td-search-row { padding: 20px 32px 0; }
+/* ---------------- HALL SEARCH (in the nav bar) ---------------- */
+/* Desktop: a magnifier icon to the right of the logo opens a full-width
+   search bar under the nav. Mobile: the icon sits in nav-right and grows
+   an inline underline input (the input node is moved between the two
+   slots by JS on breakpoint changes). */
+.nav-left { display: flex; align-items: center; gap: 16px; }
 
-.td-search { position: relative; }
+.nav-search { position: relative; display: none; align-items: center; }
 
-/* Same underline treatment as the home hero search. Collapsed to the
-   width of the text at rest; grows to the full page width on focus. */
-.td-search input {
-  width: 11em;
-  max-width: 100%;
-  padding: 10px 0;
+.nav-search-btn {
+  display: flex;
+  padding: 0;
+  color: var(--dim);
+  transition: color 0.15s;
+}
+
+.nav-search-btn:hover { color: var(--ink); }
+
+.nav-search-bar {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 40px 16px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+}
+
+.nav-search-bar[hidden] { display: none; }
+
+.nav-search-bar-inner { position: relative; }
+
+.nav-search-bar input {
+  width: 100%;
+  padding: 8px 0;
   font: inherit;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 500;
   background: none;
   border: none;
-  border-bottom: 2px solid var(--td-ink);
+  border-bottom: 2px solid var(--line);
   border-radius: 0;
-  color: var(--td-ink);
+  color: var(--ink);
   outline: none;
-  transition: width 0.35s ease, border-color 0.15s;
+  transition: border-color 0.15s;
 }
 
-.td-search input:focus,
-.td-search input:not(:placeholder-shown) { width: 100%; }
+.nav-search-bar input:focus { border-bottom-color: var(--red); }
+.nav-search-bar input::placeholder { color: var(--dim); }
 
-.td-search input::placeholder { color: var(--td-muted); }
-.td-search input:focus { border-bottom-color: var(--td-red); }
+.nav-search input {
+  width: 0;
+  padding: 2px 0;
+  margin-left: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--ink);
+  outline: none;
+  opacity: 0;
+  transition: width 0.3s ease, margin-left 0.3s ease, opacity 0.2s, border-color 0.15s;
+}
+
+.nav-search.open input {
+  width: 180px;
+  margin-left: 10px;
+  opacity: 1;
+  border-bottom-color: var(--line);
+}
+
+.nav-search.open input:focus { border-bottom-color: var(--red); }
+.nav-search input::placeholder { color: var(--dim); }
+
+/* Results dropdown hangs off the right edge of the nav search. */
+.nav-search .td-search-menu {
+  left: auto;
+  right: 0;
+  min-width: 280px;
+  top: calc(100% + 12px);
+}
 
 .td-search-menu {
   position: absolute;
@@ -341,6 +404,32 @@ nav {
   background-position: center;
   cursor: pointer;
 }
+
+/* Pull-quote from the most-helpful review, filling the empty gallery
+   cells beside the hero photo. */
+.td-gallery .cell.quote {
+  grid-column: 2 / -1;
+  grid-row: 1 / -1;
+  background: none;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 28px;
+  text-align: left;
+}
+
+.hq-text {
+  font: 500 16.5px/1.5 'DM Sans', system-ui, sans-serif;
+  color: var(--td-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hq-meta { font: 12.5px 'DM Sans', system-ui, sans-serif; color: var(--td-muted); }
 
 /* ---------------- DORM HEADER ---------------- */
 .td-header {
@@ -429,10 +518,17 @@ nav {
 .td-body {
   display: grid;
   grid-template-columns: 1fr 340px;
-  gap: 28px;
+  column-gap: 28px;
+  row-gap: 14px;
   padding: 20px 32px 32px;
   align-items: start;
 }
+
+/* The filter chips take their own grid row above the reviews, so the
+   sidebar (row 2) tops out level with the first review card. */
+.td-body > .td-filters,
+.td-body > .td-reviews { grid-column: 1; }
+.td-sidebar { grid-row: 2; grid-column: 2; }
 
 .td-reviews { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 
@@ -773,9 +869,55 @@ nav {
   filter: invert(0.92) hue-rotate(180deg) saturate(0.7) brightness(0.95);
 }
 
+/* Walk times under the mini-map. Clicking a destination previews the
+   walking route on the map above. */
+.td-walks { margin-top: 12px; }
+
+.td-walk-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--td-secondary);
+  margin-bottom: 4px;
+}
+
+.td-walk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 6px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  transition: background 0.15s, color 0.15s;
+}
+
+.td-walk-name { display: flex; flex-direction: column; gap: 1px; }
+
+.td-walk-kind {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--td-muted);
+}
+
+.td-walk-row:hover { background: var(--td-track); color: var(--td-ink); }
+.td-walk-row.active { background: var(--td-red-tint); color: var(--td-ink); }
+
+.td-walk-eta { font-weight: 700; color: var(--td-ink); white-space: nowrap; }
+.td-walk-row.active .td-walk-eta { color: var(--td-red); }
+:root[data-theme="dark"] .td-walk-row.active .td-walk-eta { color: #ff97a4; }
+
 /* ---------------- RESPONSIVE ---------------- */
 @media (max-width: 1024px) {
   .td-body { grid-template-columns: 1fr; }
+  .td-sidebar { grid-row: auto; grid-column: auto; margin-top: 14px; }
   /* Stacked layout: review CTA comes first in the sidebar, so it always
      sits directly under the last review. */
   .td-write-btn { order: 1; }
@@ -785,8 +927,6 @@ nav {
 }
 
 @media (max-width: 640px) {
-  .td-search-row { padding: 16px 20px 0; }
-  .td-search input { width: 100%; }
   /* Contained 2-col grid: full-width hero photo, tiles below — nothing
      overflows the viewport. */
   .td-gallery {
@@ -796,6 +936,7 @@ nav {
     padding: 16px 20px 0;
   }
   .td-gallery .cell.hero { grid-column: 1 / -1; }
+  .td-gallery .cell.quote { display: none; }
 
   .td-header { flex-direction: column; gap: 14px; padding: 20px 20px 8px; }
   .td-score { text-align: left; }
@@ -810,7 +951,12 @@ nav {
 
 <nav>
   <div class="nav-inner">
-    <div class="logo" onclick="location.href='index.html'">Planet<span>Dorm</span></div>
+    <div class="nav-left">
+      <div class="logo" onclick="location.href='index.html'">Planet<span>Dorm</span></div>
+      <button class="nav-search-btn nav-search-btn-desktop" id="navSearchBtnDesktop" aria-label="Search halls" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+    </div>
     <div class="nav-links" id="navLinks">
       <button class="active" onclick="location.href='index.html'">On-campus</button>
       <button onclick="location.href='index.html#map'">Map</button>
@@ -824,6 +970,13 @@ nav {
       </button>
     </div>
     <div class="nav-right">
+      <div class="nav-search" id="navSearch">
+        <input type="text" id="dormSearch" placeholder="Search halls..." autocomplete="off" aria-label="Search halls" tabindex="-1">
+        <button class="nav-search-btn" id="navSearchBtn" aria-label="Search halls" aria-expanded="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <div class="td-search-menu" id="dormSearchMenu" hidden></div>
+      </div>
       <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
         <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -833,22 +986,19 @@ nav {
       </button>
     </div>
   </div>
+  <div class="nav-search-bar" id="navSearchBar" hidden>
+    <div class="nav-search-bar-inner" id="navSearchBarSlot"></div>
+  </div>
 </nav>
 
 <div class="td-page">
-
-  <div class="td-search-row">
-    <div class="td-search">
-      <input type="text" id="dormSearch" placeholder="Search halls..." autocomplete="off" aria-label="Search halls">
-      <div class="td-search-menu" id="dormSearchMenu" hidden></div>
-    </div>
-  </div>
 
   <div class="td-gallery" id="gallery"></div>
 
   <div class="td-header" id="dormHeader"></div>
 
   <div class="td-body">
+    <div class="td-filters" id="filterRow"></div>
     <div class="td-reviews">
       <div class="td-card" id="reviewForm" hidden>
         <div class="td-form-title">Write a review</div>
@@ -867,7 +1017,6 @@ nav {
           <button class="td-submit" id="formSubmit">Submit review</button>
         </div>
       </div>
-      <div class="td-filters" id="filterRow"></div>
       <div id="reviewsLoading" class="reviews-loading visible"><img src="assets/img/logo-animated.svg" class="reviews-loading-icon" alt=""></div>
       <div id="reviewsList" class="td-reviews" style="padding:0"></div>
       <button class="td-show-all" id="showAllBtn" hidden></button>
@@ -878,6 +1027,7 @@ nav {
       <div class="td-card" id="mapCard" hidden>
         <div class="td-card-title">Location</div>
         <div class="td-map-frame" id="mapPreview" onclick="location.href='index.html#map'" role="link" aria-label="Open the campus map" title="Open the campus map"></div>
+        <div class="td-walks" id="walkTimes" hidden></div>
       </div>
       <div class="td-card" id="glanceCard" hidden></div>
       <button class="td-write-btn" id="writeReviewLink">Write a review</button>
@@ -896,7 +1046,8 @@ nav {
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <script type="module">
 import { supabase } from './assets/js/supabase.js';
-import { dorms } from './assets/js/data.js';
+import { dorms, landmarks, landmarkKinds } from './assets/js/data.js';
+import { reportOutage } from './assets/js/outage.js';
 
 /* ------------------------------------------------------------------ *
  * Editorial dorm metadata the data model doesn't carry (walk times,  *
@@ -997,6 +1148,34 @@ function renderGallery() {
   if (!img) { gallery.hidden = true; return; }
   gallery.innerHTML =
     `<div class="cell hero photo" style="background-image:url('${img}')" onclick="openLightbox('${img.replace(/'/g, "\\'")}')" role="img" aria-label="${escHtml(dorm.name)}"></div>`;
+}
+
+// Pull-quote from the review with the most helpful votes, shown in the
+// otherwise-empty gallery cells beside the hero photo.
+function renderHeroQuote() {
+  const gallery = document.getElementById('gallery');
+  let cell = document.getElementById('heroQuote');
+  const best = [...reviews]
+    .filter(r => (r.text || '').trim())
+    .sort((a, b) =>
+      helpfulCount(b) - helpfulCount(a) || new Date(b.created_at) - new Date(a.created_at))[0];
+  if (gallery.hidden || !best) { cell?.remove(); return; }
+  if (!cell) {
+    cell = document.createElement('div');
+    cell.id = 'heroQuote';
+    cell.className = 'cell quote';
+    gallery.appendChild(cell);
+  }
+  let text = best.text.trim().replace(/\s+/g, ' ');
+  if (text.length > 300) text = text.slice(0, 300).replace(/\s+\S*$/, '') + '…';
+  const votes = helpfulCount(best);
+  const who = [
+    best.name || 'Anonymous Terp',
+    best.year ? `lived here ${periodLabel(best.year)}` : null
+  ].filter(Boolean).join(', ');
+  cell.innerHTML = `
+    <p class="hq-text">“${escHtml(text)}”</p>
+    <div class="hq-meta">— ${escHtml(who)}${votes ? ` · 👍 ${votes}` : ''}</div>`;
 }
 
 // "Community & single all-gender bathrooms" becomes one chip per type.
@@ -1199,6 +1378,8 @@ function renderReviews() {
   list.querySelectorAll('.rev-helpful').forEach(b => {
     b.addEventListener('click', () => toggleHelpful(b.dataset.id));
   });
+
+  renderHeroQuote();
 }
 
 // "Helpful" votes go through the vote-helpful edge function, which dedupes
@@ -1300,21 +1481,118 @@ function renderBreakdown() {
 
 // Static mini-map of the dorm's location. Built once — unlike the other
 // sidebar cards it doesn't depend on review data, so no re-render needed.
+const PREVIEW_VIEW = { zoom: 15.6, pitch: 50, bearing: -17 };
+let previewMap = null;
+
 function renderMapPreview() {
   const card = document.getElementById('mapCard');
   if (!dorm.lat || !dorm.lng || typeof maplibregl === 'undefined') { card.hidden = true; return; }
   card.hidden = false;
-  const map = new maplibregl.Map({
+  previewMap = new maplibregl.Map({
     container: 'mapPreview',
     style: 'https://tiles.openfreemap.org/styles/liberty',
     center: [dorm.lng, dorm.lat],
-    zoom: 15.6,
-    pitch: 50,
-    bearing: -17,
+    ...PREVIEW_VIEW,
     interactive: false,
     attributionControl: false
   });
-  new maplibregl.Marker({ color: '#E21833' }).setLngLat([dorm.lng, dorm.lat]).addTo(map);
+  new maplibregl.Marker({ color: '#E21833' }).setLngLat([dorm.lng, dorm.lat]).addTo(previewMap);
+  previewMap.on('load', () => {
+    previewMap.addSource('walk-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    const layout = { 'line-cap': 'round', 'line-join': 'round' };
+    previewMap.addLayer({ id: 'walk-route-casing', type: 'line', source: 'walk-route', layout, paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.9 } });
+    previewMap.addLayer({ id: 'walk-route-line', type: 'line', source: 'walk-route', layout, paint: { 'line-color': '#e21833', 'line-width': 3.5 } });
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * Walk times (precomputed routes to dining halls + campus landmarks; *
+ * regenerate with tools/build-routes.mjs)                            *
+ * ------------------------------------------------------------------ */
+let walkRoutes = null;
+let activeWalkDest = null;
+let walkDestMarker = null;
+
+// Decode an encoded polyline (precision 6, Valhalla's default) to
+// [lng, lat] pairs.
+function decodePolyline6(str) {
+  const out = [];
+  let i = 0, lat = 0, lng = 0;
+  while (i < str.length) {
+    for (const axis of ['lat', 'lng']) {
+      let b, shift = 0, result = 0;
+      do { b = str.charCodeAt(i++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+      const delta = (result & 1) ? ~(result >> 1) : (result >> 1);
+      if (axis === 'lat') lat += delta; else lng += delta;
+    }
+    out.push([lng / 1e6, lat / 1e6]);
+  }
+  return out;
+}
+
+async function renderWalkTimes() {
+  const wrap = document.getElementById('walkTimes');
+  if (!previewMap) return;
+  try {
+    const res = await fetch('assets/data/walk-routes.json');
+    walkRoutes = res.ok ? (await res.json()).routes : null;
+  } catch { walkRoutes = null; }
+  if (!walkRoutes) return; // card just keeps the plain mini-map
+
+  // One row per category (nearest landmark by walk time), except showAll
+  // kinds like rec, which list every option nearest-first.
+  const rows = landmarkKinds.flatMap(([kind, label, showAll]) => {
+    const matches = landmarks
+      .filter(lm => lm.kind === kind)
+      .map(lm => ({ lm, r: walkRoutes[`${dorm.id}|${lm.id}`] }))
+      .filter(x => x.r)
+      .sort((a, b) => a.r.t - b.r.t);
+    return (showAll ? matches : matches.slice(0, 1)).map(({ lm, r }) => `
+      <button type="button" class="td-walk-row" data-dest="${lm.id}" title="Preview the walking route">
+        <span class="td-walk-name">
+          <span class="td-walk-kind">${label}</span>
+          ${escHtml(lm.short)}
+        </span>
+        <span class="td-walk-eta">${Math.max(1, Math.round(r.t / 60))} min</span>
+      </button>`);
+  }).join('');
+  if (!rows) return;
+
+  wrap.innerHTML = `<div class="td-walk-title">Walk times</div>${rows}`;
+  wrap.hidden = false;
+  wrap.querySelectorAll('.td-walk-row').forEach(btn =>
+    btn.addEventListener('click', () => toggleWalkRoute(btn.dataset.dest)));
+}
+
+// Click a row: draw that route on the mini-map and zoom to fit it.
+// Click it again: clear the route and return to the resting view.
+function toggleWalkRoute(destId) {
+  const lm = landmarks.find(l => l.id === destId);
+  const r = walkRoutes?.[`${dorm.id}|${destId}`];
+  const src = previewMap?.getSource('walk-route');
+  if (!lm || !r || !src) return;
+
+  if (activeWalkDest === destId) {
+    activeWalkDest = null;
+    src.setData({ type: 'FeatureCollection', features: [] });
+    walkDestMarker?.remove();
+    walkDestMarker = null;
+    previewMap.easeTo({ center: [dorm.lng, dorm.lat], ...PREVIEW_VIEW, duration: 700 });
+  } else {
+    activeWalkDest = destId;
+    const coords = decodePolyline6(r.p);
+    src.setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: coords } });
+    walkDestMarker?.remove();
+    walkDestMarker = new maplibregl.Marker({ color: '#d9a300', scale: 0.8 })
+      .setLngLat([lm.lng, lm.lat]).addTo(previewMap);
+    const bounds = new maplibregl.LngLatBounds([dorm.lng, dorm.lat], [dorm.lng, dorm.lat]);
+    coords.forEach(c => bounds.extend(c));
+    bounds.extend([lm.lng, lm.lat]);
+    previewMap.fitBounds(bounds, { padding: 30, maxZoom: 16.5, pitch: PREVIEW_VIEW.pitch, bearing: PREVIEW_VIEW.bearing, duration: 700 });
+  }
+
+  document.querySelectorAll('.td-walk-row').forEach(b =>
+    b.classList.toggle('active', b.dataset.dest === activeWalkDest));
 }
 
 // "At a glance" facts card. Carries the info that used to live in the
@@ -1347,11 +1625,19 @@ function renderGlance() {
  * are always derived, never stored)                                  *
  * ------------------------------------------------------------------ */
 async function loadReviews() {
-  const { data, error } = await supabase
-    .from('reviews')
-    .select('*')
-    .eq('dormId', dorm.id)
-    .order('created_at', { ascending: false });
+  let data, error;
+  try {
+    const query = supabase
+      .from('reviews')
+      .select('*')
+      .eq('dormId', dorm.id)
+      .order('created_at', { ascending: false });
+    // Race against a timer — Supabase free-tier pauses hang indefinitely otherwise.
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+    ({ data, error } = await Promise.race([query, timeout]));
+  } catch (e) {
+    error = e;
+  }
 
   reviewsLoaded = true;
   document.getElementById('reviewsLoading').classList.remove('visible');
@@ -1360,6 +1646,7 @@ async function loadReviews() {
     console.error('Error loading reviews:', error);
     document.getElementById('reviewsList').innerHTML =
       '<p class="td-empty">Couldn’t load reviews right now. Please try again later.</p>';
+    reportOutage(loadReviews);
     return;
   }
 
@@ -1489,10 +1776,64 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
 });
 
-/* Hall search above the gallery: type-ahead over all on-campus halls,
- * pick one to jump to its page. */
+/* Hall search in the nav bar: type-ahead over all on-campus halls; pick
+ * one to jump to its page. Desktop: the icon next to the logo opens a
+ * full-width bar under the nav. Mobile: the nav-right icon grows an
+ * inline input. One shared input/menu pair is slotted into whichever
+ * spot matches the viewport. */
+const navSearch = document.getElementById('navSearch');
+const navSearchBtn = document.getElementById('navSearchBtn');
+const navSearchBtnDesktop = document.getElementById('navSearchBtnDesktop');
+const navSearchBar = document.getElementById('navSearchBar');
+const navSearchBarSlot = document.getElementById('navSearchBarSlot');
 const searchInput = document.getElementById('dormSearch');
 const searchMenu = document.getElementById('dormSearchMenu');
+const mqDesktop = window.matchMedia('(min-width: 769px)');
+
+function placeSearch() {
+  if (mqDesktop.matches) {
+    navSearchBarSlot.append(searchInput, searchMenu);
+  } else {
+    navSearch.insertBefore(searchInput, navSearchBtn);
+    navSearch.append(searchMenu);
+  }
+}
+
+function isSearchOpen() {
+  return !navSearchBar.hidden || navSearch.classList.contains('open');
+}
+
+function openNavSearch() {
+  if (mqDesktop.matches) navSearchBar.hidden = false;
+  else navSearch.classList.add('open');
+  navSearchBtn.setAttribute('aria-expanded', 'true');
+  navSearchBtnDesktop.setAttribute('aria-expanded', 'true');
+  searchInput.removeAttribute('tabindex');
+  searchInput.focus();
+}
+
+function closeNavSearch() {
+  navSearchBar.hidden = true;
+  navSearch.classList.remove('open');
+  navSearchBtn.setAttribute('aria-expanded', 'false');
+  navSearchBtnDesktop.setAttribute('aria-expanded', 'false');
+  searchInput.setAttribute('tabindex', '-1');
+  searchInput.value = '';
+  searchMenu.hidden = true;
+  searchMenu.innerHTML = '';
+}
+
+function toggleNavSearch() {
+  if (isSearchOpen()) closeNavSearch();
+  else openNavSearch();
+}
+
+navSearchBtn.addEventListener('click', toggleNavSearch);
+navSearchBtnDesktop.addEventListener('click', toggleNavSearch);
+
+// Crossing the breakpoint closes the search and re-slots the input.
+mqDesktop.addEventListener('change', () => { closeNavSearch(); placeSearch(); });
+placeSearch();
 
 function renderSearchMenu() {
   const q = searchInput.value.trim().toLowerCase();
@@ -1512,14 +1853,14 @@ searchInput.addEventListener('input', renderSearchMenu);
 searchInput.addEventListener('focus', renderSearchMenu);
 searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') searchMenu.querySelector('button')?.click();
-  if (e.key === 'Escape') searchMenu.hidden = true;
+  if (e.key === 'Escape') closeNavSearch();
 });
 searchMenu.addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (btn) location.href = `dorm-reviews.html?dorm=${encodeURIComponent(btn.dataset.id)}`;
 });
 document.addEventListener('click', e => {
-  if (!e.target.closest('.td-search')) searchMenu.hidden = true;
+  if (!e.target.closest('.nav-search, .nav-search-btn-desktop, .nav-search-bar')) closeNavSearch();
 });
 
 renderGallery();
@@ -1528,6 +1869,7 @@ renderFilters();
 renderReviews();
 renderBreakdown();
 renderMapPreview();
+renderWalkTimes();
 renderGlance();
 loadReviews();
 </script>

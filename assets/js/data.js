@@ -407,3 +407,29 @@ export const dorms = [
 
   },
 ];
+
+// CAMPUS LANDMARKS — walk-time destinations. Coordinates are OSM building
+// centroids; precomputed walking routes to these live in
+// assets/data/walk-routes.json (regenerate with tools/build-routes.mjs).
+// `kind` groups them for the "nearest dining / library / rec" rows; kinds
+// outside those three (e.g. Stamp) keep their routes but aren't shown yet.
+export const landmarks = [
+  { id: 'yahentamitsi', name: 'Yahentamitsi Dining Hall', short: 'Yahentamitsi', kind: 'dining', lat: 38.99107, lng: -76.94459 },
+  { id: 'north251', name: '251 North Dining Hall', short: '251 North', kind: 'dining', lat: 38.99250, lng: -76.94958 },
+  { id: 'southdining', name: 'South Campus Dining Hall', short: 'South Dining', kind: 'dining', lat: 38.98305, lng: -76.94368 },
+  { id: 'mckeldin', name: 'McKeldin Library', short: 'McKeldin', kind: 'library', lat: 38.98596, lng: -76.94512 },
+  { id: 'hornbake', name: 'Hornbake Library', short: 'Hornbake', kind: 'library', lat: 38.98817, lng: -76.94155 },
+  { id: 'stemlib', name: 'STEM Library (Kirwan Hall)', short: 'STEM Library', kind: 'library', lat: 38.98862, lng: -76.93926 },
+  { id: 'eppley', name: 'Eppley Recreation Center', short: 'Eppley', kind: 'rec', lat: 38.99357, lng: -76.94521 },
+  { id: 'ritchie', name: 'Ritchie Coliseum', short: 'Ritchie', kind: 'rec', lat: 38.98503, lng: -76.93645 },
+  { id: 'stamp', name: 'Stamp Student Union', short: 'Stamp', kind: 'campus', lat: 38.98819, lng: -76.94469 }
+];
+
+// Category rows shown in the walk-times UI: [kind, label, showAll].
+// showAll lists every landmark of the kind (nearest first) instead of
+// just the closest one — there are only two rec centers, so show both.
+export const landmarkKinds = [
+  ['dining', 'Nearest dining hall'],
+  ['library', 'Nearest library'],
+  ['rec', 'Rec center', true]
+];

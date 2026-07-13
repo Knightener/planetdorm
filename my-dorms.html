@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Dorms – PlanetDorm</title>
+<title>My Dorms</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script>
 // v2 theme model: light is the default; dark is opt-in via data-theme="dark".
@@ -113,13 +113,13 @@ function toggleTheme(){
 </nav>
 
 <div class="saved-hero">
-  <h1>My Dorms<span class="dot">.</span></h1>
-  <p id="savedCount">The halls you save show up here — they're stored on this device.</p>
+  <h1>My Dorms</h1>
+  <p id="savedCount">The halls you save show up here.</p>
 </div>
 
 <div class="saved-body">
   <div class="dorm-list" id="savedGrid"></div>
-  <p class="saved-note">Note: Dorms are saved locally</p>
+  <p class="saved-note" id="savedNote" hidden>Note: Dorms are saved locally</p>
 </div>
 
 <p class="site-disclaimer">This website is not affiliated with the University of Maryland.</p>
@@ -127,6 +127,7 @@ function toggleTheme(){
 <script type="module">
 import { dorms } from './assets/js/data.js';
 import { supabase } from './assets/js/supabase.js';
+import { reportOutage } from './assets/js/outage.js';
 
 const SAVED_KEY = 'pd-saved';
 let savedDorms = new Set();
@@ -186,6 +187,7 @@ function render() {
   const saved = dorms.filter(d => savedDorms.has(d.id));
   const grid = document.getElementById('savedGrid');
   const count = document.getElementById('savedCount');
+  document.getElementById('savedNote').hidden = !saved.length;
   if (!saved.length) {
     count.textContent = 'Tap the heart on any dorm to keep it here for later.';
     grid.innerHTML = `
@@ -221,7 +223,7 @@ async function loadRatings() {
     const query = supabase.from('reviews').select('dormId, rating');
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
     const { data, error } = await Promise.race([query, timeout]);
-    if (error || !data) return;
+    if (error || !data) { reportOutage(loadRatings); return; }
     const byDorm = {};
     data.forEach(r => (byDorm[r.dormId] = byDorm[r.dormId] || []).push(r.rating));
     dorms.forEach(d => {
@@ -230,7 +232,7 @@ async function loadRatings() {
       d.rating = list.length ? list.reduce((a, b) => a + b, 0) / list.length : 0;
     });
     render();
-  } catch { /* offline / paused DB — rows just show "No reviews" */ }
+  } catch { reportOutage(loadRatings); } // offline / paused DB — rows show "No reviews" plus the banner
 }
 
 render();

@@ -1171,6 +1171,10 @@ nav {
  * MAP VIEW (real MapLibre map — production replacement for the  *
  * prototype's placeholder). Re-themed onto v2 tokens.           *
  * ============================================================= */
+/* The map view fills the viewport; without this, swipes over marker pills
+   or the bottom sheet rubber-band the page behind the map on mobile. */
+body.map-view-active { overflow: hidden; }
+
 .map-split {
   display: flex;
   height: calc(100dvh - 62px);
@@ -1375,20 +1379,59 @@ nav {
 
 #mapFrame { width: 100%; height: 100%; }
 
-/* Marker pills. */
-.map-marker { cursor: pointer; }
+/* Marker pills. touch-action keeps a swipe that starts on a pill from
+   turning into a page scroll on mobile. */
+.map-marker { cursor: pointer; touch-action: none; }
 .map-labels-hidden .map-marker { display: none; }
-.maplibregl-ctrl-group button.map-labels-toggle {
-  /* Text button: override MapLibre's fixed-square button sizing. */
-  width: auto;
-  height: 32px;
-  padding: 0 14px;
-  color: var(--ink);
+/* Map key (bottom-left control): building colors + route line legend, with
+   the labels toggle inside. Swatch colors mirror DORM_AREA_COLORS in
+   script.js — keep the two in sync. */
+.map-key {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  padding: 9px 12px 10px;
   font-family: var(--font);
-  font-size: 0.76rem;
-  font-weight: 700;
+  color: var(--ink);
+}
+.map-key-title {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+.map-key-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.9;
   white-space: nowrap;
 }
+.map-key-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.map-key-swatch.north { background: #e21833; }
+.map-key-swatch.south { background: #e8a000; }
+.map-key-swatch.commons { background: #2f6fd0; }
+.map-key-line { width: 12px; border-top: 3px solid #e21833; border-radius: 2px; flex: none; }
+.map-key .map-labels-toggle {
+  margin-top: 8px;
+  width: 100%;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.map-key .map-labels-toggle:hover { background: rgba(0, 0, 0, 0.05); }
 .map-marker-pill {
   background: var(--field);
   color: var(--ink);
@@ -1424,7 +1467,156 @@ nav {
   box-shadow: 0 0 0 2px var(--logo-gold), 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
+/* Walk-times panel (map overlay, top-left). Shows precomputed walking
+   ETAs from the selected dorm; clicking a row draws the route. */
+.map-directions {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 12; /* above active/selected marker pills (z-index 10) */
+  width: 272px;
+  max-width: calc(100% - 90px); /* keep clear of the zoom controls */
+  background: var(--field);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  font-family: var(--font);
+}
+
+.map-directions-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.map-directions-kicker {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.map-directions-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-top: 1px;
+}
+
+.map-directions-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.map-directions-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--dim);
+  font-size: 1.35rem;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.15s;
+}
+
+.map-directions-close:hover { color: var(--ink); }
+
+/* Collapsed: just the header, so the panel doesn't bury the map on phones.
+   The whole header toggles; the chevron flips to show the direction. */
+.map-directions-head { cursor: pointer; }
+.map-directions.collapsed .map-directions-list { display: none; }
+.map-directions.collapsed .map-directions-head { border-bottom: none; }
+.map-directions-collapse {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--dim);
+  padding: 2px;
+  line-height: 0;
+  transition: color 0.15s;
+}
+.map-directions-collapse:hover { color: var(--ink); }
+.map-directions-collapse svg { transition: transform 0.2s; }
+.map-directions:not(.collapsed) .map-directions-collapse svg { transform: rotate(180deg); }
+
+.map-directions-list { padding: 6px; display: flex; flex-direction: column; }
+
+.map-directions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: left;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.map-directions-name { display: flex; flex-direction: column; gap: 1px; }
+
+.map-directions-kind {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.map-directions-row:hover { background: var(--hover); }
+.map-directions-row.active { background: rgba(226, 24, 51, 0.08); }
+.map-directions-row:disabled { color: var(--dim); cursor: default; }
+.map-directions-row:disabled:hover { background: none; }
+
+.map-directions-eta {
+  font-weight: 800;
+  color: var(--red);
+  white-space: nowrap;
+}
+
+.map-directions-row:disabled .map-directions-eta { color: var(--dim); }
+
+.map-directions-empty {
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+
+/* Destination pill: red accents instead of the dorm gold, and it stays
+   visible when the dorm labels are toggled off. */
+.route-dest-marker .map-marker-pill { border-color: var(--red); }
+.route-dest-marker .map-marker-sub { color: var(--red); }
+.map-labels-hidden .route-dest-marker { display: block; }
+
+:root[data-theme="dark"] .map-directions-row.active { background: rgba(255, 84, 104, 0.14); }
+:root[data-theme="dark"] .map-directions-eta,
+:root[data-theme="dark"] .route-dest-marker .map-marker-sub { color: #ff5468; }
+:root[data-theme="dark"] .route-dest-marker .map-marker-pill { border-color: #ff5468; }
+
 /* Dark-map recolouring of the sidebar + MapLibre chrome. */
+:root[data-theme="dark"] .map-key {
+  background: #14161c;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+:root[data-theme="dark"] .map-key-swatch.north { background: #ff5468; }
+:root[data-theme="dark"] .map-key-swatch.south { background: #ffc233; }
+:root[data-theme="dark"] .map-key-swatch.commons { background: #5b96f0; }
+:root[data-theme="dark"] .map-key-line { border-top-color: #ff5468; }
+:root[data-theme="dark"] .map-key .map-labels-toggle:hover { background: rgba(255, 255, 255, 0.08); }
 :root[data-theme="dark"] .map-sidebar { background: #0f1116; }
 :root[data-theme="dark"] .maplibregl-ctrl-group {
   background: #14161c;
@@ -1546,6 +1738,12 @@ nav {
     display: flex; justify-content: center; align-items: center;
     padding: 10px 0 6px; cursor: grab; touch-action: none;
   }
+  /* The whole card is a drag surface: the head always, the list only while
+     the sheet is closed (open sheet keeps pan-y so the list can scroll). */
+  .map-sidebar-head { touch-action: none; }
+  .map-sidebar:not(.sheet-open) .map-sidebar-list { touch-action: none; }
+  /* Keep the map key visible above the peeking bottom sheet (168px). */
+  .map-container .maplibregl-ctrl-bottom-left { bottom: 172px; }
   .map-sheet-handle span { width: 40px; height: 5px; border-radius: 999px; background: var(--surface3); }
   .map-sidebar-head { padding-top: 4px; }
   .map-sidebar-toggle { display: none; }

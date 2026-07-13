@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
-import { dorms } from './data.js';
+import { dorms, landmarks, landmarkKinds } from './data.js';
+import { reportOutage } from './outage.js';
 
 const SITEKEY = '48ce88c8-9f00-47ee-a3f6-900c5abe7686';
 // Supabase requires a JWT on Edge Function calls; the anon key is public anyway.
@@ -9,10 +10,9 @@ const SUBMIT_URL = 'https://qqbfiwixlqsnjsmwirtf.supabase.co/functions/v1/submit
 /* ------------------------------------------------------------------ *
  * Reviews loading (real data model — Supabase + realtime)            *
  * ------------------------------------------------------------------ */
-function showMaintenanceOverlay() {
+function handleReviewsOutage() {
   hideReviewsLoading();
-  const overlay = document.getElementById('maintenanceOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  reportOutage(loadAllReviews);
 }
 
 function showReviewsLoading() {
@@ -35,13 +35,13 @@ async function loadAllReviews() {
     ({ data, error } = await Promise.race([query, timeout]));
   } catch (e) {
     console.error('Error loading reviews:', e);
-    showMaintenanceOverlay();
+    handleReviewsOutage();
     return;
   }
 
   if (error || !data) {
     console.error('Error loading reviews:', error);
-    showMaintenanceOverlay();
+    handleReviewsOutage();
     return;
   }
 
@@ -775,6 +775,9 @@ function showSection(name) {
     document.getElementById('section-' + name).classList.add('active');
   }
   document.getElementById('siteDisclaimer').style.display = name === 'map' ? 'none' : '';
+  // Map view fills the viewport; lock page scroll so swipes go to the
+  // map and the bottom sheet instead of rubber-banding the page.
+  document.body.classList.toggle('map-view-active', name === 'map');
   if (name === 'map') initMap();
 }
 
@@ -1073,7 +1076,7 @@ function wireDormBuildingEvents(map) {
     if (!d) return;
     map.flyTo({ center: [d.lng, d.lat], zoom: 17.5, pitch: 50, bearing: -17, duration: 900 });
     selectMapDorm(d.id);
-    document.querySelector(`#mapSidebarList .map-card[data-id="${d.id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    revealMapCard(d.id);
   });
 }
 
@@ -1084,7 +1087,7 @@ function wireDormBuildingEvents(map) {
 // 'styledataloading' rearms the guard whenever a new style starts loading.
 function hookMapTheme(map) {
   let applied = false;
-  const apply = () => { applied = true; applyMapTheme(map); addDormBuildings(map); };
+  const apply = () => { applied = true; applyMapTheme(map); addDormBuildings(map); restoreWalkRoute(map); };
   map.on('styledataloading', () => { applied = false; });
   map.on('style.load', apply);
   map.on('styledata', () => { if (!applied && map.isStyleLoaded()) apply(); });
@@ -1137,6 +1140,20 @@ function setMapActive(id, on) {
 }
 
 let selectedMapId = null;
+// Scroll the sidebar list (and nothing else) so the dorm's card is centered.
+// scrollIntoView would also scroll ancestors, which on mobile yanks the
+// bottom sheet up over the map.
+function revealMapCard(id) {
+  const list = document.getElementById('mapSidebarList');
+  const card = list?.querySelector(`.map-card[data-id="${id}"]`);
+  if (!list || !card) return;
+  const delta = card.getBoundingClientRect().top - list.getBoundingClientRect().top;
+  list.scrollTo({
+    top: list.scrollTop + delta - (list.clientHeight - card.offsetHeight) / 2,
+    behavior: 'smooth'
+  });
+}
+
 function selectMapDorm(id) {
   if (selectedMapId && selectedMapId !== id) {
     campusMarkerById[selectedMapId]?.el.classList.remove('marker-selected');
@@ -1147,25 +1164,247 @@ function selectMapDorm(id) {
   setDormBuildingState(campusMap, id, { selected: true });
   campusMarkerById[id]?.el.classList.add('marker-selected');
   document.querySelector(`#mapSidebarList .map-card[data-id="${id}"]`)?.classList.add('marker-selected');
+  const d = mapDorms.find(x => x.id === id);
+  if (d) openDirections(d);
 }
 
-// Custom control (bottom-left) that toggles the dorm marker pills.
-// Works via a class on the map container so it applies to markers
-// added or re-added later.
-function addLabelsToggle(map) {
+/* ------------------------------------------------------------------ *
+ * Walk times + routes (precomputed against OSM walkways; regenerate  *
+ * with tools/build-routes.mjs)                                       *
+ * ------------------------------------------------------------------ */
+const ROUTE_SRC = 'walk-route';
+const ROUTE_CASING = 'walk-route-casing';
+const ROUTE_LINE = 'walk-route-line';
+const EMPTY_FC = { type: 'FeatureCollection', features: [] };
+
+let walkRoutes;            // undefined = not loaded, null = failed, {} = loaded
+let walkRoutesPromise = null;
+let directionsDorm = null; // dorm the panel is showing
+let activeWalkDest = null; // landmark id of the currently drawn route
+let routeDestMarker = null;
+
+function loadWalkRoutes() {
+  if (!walkRoutesPromise) {
+    walkRoutesPromise = fetch('assets/data/walk-routes.json')
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => (walkRoutes = j?.routes || null))
+      .catch(() => (walkRoutes = null));
+  }
+  return walkRoutesPromise;
+}
+
+// Decode an encoded polyline (precision 6, Valhalla's default) to
+// [lng, lat] pairs.
+function decodePolyline6(str) {
+  const out = [];
+  let i = 0, lat = 0, lng = 0;
+  while (i < str.length) {
+    for (const axis of ['lat', 'lng']) {
+      let b, shift = 0, result = 0;
+      do { b = str.charCodeAt(i++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+      const delta = (result & 1) ? ~(result >> 1) : (result >> 1);
+      if (axis === 'lat') lat += delta; else lng += delta;
+    }
+    out.push([lng / 1e6, lat / 1e6]);
+  }
+  return out;
+}
+
+function walkMinutes(r) { return Math.max(1, Math.round(r.t / 60)); }
+
+function routeLinePaint() {
+  const dark = isDarkTheme();
+  return {
+    casing: { 'line-color': dark ? '#0f1116' : '#ffffff', 'line-width': 7, 'line-opacity': 0.85 },
+    line: { 'line-color': dark ? '#ff5468' : '#e21833', 'line-width': 4 }
+  };
+}
+
+// The route renders beneath the 3D building extrusions so it hugs the
+// ground instead of floating over roofs.
+function ensureRouteLayers(map) {
+  if (!map?.getStyle()) return;
+  try {
+    if (!map.getSource(ROUTE_SRC)) {
+      map.addSource(ROUTE_SRC, { type: 'geojson', data: EMPTY_FC });
+    }
+    const beforeId = map.getStyle().layers.find(l => l.type === 'fill-extrusion')?.id;
+    const paint = routeLinePaint();
+    const layout = { 'line-cap': 'round', 'line-join': 'round' };
+    if (!map.getLayer(ROUTE_CASING)) {
+      map.addLayer({ id: ROUTE_CASING, type: 'line', source: ROUTE_SRC, layout, paint: paint.casing }, beforeId);
+    }
+    if (!map.getLayer(ROUTE_LINE)) {
+      map.addLayer({ id: ROUTE_LINE, type: 'line', source: ROUTE_SRC, layout, paint: paint.line }, beforeId);
+    }
+    for (const [k, v] of Object.entries(paint.casing)) map.setPaintProperty(ROUTE_CASING, k, v);
+    for (const [k, v] of Object.entries(paint.line)) map.setPaintProperty(ROUTE_LINE, k, v);
+  } catch (e) {
+    console.warn('walk route layers:', e);
+  }
+}
+
+// Re-adds the route after a style reload (theme toggle wipes all layers).
+function restoreWalkRoute(map) {
+  if (map !== campusMap || !directionsDorm || !activeWalkDest) return;
+  const r = walkRoutes?.[`${directionsDorm.id}|${activeWalkDest}`];
+  if (!r) return;
+  ensureRouteLayers(map);
+  map.getSource(ROUTE_SRC)?.setData({
+    type: 'Feature', properties: {},
+    geometry: { type: 'LineString', coordinates: decodePolyline6(r.p) }
+  });
+}
+
+function setDirectionsCollapsed(collapsed) {
+  const panel = document.getElementById('mapDirections');
+  panel.classList.toggle('collapsed', collapsed);
+  const btn = document.getElementById('mapDirectionsCollapse');
+  btn.setAttribute('aria-expanded', String(!collapsed));
+  btn.setAttribute('aria-label', collapsed ? 'Expand walk times' : 'Collapse walk times');
+}
+
+let directionsToggleWired = false;
+function wireDirectionsToggle() {
+  if (directionsToggleWired) return;
+  directionsToggleWired = true;
+  // The whole head is a toggle target (easier to hit than the chevron),
+  // except the close button.
+  document.querySelector('#mapDirections .map-directions-head').addEventListener('click', e => {
+    if (e.target.closest('.map-directions-close')) return;
+    setDirectionsCollapsed(!document.getElementById('mapDirections').classList.contains('collapsed'));
+  });
+}
+
+async function openDirections(d) {
+  const changed = directionsDorm?.id !== d.id;
+  directionsDorm = d;
+  if (changed && activeWalkDest) clearWalkRoute();
+  wireDirectionsToggle();
+  document.getElementById('mapDirectionsTitle').textContent = d.name;
+  document.getElementById('mapDirections').hidden = false;
+  // Phones: the full landmark list would cover most of the map, so the
+  // panel opens as just its header until tapped.
+  if (changed) setDirectionsCollapsed(sheetMedia.matches);
+  renderDirectionsList();
+  if (walkRoutes === undefined) {
+    await loadWalkRoutes();
+    if (directionsDorm === d) renderDirectionsList();
+  }
+}
+
+// Rows to show for a dorm: per category, the closest landmark by walking
+// time — or all of them (nearest first) for showAll kinds like rec.
+function walkRowsFor(dormId) {
+  const rows = [];
+  for (const [kind, label, showAll] of landmarkKinds) {
+    const matches = landmarks
+      .filter(lm => lm.kind === kind)
+      .map(lm => ({ lm, r: walkRoutes?.[`${dormId}|${lm.id}`], label }))
+      .filter(x => x.r)
+      .sort((a, b) => a.r.t - b.r.t);
+    rows.push(...(showAll ? matches : matches.slice(0, 1)));
+  }
+  return rows;
+}
+
+function renderDirectionsList() {
+  const list = document.getElementById('mapDirectionsList');
+  if (!directionsDorm) return;
+  if (walkRoutes === null) {
+    list.innerHTML = '<p class="map-directions-empty">Walk times are unavailable right now.</p>';
+    return;
+  }
+  if (walkRoutes === undefined) {
+    list.innerHTML = landmarkKinds.map(([, label]) => `
+      <div class="map-directions-row" aria-hidden="true">
+        <span class="map-directions-name"><span class="map-directions-kind">${label}</span>…</span>
+      </div>`).join('');
+    return;
+  }
+  list.innerHTML = walkRowsFor(directionsDorm.id).map(({ lm, r, label }) => `
+      <button type="button" class="map-directions-row ${activeWalkDest === lm.id ? 'active' : ''}"
+              data-dest="${lm.id}">
+        <span class="map-directions-name">
+          <span class="map-directions-kind">${label}</span>
+          ${escHtml(lm.short)}
+        </span>
+        <span class="map-directions-eta">${walkMinutes(r)} min</span>
+      </button>`).join('');
+
+  list.querySelectorAll('button.map-directions-row').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lm = landmarks.find(l => l.id === btn.dataset.dest);
+      const r = lm && walkRoutes?.[`${directionsDorm.id}|${lm.id}`];
+      if (!r) return;
+      if (activeWalkDest === lm.id) clearWalkRoute();
+      else drawWalkRoute(directionsDorm, lm, r);
+      renderDirectionsList();
+    });
+  });
+}
+
+function drawWalkRoute(d, lm, r) {
+  activeWalkDest = lm.id;
+  ensureRouteLayers(campusMap);
+  const coords = decodePolyline6(r.p);
+  campusMap.getSource(ROUTE_SRC)?.setData({
+    type: 'Feature', properties: {},
+    geometry: { type: 'LineString', coordinates: coords }
+  });
+
+  routeDestMarker?.remove();
+  const el = document.createElement('div');
+  el.className = 'map-marker route-dest-marker';
+  el.innerHTML = `
+    <div class="map-marker-pill">
+      <span class="map-marker-name">${escHtml(lm.short)}</span>
+      <span class="map-marker-sub">${walkMinutes(r)} min walk</span>
+    </div>`;
+  routeDestMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+    .setLngLat([lm.lng, lm.lat]).addTo(campusMap);
+
+  const bounds = new maplibregl.LngLatBounds([d.lng, d.lat], [d.lng, d.lat]);
+  coords.forEach(c => bounds.extend(c));
+  bounds.extend([lm.lng, lm.lat]);
+  const padding = sheetMedia.matches
+    ? { top: 200, bottom: 220, left: 40, right: 40 }
+    : { top: 100, bottom: 80, left: 330, right: 80 };
+  campusMap.fitBounds(bounds, { padding, maxZoom: 17, pitch: 50, bearing: -17, duration: 900 });
+}
+
+function clearWalkRoute() {
+  activeWalkDest = null;
+  routeDestMarker?.remove();
+  routeDestMarker = null;
+  campusMap?.getSource(ROUTE_SRC)?.setData(EMPTY_FC);
+}
+
+function closeDirections() {
+  clearWalkRoute();
+  directionsDorm = null;
+  document.getElementById('mapDirections').hidden = true;
+}
+
+// Custom control (bottom-left): map key explaining the building colors and
+// route line, with the marker-pill toggle at the bottom. The toggle works
+// via a class on the map container so it applies to markers added later.
+function addMapKey(map) {
   const container = document.createElement('div');
-  container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'map-labels-toggle';
-  btn.textContent = 'Hide Labels';
-  btn.setAttribute('aria-pressed', 'false');
+  container.className = 'maplibregl-ctrl map-key';
+  container.innerHTML = `
+    <div class="map-key-title">Key</div>
+    <div class="map-key-row"><span class="map-key-swatch north"></span>North Campus</div>
+    <div class="map-key-row"><span class="map-key-swatch south"></span>South Campus</div>
+    <div class="map-key-row"><span class="map-key-swatch commons"></span>The Commons</div>
+    <div class="map-key-row"><span class="map-key-line"></span>Walking route</div>
+    <button type="button" class="map-labels-toggle" aria-pressed="false">Hide labels</button>`;
+  const btn = container.querySelector('.map-labels-toggle');
   btn.addEventListener('click', () => {
     const hidden = map.getContainer().classList.toggle('map-labels-hidden');
-    btn.textContent = hidden ? 'Show labels' : 'Hide Labels';
+    btn.textContent = hidden ? 'Show labels' : 'Hide labels';
     btn.setAttribute('aria-pressed', String(hidden));
   });
-  container.appendChild(btn);
   map.addControl({ onAdd: () => container, onRemove: () => container.remove() }, 'bottom-left');
 }
 
@@ -1183,7 +1422,7 @@ function addCampusMarkers(dormList) {
     el.addEventListener('click', () => {
       campusMap.flyTo({ center: [d.lng, d.lat], zoom: 17.5, pitch: 50, bearing: -17, duration: 900 });
       selectMapDorm(d.id);
-      document.querySelector(`#mapSidebarList .map-card[data-id="${d.id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      revealMapCard(d.id);
     });
     const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat([d.lng, d.lat]).addTo(campusMap);
     campusMarkerById[d.id] = { marker, el };
@@ -1334,23 +1573,39 @@ function initMapSheet() {
     const m = /translateY\(([-\d.]+)px\)/.exec(sheet.style.transform);
     return m ? parseFloat(m[1]) : sheetPeekOffset(sheet);
   };
-  handle.addEventListener('pointerdown', e => {
+  // Drags are wired to the whole sheet, not just the handle, so any swipe
+  // on the peeking card pulls it up. When the sheet is open, drags starting
+  // in the list are ignored so the list itself can scroll.
+  sheet.addEventListener('pointerdown', e => {
     if (!sheetMedia.matches) return;
+    if (sheet.classList.contains('sheet-open') && e.target.closest('.map-sidebar-list')) return;
     startY = e.clientY; startT = currentT();
     sheet.classList.add('sheet-dragging');
-    handle.setPointerCapture(e.pointerId);
+    sheet.setPointerCapture(e.pointerId);
   });
-  handle.addEventListener('pointermove', e => {
+  sheet.addEventListener('pointermove', e => {
     if (startY === null) return;
     const t = Math.max(0, Math.min(sheetPeekOffset(sheet), startT + (e.clientY - startY)));
     sheet.style.transform = `translateY(${t}px)`;
   });
-  handle.addEventListener('pointerup', e => {
+  sheet.addEventListener('pointerup', e => {
     if (startY === null) return;
     sheet.classList.remove('sheet-dragging');
     const moved = Math.abs(e.clientY - startY);
-    if (moved < 6) setSheetOpen(!sheet.classList.contains('sheet-open'));
-    else setSheetOpen(currentT() < sheetPeekOffset(sheet) / 2);
+    if (moved < 6) {
+      // A tap toggles only on the grab handle; taps elsewhere must reach
+      // the search box and filter buttons untouched.
+      if (e.target.closest('.map-sheet-handle')) setSheetOpen(!sheet.classList.contains('sheet-open'));
+      else setSheetOpen(sheet.classList.contains('sheet-open'));
+    } else {
+      setSheetOpen(currentT() < sheetPeekOffset(sheet) / 2);
+    }
+    startY = null;
+  });
+  sheet.addEventListener('pointercancel', () => {
+    if (startY === null) return;
+    sheet.classList.remove('sheet-dragging');
+    setSheetOpen(currentT() < sheetPeekOffset(sheet) / 2);
     startY = null;
   });
 }
@@ -1359,7 +1614,7 @@ function initMap() {
   mapDorms = dorms.filter(d => d.campus === 'on' && d.lat && d.lng);
   if (!campusMap) {
     campusMap = createCampusMap('mapFrame', [-76.9440, 38.9875], 14.5);
-    addLabelsToggle(campusMap);
+    addMapKey(campusMap);
     // 'render' fires every drawn frame, so the pills track the roofs through
     // pans, zooms, and pitch changes (and pick up heights as tiles load).
     campusMap.on('render', liftMarkersToRoofs);
@@ -1432,7 +1687,7 @@ Object.assign(window, {
   setReviewSort, openForm, closeForm, formSetRating, formSetYear, submitReview,
   quickSetRating, quickSetYear, quickSubmit,
   openLightbox, closeLightbox, closeNav,
-  filterMapSidebar, toggleMapSidebar, setMapCampusFilter
+  filterMapSidebar, toggleMapSidebar, setMapCampusFilter, closeDirections
 });
 
 // Close the mobile menu with Escape / clicking a link handled inline.

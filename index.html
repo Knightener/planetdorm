@@ -167,6 +167,21 @@ function toggleTheme(){
     </button>
     <div class="map-container">
       <div id="mapFrame"></div>
+      <div class="map-directions" id="mapDirections" hidden>
+        <div class="map-directions-head">
+          <div class="map-directions-titles">
+            <div class="map-directions-kicker">Walking from</div>
+            <div class="map-directions-title" id="mapDirectionsTitle"></div>
+          </div>
+          <div class="map-directions-actions">
+            <button class="map-directions-collapse" id="mapDirectionsCollapse" aria-label="Collapse walk times" aria-expanded="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <button class="map-directions-close" onclick="closeDirections()" aria-label="Close walk times">&times;</button>
+          </div>
+        </div>
+        <div class="map-directions-list" id="mapDirectionsList"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -174,12 +189,6 @@ function toggleTheme(){
 <p id="siteDisclaimer" class="site-disclaimer">This website is not affiliated with the University of Maryland.</p>
 
 <div id="toast" class="toast"></div>
-
-<div id="maintenanceOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;">
-  <img src="assets/img/logo-animated.svg" alt="PlanetDorm" style="width:80px;margin-bottom:1.5rem;">
-  <h1 style="color:var(--logo-gold);font-weight:800;margin-bottom:0.75rem;">We'll be right back...</h1>
-  <p style="color:var(--dim);font-size:1.1rem;max-width:400px;">Our review server is temporarily down. We will be back up soon!</p>
-</div>
 
 <!-- Invisible hCaptcha host for the quick-post strip (rendered on demand). -->
 <div id="quickCaptcha" style="position:fixed;width:0;height:0;overflow:hidden;left:0;bottom:0"></div>
