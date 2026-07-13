@@ -871,7 +871,11 @@ nav {
 
 /* Walk times under the mini-map. Clicking a destination previews the
    walking route on the map above. */
-.td-walks { margin-top: 12px; }
+.td-walks {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--td-track);
+}
 
 .td-walk-title {
   font-size: 12px;
@@ -879,7 +883,7 @@ nav {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--td-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .td-walk-row {
@@ -888,16 +892,18 @@ nav {
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  padding: 7px 6px;
+  padding: 8px 6px;
   border-radius: 8px;
   text-align: left;
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 600;
+  line-height: 1.35;
   color: var(--td-secondary);
   transition: background 0.15s, color 0.15s;
 }
 
-.td-walk-name { display: flex; flex-direction: column; gap: 1px; }
+.td-walk-name { display: flex; flex-direction: column; gap: 2px; }
 
 .td-walk-kind {
   font-size: 10.5px;
@@ -1239,7 +1245,7 @@ function renderHeader() {
       <div class="td-score-meta">${count} review${count === 1 ? '' : 's'}${priceHtml}</div>
     </div>`;
   updateSaveBtn();
-  document.title = `${dorm.name} — Dorm Reviews`;
+  document.title = `${dorm.name} Dorm Reviews`;
 }
 
 /* ------------------------------------------------------------------ *
@@ -1772,6 +1778,9 @@ window.openLightbox = function (src) {
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('active');
 };
+// The save button is rendered with an inline onclick; module functions
+// aren't global, so expose it explicitly.
+window.toggleSaved = toggleSaved;
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
 });
