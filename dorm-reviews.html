@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
 // Same theme model as the rest of the site (persisted under "pd2-theme").
 (function(){
@@ -75,7 +75,8 @@ function toggleTheme(){
 body {
   background: var(--td-page);
   color: var(--td-ink);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -246,14 +247,7 @@ nav {
     border-bottom: none;
   }
   .nav-links button.active { border-bottom: none; color: var(--red); }
-  .nav-theme-toggle { display: flex; margin-top: auto; border-top: 1px solid var(--line); padding-top: 24px; }
-
-  /* Search collapses back into the nav-right icon with an inline input;
-     the desktop logo-side icon and under-nav bar go away. */
-  .nav-search { display: flex; }
-  .nav-search.open input { width: 140px; }
-  .nav-search-btn-desktop { display: none; }
-  .nav-search-bar { display: none; }
+  .nav-theme-toggle { display: grid; margin-top: auto; border-top: 1px solid var(--line); padding-top: 24px; }
 }
 
 /* ---------------- HALL SEARCH (in the nav bar) ---------------- */
@@ -333,6 +327,16 @@ nav {
 
 .nav-search.open input:focus { border-bottom-color: var(--red); }
 .nav-search input::placeholder { color: var(--dim); }
+
+@media (max-width: 768px) {
+  /* Search collapses back into the nav-right icon with an inline input;
+     the desktop logo-side icon and under-nav bar go away. (Must come
+     after the base hall-search rules above so it wins the cascade.) */
+  .nav-search { display: flex; }
+  .nav-search.open input { width: 140px; }
+  .nav-search-btn-desktop { display: none; }
+  .nav-search-bar { display: none; }
+}
 
 /* Results dropdown hangs off the right edge of the nav search. */
 .nav-search .td-search-menu {
@@ -634,6 +638,10 @@ nav {
 .rev-tag.pos { color: var(--td-pos); background: var(--td-pos-bg); }
 .rev-tag.neg { color: var(--td-neg); background: var(--td-neg-bg); }
 
+/* The poster's own not-yet-approved review (rendered from localStorage). */
+.td-card.pending { border-style: dashed; }
+.rev-tag.pend { color: var(--td-neg); background: var(--td-neg-bg); margin-left: auto; }
+
 .rev-helpful {
   margin-left: auto;
   font-size: 12.5px;
@@ -863,6 +871,9 @@ nav {
 
 .td-map-frame .maplibregl-canvas { cursor: pointer; }
 
+/* MapLibre's stylesheet sets Helvetica on the map container; match the page font. */
+.td-map-frame .maplibregl-map { font-family: 'Inter', system-ui, sans-serif; }
+
 /* Rough dark-mode look for the light map tiles; the marker is a DOM
    overlay, so filtering only the canvas leaves it red. */
 :root[data-theme="dark"] .td-map-frame canvas {
@@ -895,7 +906,8 @@ nav {
   padding: 8px 6px;
   border-radius: 8px;
   text-align: left;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-optical-sizing: auto;
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.35;
@@ -1332,7 +1344,32 @@ document.addEventListener('click', e => {
 /* ------------------------------------------------------------------ *
  * Review list                                                        *
  * ------------------------------------------------------------------ */
-function reviewCardHTML(r, i) {
+/* Own submissions awaiting approval. The server hides pending reviews from
+ * everyone, so the poster's copy lives in localStorage and renders only in
+ * this browser until the approved row shows up in a fetch. */
+const PENDING_KEY = 'td-my-pending';
+
+function loadPendingStore() {
+  const cutoff = Date.now() - 30 * 24 * 3600 * 1000; // assume rejected after 30 days
+  try {
+    return JSON.parse(localStorage.getItem(PENDING_KEY) || '[]')
+      .filter(p => p && p.id != null && new Date(p.created_at).getTime() > cutoff);
+  } catch { return []; }
+}
+
+function myPendingReviews() {
+  return loadPendingStore().filter(p =>
+    p.dormId === dorm.id && !reviews.some(r => String(r.id) === String(p.id)));
+}
+
+// Once a pending review comes back from the server (approved), drop the local copy.
+function prunePendingStore() {
+  localStorage.setItem(PENDING_KEY, JSON.stringify(
+    loadPendingStore().filter(p =>
+      p.dormId !== dorm.id || !reviews.some(r => String(r.id) === String(p.id)))));
+}
+
+function reviewCardHTML(r, i, isPending = false) {
   const name = r.name || 'Anonymous Terp';
   const initial = (name.trim()[0] || 'A').toUpperCase();
   const sub = [r.classYear, r.major].filter(Boolean).join(', ');
@@ -1348,7 +1385,7 @@ function reviewCardHTML(r, i) {
     `<span class="rev-tag ${t.s === 'neg' ? 'neg' : 'pos'}">${escHtml(t.t || t)}</span>`).join('');
   const voted = helpfulVotes.has(String(r.id));
   return `
-    <div class="td-card">
+    <div class="td-card${isPending ? ' pending' : ''}">
       <div class="rev-head">
         <div class="rev-avatar v${i % 3}">${escHtml(initial)}</div>
         <div class="rev-id">
@@ -1361,7 +1398,9 @@ function reviewCardHTML(r, i) {
       <div class="rev-foot">
         ${posted ? `<span class="rev-posted">Posted ${posted}</span>` : ''}
         ${tags}
-        <button class="rev-helpful ${voted ? 'voted' : ''}" data-id="${escHtml(String(r.id))}" title="${voted ? 'Click to remove your helpful vote' : 'Mark this review helpful'}">👍 Helpful (${helpfulCount(r)})</button>
+        ${isPending
+          ? '<span class="rev-tag pend" title="Visible only to you until it gets approved">Pending approval</span>'
+          : `<button class="rev-helpful ${voted ? 'voted' : ''}" data-id="${escHtml(String(r.id))}" title="${voted ? 'Click to remove your helpful vote' : 'Mark this review helpful'}">👍 Helpful (${helpfulCount(r)})</button>`}
       </div>
     </div>`;
 }
@@ -1370,12 +1409,16 @@ function renderReviews() {
   const list = document.getElementById('reviewsList');
   const all = filteredReviews();
   const shown = all.slice(0, visibleCount);
+  // The poster's own pending reviews always sit on top, unaffected by filters.
+  const mine = myPendingReviews();
 
-  list.innerHTML = shown.length
-    ? shown.map(reviewCardHTML).join('')
-    : reviewsLoaded
-      ? `<p class="td-empty">${reviews.length ? 'No reviews match these filters.' : 'No reviews yet!'}</p>`
-      : '';
+  list.innerHTML =
+    mine.map(r => reviewCardHTML(r, 0, true)).join('') +
+    (shown.length
+      ? shown.map((r, i) => reviewCardHTML(r, i)).join('')
+      : reviewsLoaded && !mine.length
+        ? `<p class="td-empty">${reviews.length ? 'No reviews match these filters.' : 'No reviews yet!'}</p>`
+        : '');
 
   const btn = document.getElementById('showAllBtn');
   btn.hidden = all.length <= visibleCount;
@@ -1657,6 +1700,7 @@ async function loadReviews() {
   }
 
   reviews = data;
+  prunePendingStore();
 
   renderHeader();
   renderFilters();
@@ -1753,8 +1797,15 @@ async function submitReview() {
     return showToast(body.error || 'Failed to submit review. Please try again later.', 'error');
   }
 
+  // Keep a local copy of the pending review so the poster sees it right away;
+  // it stays private to this browser until approved.
+  const body = await res.json().catch(() => ({}));
+  if (body.review && body.review.id != null) {
+    localStorage.setItem(PENDING_KEY, JSON.stringify([...loadPendingStore(), body.review]));
+  }
+
   closeForm();
-  showToast('Review submitted successfully! Thanks for contributing.', 'success');
+  showToast('Review submitted! Only you can see it until it gets approved.', 'success');
   loadReviews();
 }
 

@@ -95,14 +95,14 @@ function toggleTheme(){
     padding: 36px 24px 0;
   }
 
-  /* Version tag pinned to the bottom-right corner of the viewport. */
+  /* Version tag: centered under the site disclaimer. */
+  .site-disclaimer { padding-bottom: 6px; }
   .about-version {
-    position: fixed;
-    right: 16px;
-    bottom: 12px;
+    display: block;
+    text-align: center;
     color: var(--dim);
     font-size: 0.75rem;
-    pointer-events: none;
+    padding-bottom: 20px;
   }
 
   @media (max-width: 768px) {
@@ -187,7 +187,6 @@ Also, if you have any questions check out the FAQ or send us a message. We hope 
 </div>
 
 <p class="site-disclaimer">This website is not affiliated with the University of Maryland.</p>
-
 <span class="about-version">Version 0.1</span>
 
 </body>

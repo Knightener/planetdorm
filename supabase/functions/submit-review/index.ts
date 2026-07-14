@@ -94,21 +94,28 @@ Deno.serve(async (req) => {
       : 'Anonymous Terp'
 
   // Use the service role key so the insert bypasses RLS (anon inserts are blocked by policy).
+  // New rows get status='pending' from the column default; they stay hidden from the
+  // public read policy until approved in the dashboard. The inserted row is returned
+  // so the poster's browser can show their own review locally while it waits.
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-  const { error } = await supabase.from('reviews').insert({
-    dormId,
-    name: cleanName,
-    rating,
-    text: text.trim(),
-    year,
-  })
+  const { data: review, error } = await supabase
+    .from('reviews')
+    .insert({
+      dormId,
+      name: cleanName,
+      rating,
+      text: text.trim(),
+      year,
+    })
+    .select('id, dormId, name, rating, text, year, created_at')
+    .single()
 
   if (error) {
     console.error('[submit-review] DB insert error:', error.code, error.message)
     return err('Failed to save review', 500)
   }
 
-  return new Response(JSON.stringify({ success: true }), {
+  return new Response(JSON.stringify({ success: true, review }), {
     headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
   })
 })

@@ -60,15 +60,30 @@ Deno.serve(async (req) => {
   // action defaults to 'add' for backward compatibility; 'remove' unvotes.
   const act = action === 'remove' ? 'remove' : 'add'
 
-  // Voter identity = salted hash of (clientId + IP). The salt keeps hashes
-  // unforgeable; including clientId means dorm-mates behind the same campus
-  // NAT don't block each other, and the IP makes localStorage-clearing alone
-  // insufficient to re-vote.
+  // Voter identity = salted hash of the clientId alone. Deliberately NOT
+  // tied to the IP: IPs rotate (dorm wifi vs. home vs. phone data), and a
+  // rotated IP made earlier votes impossible to remove — the delete hashed
+  // to a different voter and silently matched nothing. The salt keeps
+  // hashes unforgeable, and the per-IP rate limit below still caps spam.
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? ''
-  const voter_hash = await sha256(`${VOTE_SALT}:${clientId}:${ip}`)
+  const voter_hash = await sha256(`${VOTE_SALT}:${clientId}`)
+  // Votes cast before this change hashed (clientId + IP); match those too
+  // so they can still be un-voted while the voter's IP is unchanged.
+  const legacy_voter_hash = await sha256(`${VOTE_SALT}:${clientId}:${ip}`)
   const ip_hash = await sha256(`${VOTE_SALT}:ip:${ip}`)
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+  // Authoritative count, returned on every success so the page can
+  // reconcile its optimistic UI even when nothing changed server-side.
+  async function currentCount(): Promise<number | null> {
+    const { data: row } = await supabase
+      .from('reviews')
+      .select('helpful_count')
+      .eq('id', reviewId)
+      .single()
+    return row?.helpful_count ?? null
+  }
 
   // Removing a vote: delete this voter's row (the DELETE trigger decrements
   // helpful_count). Not rate-limited — it can't inflate counts.
@@ -77,17 +92,12 @@ Deno.serve(async (req) => {
       .from('review_votes')
       .delete()
       .eq('review_id', reviewId)
-      .eq('voter_hash', voter_hash)
+      .in('voter_hash', [voter_hash, legacy_voter_hash])
     if (error) {
       console.error('[vote-helpful] delete error:', error.code, error.message)
       return json({ error: 'Failed to remove vote' }, 500)
     }
-    const { data: row } = await supabase
-      .from('reviews')
-      .select('helpful_count')
-      .eq('id', reviewId)
-      .single()
-    return json({ success: true, removed: true, helpful_count: row?.helpful_count ?? null })
+    return json({ success: true, removed: true, helpful_count: await currentCount() })
   }
 
   // Per-IP rate limit.
@@ -101,6 +111,17 @@ Deno.serve(async (req) => {
     return json({ error: 'Too many votes, try again later' }, 429)
   }
 
+  // A pre-change vote row for this person also counts as already voted, so
+  // an IP rotation can't double-count them.
+  const { count: legacyVote } = await supabase
+    .from('review_votes')
+    .select('*', { count: 'exact', head: true })
+    .eq('review_id', reviewId)
+    .eq('voter_hash', legacy_voter_hash)
+  if ((legacyVote ?? 0) > 0) {
+    return json({ success: true, already: true, helpful_count: await currentCount() })
+  }
+
   // The (review_id, voter_hash) primary key makes this idempotent:
   // a second vote from the same person hits a unique violation (23505).
   const { error } = await supabase
@@ -108,7 +129,7 @@ Deno.serve(async (req) => {
     .insert({ review_id: reviewId, voter_hash, ip_hash })
 
   if (error && error.code === '23505') {
-    return json({ success: true, already: true })
+    return json({ success: true, already: true, helpful_count: await currentCount() })
   }
   if (error) {
     // Foreign-key violation = review doesn't exist.
@@ -117,11 +138,5 @@ Deno.serve(async (req) => {
     return json({ error: 'Failed to save vote' }, 500)
   }
 
-  const { data: row } = await supabase
-    .from('reviews')
-    .select('helpful_count')
-    .eq('id', reviewId)
-    .single()
-
-  return json({ success: true, helpful_count: row?.helpful_count ?? null })
+  return json({ success: true, helpful_count: await currentCount() })
 })
