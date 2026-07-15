@@ -62,7 +62,10 @@ function toggleTheme(){
   <div class="hero-main">
     <h1>Welcome to PlanetDorm</h1>
     <p>Honest reviews of every University of Maryland residence hall, written by the Terps who lived there.</p>
-    <input type="text" id="searchInput" class="hero-search" placeholder="Search halls..." oninput="filterDorms()">
+    <div class="hero-search-wrap">
+      <input type="text" id="searchInput" class="hero-search" aria-label="Search halls" oninput="filterDorms()">
+      <span class="hero-search-hint" id="searchHint" aria-hidden="true">Search halls...</span>
+    </div>
   </div>
 </div>
 
@@ -73,15 +76,14 @@ function toggleTheme(){
         Filter by...
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <span class="count-label" id="countEcho"></span>
     </div>
     <div class="sort-row">
       <span class="sort-tag">Sort</span>
-      <button class="sort-opt active" data-sort="default" onclick="selectSort('default')">Default</button>
+      <button class="sort-opt active" data-sort="alpha" onclick="selectSort('alpha')">Alphabetical</button>
       <button class="sort-opt" data-sort="rating-desc" onclick="selectSort('rating-desc')">Highest rated</button>
       <button class="sort-opt" data-sort="rating-asc" onclick="selectSort('rating-asc')">Lowest rated</button>
       <select class="sort-select" id="sortSelect" aria-label="Sort halls" onchange="selectSort(this.value)">
-        <option value="default">Default</option>
+        <option value="alpha">Alphabetical</option>
         <option value="rating-desc">Highest rated</option>
         <option value="rating-asc">Lowest rated</option>
       </select>
@@ -116,12 +118,6 @@ function toggleTheme(){
           </div>
         </div>
         <div class="filter-line">
-          <span class="filter-label">Saved</span>
-          <div class="chip-group">
-            <button class="chip" data-group="saved" data-value="only" onclick="toggleChip(this)">♥ Saved halls</button>
-          </div>
-        </div>
-        <div class="filter-line">
           <span class="filter-label">Features</span>
           <div class="chip-group">
             <button class="chip" data-group="feature" data-value="ac" onclick="toggleChip(this)">A/C</button>
@@ -130,6 +126,7 @@ function toggleTheme(){
             <button class="clear-all" id="clearAllBtn" onclick="setAllFilter()" hidden>Clear all</button>
           </div>
         </div>
+        <span class="count-label" id="countEcho"></span>
       </div>
     </div>
   </div>

@@ -280,9 +280,48 @@ nav {
 
 .hero-search:focus { border-bottom-color: var(--red); }
 /* Stay expanded while typing and whenever text remains in the field
-   (.has-text is toggled in script.js; :placeholder-shown is unreliable
-   here because the typewriter placeholder empties out each cycle). */
+   (.has-text is toggled in script.js). */
 .hero-search:focus, .hero-search.has-text { width: 100%; }
+
+/* Animated stand-in for the native placeholder: script.js types the
+   phrases into it character by character; the caret is the ::after. */
+.hero-search-wrap { position: relative; }
+
+.hero-search-hint {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  color: var(--dim);
+  font-size: 1.15rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.hero-search-hint::after {
+  content: '';
+  width: 2px;
+  height: 1.15em;
+  margin-left: 3px;
+  background: var(--dim);
+  animation: caret-blink 1.1s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  0%, 55%   { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+.hero-search:focus ~ .hero-search-hint,
+.hero-search.has-text ~ .hero-search-hint {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-search-hint::after { animation: none; }
+}
 
 @media (max-width: 768px) {
   .hero-search { width: 100%; }
@@ -313,10 +352,8 @@ nav {
   padding: 4px 0;
   cursor: pointer;
   color: var(--red);
-  font-size: 0.82rem;
+  font-size: 1.00rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 
 @media (hover: hover) {
@@ -427,15 +464,13 @@ nav {
   padding: 24px 8px 8px;
 }
 
+/* Lives at the bottom of the filter band, so it collapses with it. */
 .count-label {
   font-size: 0.88rem;
   color: var(--dim);
   font-weight: 600;
-  /* Only shown while the filter band is expanded. */
-  display: none;
+  margin-top: 4px;
 }
-
-.filter-toggle.open + .count-label { display: inline; }
 
 .sort-row {
   display: flex;

@@ -101,8 +101,7 @@ let campusFilters = new Set();
 let roomTypeFilters = new Set();
 let bathroomFilters = new Set();
 let featureFilters = new Set();
-let savedFilters = new Set();
-let onCampusSort = 'default';
+let onCampusSort = 'alpha';
 
 /* Saved halls — device-local, like theme/filters/helpful votes. */
 const SAVED_KEY = 'pd-saved';
@@ -129,8 +128,6 @@ function toggleSaved(id, ev) {
     b.setAttribute('aria-pressed', String(on));
     b.setAttribute('aria-label', on ? 'Remove from saved' : 'Save this hall');
   });
-  // Un-saving while "Saved only" is active should drop the row immediately.
-  if (savedFilters.size) renderDorms();
 }
 let reviewSort = 'newest';
 let currentSection = 'home';
@@ -251,7 +248,6 @@ function passesFeatureFilter(d) {
 function passesFilters(d) {
   const q = document.getElementById('searchInput').value.toLowerCase();
   if (!matchesSearch(d, q)) return false;
-  if (savedFilters.size && !savedDorms.has(d.id)) return false;
   if (campusFilters.size && !campusFilters.has(d.area)) return false;
   if (!passesRoomTypeFilter(d)) return false;
   if (!passesBathroomFilter(d)) return false;
@@ -261,7 +257,7 @@ function passesFilters(d) {
 
 // Zero-review halls always sink to the bottom of rating sorts.
 function applySorting(arr) {
-  if (onCampusSort === 'default') return arr;
+  if (onCampusSort === 'alpha') return [...arr].sort((a, b) => a.name.localeCompare(b.name));
   return [...arr].sort((a, b) => {
     if (a.reviews === 0 && b.reviews === 0) return 0;
     if (a.reviews === 0) return 1;
@@ -307,7 +303,7 @@ function renderDorms() {
 function filterDorms() { renderDorms(); }
 
 function toggleChip(btn) {
-  const set = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters, saved: savedFilters }[btn.dataset.group];
+  const set = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters }[btn.dataset.group];
   const v = btn.dataset.value;
   if (set.has(v)) { set.delete(v); btn.classList.remove('active'); }
   else { set.add(v); btn.classList.add('active'); }
@@ -317,7 +313,7 @@ function toggleChip(btn) {
 }
 
 function updateClearAll() {
-  const any = campusFilters.size || roomTypeFilters.size || bathroomFilters.size || featureFilters.size || savedFilters.size;
+  const any = campusFilters.size || roomTypeFilters.size || bathroomFilters.size || featureFilters.size;
   document.getElementById('clearAllBtn').hidden = !any;
 }
 
@@ -326,7 +322,6 @@ function setAllFilter() {
   roomTypeFilters.clear();
   bathroomFilters.clear();
   featureFilters.clear();
-  savedFilters.clear();
   document.querySelectorAll('.filter-band .chip.active').forEach(c => c.classList.remove('active'));
   saveFilters();
   updateClearAll();
@@ -337,7 +332,7 @@ const FILTERS_KEY = 'pd-filters';
 
 function saveFilters() {
   localStorage.setItem(FILTERS_KEY, JSON.stringify({
-    campus: [...campusFilters], room: [...roomTypeFilters], bath: [...bathroomFilters], feature: [...featureFilters], saved: [...savedFilters]
+    campus: [...campusFilters], room: [...roomTypeFilters], bath: [...bathroomFilters], feature: [...featureFilters]
   }));
 }
 
@@ -345,7 +340,7 @@ function restoreFilters() {
   let saved;
   try { saved = JSON.parse(localStorage.getItem(FILTERS_KEY)); } catch { /* corrupt entry — start clean */ }
   if (!saved) return;
-  const sets = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters, saved: savedFilters };
+  const sets = { campus: campusFilters, room: roomTypeFilters, bath: bathroomFilters, feature: featureFilters };
   document.querySelectorAll('.filter-band .chip').forEach(chip => {
     if ((saved[chip.dataset.group] || []).includes(chip.dataset.value)) {
       sets[chip.dataset.group].add(chip.dataset.value);
@@ -354,7 +349,7 @@ function restoreFilters() {
   });
   updateClearAll();
   // Filters carried over from the last visit shouldn't be invisible.
-  if (campusFilters.size + roomTypeFilters.size + bathroomFilters.size + featureFilters.size + savedFilters.size) {
+  if (campusFilters.size + roomTypeFilters.size + bathroomFilters.size + featureFilters.size) {
     document.getElementById('filterBand').classList.add('open');
     document.getElementById('filterToggle').classList.add('open');
   }
@@ -1664,20 +1659,35 @@ function closeNav() {
   document.getElementById('navToggle').classList.remove('open');
 }
 
+// Types the phrases into the hint overlay character by character (the
+// blinking caret is CSS, .hero-search-hint::after). The hint hides via CSS
+// while the field is focused or holds text, so the loop just idles then.
 function startPlaceholderTypewriter() {
-  const el = document.getElementById('searchInput');
+  const hint = document.getElementById('searchHint');
+  const input = document.getElementById('searchInput');
   const phrases = ['Search halls...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
-  let i = 0, j = 0, del = false;
-  (function tick() {
-    let delay = del ? 35 : 60 + Math.random() * 40;
-    if (document.activeElement !== el && !el.value) {
-      del ? j-- : j++;
-      el.placeholder = phrases[i].slice(0, j);
-      if (!del && j === phrases[i].length) { del = true; delay = 1800; }
-      if (del && j === 0) { del = false; i = (i + 1) % phrases.length; delay = 400; }
+  // Reduced motion: leave the first phrase static, caret already unblinking.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // The HTML ships with the first phrase pre-rendered: hold it, then erase.
+  let i = 0, j = phrases[0].length, del = true;
+  function tick() {
+    if (document.activeElement === input || input.value) { setTimeout(tick, 500); return; }
+    let delay;
+    if (del) {
+      j--;
+      // Accelerate as more is erased so deletion reads as one smooth motion.
+      delay = Math.max(16, 42 - (phrases[i].length - j) * 2);
+      if (j === 0) { del = false; i = (i + 1) % phrases.length; delay = 600; }
+    } else {
+      j++;
+      delay = 65 + Math.random() * 25;
+      if (phrases[i][j - 1] === ' ') delay += 70; // brief beat between words
+      if (j === phrases[i].length) { del = true; delay = 2200; }
     }
+    hint.textContent = phrases[i].slice(0, j);
     setTimeout(tick, delay);
-  })();
+  }
+  setTimeout(tick, 2200);
 }
 
 // Expose handlers for inline onclick attributes (ES module scope isn't global).

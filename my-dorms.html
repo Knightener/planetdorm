@@ -23,33 +23,18 @@ function toggleTheme(){
 </script>
 <link rel="stylesheet" href="assets/css/styles.css">
 <style>
-  /* Matches the index hero: same padding, type scale, and hairline border. */
-  .saved-hero {
-    padding: 88px 48px 48px;
-    border-bottom: 1px solid var(--line);
-  }
+  /* Sticky footer: the list area grows so the disclaimer stays pinned
+     to the bottom of the viewport even when few halls are saved. */
+  body { min-height: 100vh; display: flex; flex-direction: column; }
 
-  .saved-hero h1 {
-    font-weight: 800;
-    font-size: clamp(2.2rem, 4vw, 3.4rem);
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-    margin: 0 0 14px;
-  }
-
-  .saved-hero h1 .dot { color: var(--red); }
-
-  .saved-hero p {
-    color: var(--dim);
-    font-size: 1.02rem;
-    margin: 0;
-    max-width: 40em;
-  }
-
-  .saved-body { padding: 0 48px 64px; }
+  .saved-body { flex: 1; padding: 32px 48px 64px; display: flex; flex-direction: column; }
+  .saved-body > * { width: 100%; }
+  /* With nothing saved, float the empty-state card to the vertical center
+     of the space between the nav and the disclaimer. */
+  .saved-body:has(.saved-empty) { justify-content: center; }
 
   .saved-note {
-    text-align: right;
+    text-align: center;
     font-size: 0.75rem;
     color: var(--dim);
     margin: 0;
@@ -78,8 +63,7 @@ function toggleTheme(){
   .saved-empty .browse-link:hover { background: var(--red-dark); }
 
   @media (max-width: 768px) {
-    .saved-hero { padding: 56px 20px 36px; }
-    .saved-body { padding: 0 20px 48px; }
+    .saved-body { padding: 24px 20px 48px; }
   }
 </style>
 </head>
@@ -111,11 +95,6 @@ function toggleTheme(){
     </div>
   </div>
 </nav>
-
-<div class="saved-hero">
-  <h1>My Dorms</h1>
-  <p id="savedCount">The halls you save show up here.</p>
-</div>
 
 <div class="saved-body">
   <div class="dorm-list" id="savedGrid"></div>
@@ -186,10 +165,8 @@ function dormRowHTML(d) {
 function render() {
   const saved = dorms.filter(d => savedDorms.has(d.id));
   const grid = document.getElementById('savedGrid');
-  const count = document.getElementById('savedCount');
   document.getElementById('savedNote').hidden = !saved.length;
   if (!saved.length) {
-    count.textContent = 'Tap the heart on any dorm to keep it here for later.';
     grid.innerHTML = `
       <div class="saved-empty">
         <h2>No saved dorms yet</h2>
@@ -198,7 +175,6 @@ function render() {
       </div>`;
     return;
   }
-  count.textContent = `${saved.length} saved hall${saved.length === 1 ? '' : 's'}.`;
   grid.innerHTML = saved.map(dormRowHTML).join('');
 
   grid.querySelectorAll('.dorm-row').forEach(row => {
