@@ -80,6 +80,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Slim, trackless scrollbars, matching the rest of the site. */
+* { scrollbar-width: thin; scrollbar-color: var(--td-muted) transparent; }
+
+::-webkit-scrollbar { width: 12px; height: 12px; background: transparent; }
+::-webkit-scrollbar-track { background: transparent; border: none; box-shadow: none; }
+::-webkit-scrollbar-thumb {
+  background: var(--td-muted);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--td-ink); background-clip: content-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
 .td-page { width: 100%; }
 
 button { font: inherit; background: none; border: none; cursor: pointer; }
@@ -239,6 +253,8 @@ nav {
     overflow-y: auto;
   }
   .nav-links.open { display: flex; }
+  /* The drawer covers the viewport; the page must not scroll behind it. */
+  body.nav-open { overflow: hidden; }
   .nav-links button {
     width: 100%;
     text-align: left;
@@ -678,15 +694,22 @@ nav {
 /* ---------------- SIDEBAR ---------------- */
 .td-sidebar { display: flex; flex-direction: column; gap: 16px; }
 
-.td-card-title { font-weight: 800; font-size: 15px; color: var(--td-ink); margin-bottom: 14px; }
+/* Matches .glance-title / .td-walk-title. */
+.td-card-title {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--td-secondary);
+  margin-bottom: 14px;
+}
 
 .bd-rows { display: flex; flex-direction: column; gap: 11px; }
 
 .bd-row { display: flex; align-items: center; gap: 10px; }
-.bd-label { width: 86px; font-size: 12.5px; color: var(--td-secondary); flex-shrink: 0; }
+.bd-label { width: 92px; font-size: 13.5px; color: var(--td-secondary); flex-shrink: 0; }
 .bd-track { flex: 1; height: 8px; background: var(--td-track); border-radius: 999px; overflow: hidden; }
 .bd-fill { height: 100%; background: var(--td-red); border-radius: 999px; }
-.bd-score { width: 26px; text-align: right; font-size: 12.5px; font-weight: 700; color: var(--td-ink); }
+.bd-score { width: 26px; text-align: right; font-size: 13.5px; font-weight: 700; color: var(--td-ink); }
 
 .bd-foot {
   margin-top: 16px;
@@ -699,10 +722,9 @@ nav {
 
 /* At-a-glance facts card. */
 .glance-title {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--td-secondary);
   margin-bottom: 12px;
 }
@@ -716,8 +738,8 @@ nav {
   gap: 16px;
 }
 
-.glance-label { font-size: 14px; color: var(--td-muted); flex-shrink: 0; }
-.glance-value { font-size: 14.5px; color: var(--td-ink); text-align: right; }
+.glance-label { font-size: 13.5px; color: var(--td-muted); flex-shrink: 0; }
+.glance-value { font-size: 13.5px; color: var(--td-ink); text-align: right; }
 
 .glance-foot {
   margin-top: 14px;
@@ -727,6 +749,11 @@ nav {
   color: var(--td-muted);
   line-height: 1.5;
 }
+
+.glance-foot a { color: inherit; text-decoration: underline; }
+
+/* A rate note plus an editorial subline: only the first gets the divider. */
+.glance-foot + .glance-foot { margin-top: 8px; padding-top: 0; border-top: none; }
 
 .td-write-btn {
   width: 100%;
@@ -849,7 +876,50 @@ nav {
 }
 
 .td-lightbox.active { display: flex; }
-.td-lightbox img { max-width: 90%; max-height: 85vh; object-fit: contain; }
+
+/* Viewer column: rounded photo above a thumbnail selector. */
+.td-lightbox-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 92vw;
+}
+
+.td-lightbox-inner img {
+  max-width: 92vw;
+  max-height: 76vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.td-lightbox-strip {
+  display: flex;
+  gap: 10px;
+  max-width: 92vw;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: none;
+}
+.td-lightbox-strip::-webkit-scrollbar { display: none; }
+.td-lightbox-strip:empty { display: none; }
+
+.td-lightbox-thumb {
+  width: 84px;
+  height: 58px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  border: 2px solid transparent;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  opacity: 0.55;
+  padding: 0;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.td-lightbox-thumb:hover { opacity: 0.85; }
+.td-lightbox-thumb.active { opacity: 1; border-color: #fff; }
 
 .td-lightbox-close {
   position: absolute;
@@ -857,7 +927,14 @@ nav {
   right: 24px;
   color: #fff;
   font-size: 2rem;
+  background: none;
+  border: none;
+  line-height: 1;
+  cursor: pointer;
 }
+
+/* Page must not scroll behind the viewer. */
+body.lightbox-open { overflow: hidden; }
 
 /* ---------------- LOCATION MAP PREVIEW ---------------- */
 .td-map-frame {
@@ -889,10 +966,9 @@ nav {
 }
 
 .td-walk-title {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--td-secondary);
   margin-bottom: 6px;
 }
@@ -902,8 +978,11 @@ nav {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  width: 100%;
-  padding: 8px 6px;
+  /* Bleed the hover surface past the card padding so the row text lines
+     up with the card title and the other sidebar cards. */
+  width: calc(100% + 20px);
+  margin-inline: -10px;
+  padding: 8px 10px;
   border-radius: 8px;
   text-align: left;
   font-family: 'Inter', system-ui, sans-serif;
@@ -918,10 +997,9 @@ nav {
 .td-walk-name { display: flex; flex-direction: column; gap: 2px; }
 
 .td-walk-kind {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--td-muted);
 }
 
@@ -999,7 +1077,7 @@ nav {
         <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.body.classList.toggle('nav-open', document.getElementById('navLinks').classList.toggle('open'));this.classList.toggle('open')">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -1056,15 +1134,18 @@ nav {
 
 <div class="td-toast" id="toast"></div>
 
-<div class="td-lightbox" id="lightbox" onclick="this.classList.remove('active')">
-  <button class="td-lightbox-close">&times;</button>
-  <img id="lightboxImg" src="" alt="">
+<div class="td-lightbox" id="lightbox">
+  <button class="td-lightbox-close" id="lightboxClose" aria-label="Close photo viewer">&times;</button>
+  <div class="td-lightbox-inner">
+    <img id="lightboxImg" src="" alt="">
+    <div class="td-lightbox-strip" id="lightboxStrip"></div>
+  </div>
 </div>
 
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <script type="module">
 import { supabase } from './assets/js/supabase.js';
-import { dorms, landmarks, landmarkKinds } from './assets/js/data.js';
+import { dorms, landmarks, landmarkKinds, formatRates, RATE_YEAR, RATE_SOURCE } from './assets/js/data.js';
 import { reportOutage } from './assets/js/outage.js';
 
 /* ------------------------------------------------------------------ *
@@ -1193,7 +1274,7 @@ function renderHeroQuote() {
   ].filter(Boolean).join(', ');
   cell.innerHTML = `
     <p class="hq-text">“${escHtml(text)}”</p>
-    <div class="hq-meta">— ${escHtml(who)}${votes ? ` · 👍 ${votes}` : ''}</div>`;
+    <div class="hq-meta">${escHtml(who)}${votes ? ` · 👍 ${votes}` : ''}</div>`;
 }
 
 // "Community & single all-gender bathrooms" becomes one chip per type.
@@ -1650,15 +1731,17 @@ function toggleWalkRoute(destId) {
 function renderGlance() {
   const card = document.getElementById('glanceCard');
   const dining = (dorm.dining || '').replace(' Dining Hall', '');
+  const rates = formatRates(dorm);
   const rows = [
     ['Building Type', dorm.type],
     ['Dining', dining],
-    ['Built', dorm.built]
+    ['Built', dorm.built],
+    [`Rate (${RATE_YEAR})`, rates]
   ].filter(([, v]) => v);
   if (!rows.length && !meta.subline) { card.hidden = true; return; }
   card.hidden = false;
   card.innerHTML = `
-    <div class="glance-title">At a glance</div>
+    <div class="glance-title">Dorm Details</div>
     <div class="glance-rows">
       ${rows.map(([k, v]) => `
         <div class="glance-row">
@@ -1666,6 +1749,7 @@ function renderGlance() {
           <span class="glance-value">${escHtml(String(v))}</span>
         </div>`).join('')}
     </div>
+    ${rates ? `<div class="glance-foot">Academic year, room only; dining billed separately. Exact price depends on room type and assignment. <a href="${RATE_SOURCE}" target="_blank" rel="noopener">UMD rates</a></div>` : ''}
     ${meta.subline ? `<div class="glance-foot">${escHtml(meta.subline)}</div>` : ''}`;
 }
 
@@ -1825,15 +1909,58 @@ document.getElementById('formText').addEventListener('input', function () {
   document.getElementById('charCount').textContent = `${this.value.length} / 2000`;
 });
 
+/* Photo viewer: rounded image with a thumbnail selector underneath. The
+ * strip lists every photo the hall has (it collapses when there is only
+ * one) and the page is locked from scrolling while the viewer is open. */
+let lightboxPhotos = [];
+
+function showLightboxPhoto(i) {
+  if (!lightboxPhotos[i]) return;
+  document.getElementById('lightboxImg').src = lightboxPhotos[i];
+  document.querySelectorAll('#lightboxStrip .td-lightbox-thumb')
+    .forEach((t, n) => t.classList.toggle('active', n === i));
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.classList.remove('lightbox-open');
+}
+
 window.openLightbox = function (src) {
-  document.getElementById('lightboxImg').src = src;
+  const all = dorm?.imgs?.length ? dorm.imgs : [src];
+  lightboxPhotos = all.includes(src) ? all : [src, ...all];
+
+  const strip = document.getElementById('lightboxStrip');
+  // A single photo needs no selector.
+  strip.innerHTML = lightboxPhotos.length > 1
+    ? lightboxPhotos.map((p, i) =>
+        `<button class="td-lightbox-thumb" data-i="${i}" style="background-image:url('${p.replace(/'/g, "\\'")}')" aria-label="Photo ${i + 1}"></button>`).join('')
+    : '';
+  strip.querySelectorAll('.td-lightbox-thumb').forEach(t => {
+    t.addEventListener('click', () => showLightboxPhoto(Number(t.dataset.i)));
+  });
+
+  showLightboxPhoto(lightboxPhotos.indexOf(src));
   document.getElementById('lightbox').classList.add('active');
+  document.body.classList.add('lightbox-open');
 };
+
+// Click the backdrop (not the photo or the strip) to dismiss.
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target.id === 'lightbox') closeLightbox();
+});
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 // The save button is rendered with an inline onclick; module functions
 // aren't global, so expose it explicitly.
 window.toggleSaved = toggleSaved;
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
+  if (!document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    const cur = lightboxPhotos.indexOf(document.getElementById('lightboxImg').src);
+    const step = e.key === 'ArrowRight' ? 1 : -1;
+    showLightboxPhoto((cur + step + lightboxPhotos.length) % lightboxPhotos.length);
+  }
 });
 
 /* Hall search in the nav bar: type-ahead over all on-campus halls; pick

@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js';
-import { dorms, landmarks, landmarkKinds } from './data.js';
+import { dorms, landmarks, landmarkKinds, formatRates, RATE_YEAR, RATE_SOURCE } from './data.js';
 import { reportOutage } from './outage.js';
 
 const SITEKEY = '48ce88c8-9f00-47ee-a3f6-900c5abe7686';
@@ -415,6 +415,11 @@ function checklistHTML(d) {
   rows.push(row('Rooms', d.roomTypes, 'var(--dim)'));
   rows.push(row('Dining', (d.dining || '—').replace(' Dining Hall', ''), 'var(--dim)'));
   rows.push(row('Built', String(d.built), 'var(--dim)'));
+  const rates = formatRates(d);
+  if (rates) {
+    rows.push(row(`Rate (${RATE_YEAR})`, rates, 'var(--ink)'));
+    rows.push(`<div class="checklist-note">Academic year, room only; dining billed separately. Exact price depends on room type and assignment. <a href="${RATE_SOURCE}" target="_blank" rel="noopener">UMD rates</a></div>`);
+  }
   return rows.join('');
 }
 
@@ -784,7 +789,6 @@ let detailMap = null;
 let campusMarkerById = {};
 let dormRoofHeight = {}; // dormId -> roof height in meters, from the base map's buildings
 let mapDorms = [];
-let mapCampusFilter = 'all';
 
 const CAMPUS_BOUNDS = [[-76.975, 38.970], [-76.915, 39.005]];
 
@@ -1466,16 +1470,13 @@ function mapCardHTML(d) {
 
 function renderMapSidebar(query = '') {
   const q = query.trim().toLowerCase();
-  const shown = mapDorms.filter(d => (mapCampusFilter === 'all' || d.area === mapCampusFilter) && matchesSearch(d, q));
+  const shown = mapDorms.filter(d => matchesSearch(d, q));
   const shownIds = new Set(shown.map(d => d.id));
 
   const list = document.getElementById('mapSidebarList');
   list.innerHTML = shown.length
     ? shown.map(mapCardHTML).join('')
     : '<p class="no-results" style="padding:20px 4px">No housing matches your search.</p>';
-
-  document.getElementById('mapResultCount').innerHTML =
-    `Showing <strong>${shown.length}</strong> result${shown.length === 1 ? '' : 's'}`;
 
   list.querySelectorAll('.map-card').forEach(card => {
     const id = card.dataset.id;
@@ -1506,27 +1507,6 @@ function renderMapSidebar(query = '') {
 }
 
 function filterMapSidebar() { renderMapSidebar(document.getElementById('mapSearchInput').value); }
-
-function setMapCampusFilter(area, btn) {
-  mapCampusFilter = area;
-  document.querySelectorAll('#mapCampusFilter button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  filterMapSidebar();
-  zoomMapToCampus(area);
-}
-
-function zoomMapToCampus(area) {
-  if (!campusMap) return;
-  if (area === 'all') {
-    campusMap.flyTo({ center: [-76.9440, 38.9875], zoom: 14.5, pitch: 50, bearing: -17 });
-    return;
-  }
-  const inArea = mapDorms.filter(d => d.area === area);
-  if (!inArea.length) return;
-  const bounds = new maplibregl.LngLatBounds();
-  inArea.forEach(d => bounds.extend([d.lng, d.lat]));
-  campusMap.fitBounds(bounds, { padding: 80, maxZoom: 16.5, pitch: 50, bearing: -17, duration: 900 });
-}
 
 function toggleMapSidebar() {
   document.getElementById('mapSplit').classList.toggle('sidebar-collapsed');
@@ -1657,6 +1637,7 @@ function showToast(message, type = 'success') {
 function closeNav() {
   document.getElementById('navLinks').classList.remove('open');
   document.getElementById('navToggle').classList.remove('open');
+  document.body.classList.remove('nav-open');
 }
 
 // Types the phrases into the hint overlay character by character (the
@@ -1697,7 +1678,7 @@ Object.assign(window, {
   setReviewSort, openForm, closeForm, formSetRating, formSetYear, submitReview,
   quickSetRating, quickSetYear, quickSubmit,
   openLightbox, closeLightbox, closeNav,
-  filterMapSidebar, toggleMapSidebar, setMapCampusFilter, closeDirections
+  filterMapSidebar, toggleMapSidebar, closeDirections
 });
 
 // Close the mobile menu with Escape / clicking a link handled inline.

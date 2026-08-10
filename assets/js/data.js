@@ -433,3 +433,72 @@ export const landmarkKinds = [
   ['library', 'Nearest library'],
   ['rec', 'Rec center', true]
 ];
+
+// HOUSING RATES
+// UMD prices by hall *style* and room type, not by hall name, so we store the
+// published rate grid once and derive each hall's range from its type/ac/rooms.
+// Full academic year (fall + spring), room only — dining plans are billed
+// separately. Refresh yearly from RATE_SOURCE; rerun tools/check-rates.mjs.
+export const RATE_YEAR = '2026-27';
+export const RATE_SOURCE = 'https://reslife.umd.edu/apply-housing/rates-terms';
+
+// Columns are style keys; rows are room types. null = not offered in that style.
+const rateTable = {
+  'trad-noac':  { single: 10743, singleBath: null,  double: 9216,  doubleBath: 10743, triple: 8188, tripleBath: 9714 },
+  'trad-ac':    { single: 11820, singleBath: 13345, double: 10290, doubleBath: 11820, triple: 9264, tripleBath: 10790 },
+  'new-trad':   { single: 12282, singleBath: 13808, double: 10755, doubleBath: 12282, triple: null, tripleBath: null },
+  'semi-suite': { single: null,  singleBath: null,  double: null,  doubleBath: 11065, triple: null, tripleBath: null },
+  'suite':      { single: 12437, singleBath: 13963, double: 10910, doubleBath: 12437, triple: 9821, tripleBath: null },
+  'apartment':  { single: 13157, singleBath: 14683, double: 11629, doubleBath: 13157, triple: 10468, tripleBath: null }
+};
+
+// Halls whose style column differs from what type + ac implies. Johnson-Whittle
+// and Pyon-Chen are traditional in layout but priced as New Traditional.
+const rateStyleOverrides = {
+  johnsonwhittle: ['new-trad'],
+  pyonchen: ['new-trad']
+};
+
+function styleKeys(d) {
+  if (rateStyleOverrides[d.id]) return rateStyleOverrides[d.id];
+  const t = d.type || '';
+  if (t === 'Traditional') return [d.ac ? 'trad-ac' : 'trad-noac'];
+  const keys = [];
+  if (t.includes('Semi-Suite')) keys.push('semi-suite');
+  // Strip "Semi-Suite" first so it doesn't also match the plain Suite column.
+  if (t.replace(/Semi-Suite/g, '').includes('Suite')) keys.push('suite');
+  if (t.includes('Apartment')) keys.push('apartment');
+  return keys;
+}
+
+// Which rows of the grid a hall can actually be billed at. Suite/apartment and
+// semi-suite rooms come with a bath, so those styles span both the plain and
+// "with bath" rows; traditional halls only hit the plain rows.
+function rowKeys(d) {
+  const r = (d.roomTypes || '').toLowerCase();
+  const withBath = d.type !== 'Traditional';
+  const rows = [];
+  if (r.includes('single')) rows.push('single', ...(withBath ? ['singleBath'] : []));
+  if (r.includes('double')) rows.push('double', ...(withBath ? ['doubleBath'] : []));
+  if (r.includes('triple') || r.includes('quad')) rows.push('triple', ...(withBath ? ['tripleBath'] : []));
+  return rows;
+}
+
+// Low/high academic-year rate for a hall, or null if we can't place it.
+export function dormRates(d) {
+  const prices = [];
+  for (const s of styleKeys(d)) {
+    const col = rateTable[s];
+    if (!col) continue;
+    for (const r of rowKeys(d)) if (col[r] != null) prices.push(col[r]);
+  }
+  if (!prices.length) return null;
+  return { low: Math.min(...prices), high: Math.max(...prices) };
+}
+
+export function formatRates(d) {
+  const r = dormRates(d);
+  if (!r) return null;
+  const usd = n => '$' + n.toLocaleString('en-US');
+  return r.low === r.high ? usd(r.low) : `${usd(r.low)} – ${usd(r.high)}`;
+}
