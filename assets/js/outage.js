@@ -25,7 +25,7 @@ function bannerEl() {
     el.setAttribute('role', 'status');
     el.style.cssText = 'display:none;position:fixed;left:0;right:0;bottom:0;z-index:9000;background:var(--logo-gold);color:#1a1a1a;font-size:0.9rem;font-weight:600;text-align:center;padding:10px 44px;';
     el.innerHTML = `
-      <span>Ratings and reviews are temporarily unavailable. The rest of the site still works; we will reconnect automatically.</span>
+      <span>Our site is experiencing some issues. We are working to fix them as soon as possible!</span>
       <button aria-label="Dismiss" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.2rem;line-height:1;cursor:pointer;color:inherit;">&times;</button>`;
     el.querySelector('button').addEventListener('click', () => { el.style.display = 'none'; });
     document.body.appendChild(el);

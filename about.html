@@ -63,10 +63,9 @@ function toggleTheme(){
 
   .about-label {
     display: block;
-    font-size: 0.72rem;
+    font-size: 0.92rem;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.02em;
     color: var(--dim);
     margin-bottom: 12px;
   }
@@ -134,7 +133,7 @@ function toggleTheme(){
         <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')">
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" onclick="document.body.classList.toggle('nav-open', document.getElementById('navLinks').classList.toggle('open'));this.classList.toggle('open')">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -142,7 +141,7 @@ function toggleTheme(){
 </nav>
 
 <div class="about-hero">
-  <h1>Made by Terps, for Terps</h1>
+  <h1>What is PlanetDorm?</h1>
   <p>We made PlanetDorm for UMD students just like you! We found there were almost no reviews for dorms at UMD
     and we wanted to change that, so that incoming and returning students would know exactly what it's like to
     live there before they actually move in. Even if you were already assigned a dorm, you can learn more about your
