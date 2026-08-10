@@ -1,11 +1,6 @@
 import { supabase } from './supabase.js';
-import { dorms, landmarks, landmarkKinds, formatRates, RATE_YEAR, RATE_SOURCE } from './data.js';
+import { dorms, landmarks, landmarkKinds } from './data.js';
 import { reportOutage } from './outage.js';
-
-const SITEKEY = '48ce88c8-9f00-47ee-a3f6-900c5abe7686';
-// Supabase requires a JWT on Edge Function calls; the anon key is public anyway.
-const ANON_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxYmZpd2l4bHFzbmpzbXdpcnRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Mjc2OTEsImV4cCI6MjA5MTUwMzY5MX0.Qy2_QBt4l2uRPiLQIKAaao4gNwZf0bkniUob9EtBXMY';
-const SUBMIT_URL = 'https://qqbfiwixlqsnjsmwirtf.supabase.co/functions/v1/submit-review';
 
 /* ------------------------------------------------------------------ *
  * Reviews loading (real data model — Supabase + realtime)            *
@@ -70,7 +65,6 @@ async function loadAllReviews() {
 
   hideReviewsLoading();
   if (currentSection === 'home') renderDorms();
-  if (currentDorm) renderDetailDynamic();
 }
 
 function setupReviewsListener() {
@@ -129,17 +123,7 @@ function toggleSaved(id, ev) {
     b.setAttribute('aria-label', on ? 'Remove from saved' : 'Save this hall');
   });
 }
-let reviewSort = 'newest';
 let currentSection = 'home';
-let currentDorm = null;
-
-// Quick-post strip state (persists across dynamic re-renders).
-let quickRating = 0;
-let quickYear = '';
-// Full-form state.
-let formRating = 0;
-let formYear = '';
-let formCaptchaId = null;
 
 /* ------------------------------------------------------------------ *
  * Rating helpers                                                     *
@@ -363,398 +347,12 @@ function selectSort(val) {
 }
 
 /* ------------------------------------------------------------------ *
- * Detail view                                                        *
+ * Detail view — hall pages live in dorm-reviews.html                 *
  * ------------------------------------------------------------------ */
-function academicYears(count) {
-  const now = new Date();
-  // Academic year starts in August (month 7).
-  const startYear = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
-  const arr = [];
-  for (let y = startYear; y > startYear - count; y--) arr.push(`${y}-${y + 1}`);
-  return arr;
-}
-
-function ratingBoxHTML(d) {
-  const none = d.reviews === 0;
-  const tc = none ? 'rating-dim' : tierClass(d.rating);
-  const num = none ? '–' : d.rating.toFixed(1);
-  const full = Math.round(d.rating);
-  return `
-    <span class="big ${tc}">${num}</span>
-    <div>
-      <div><span class="stars ${tc}">${'★'.repeat(full)}</span><span class="stars stars-empty">${'☆'.repeat(5 - full)}</span></div>
-      <div class="count">${reviewWord(d.reviews)}</div>
-    </div>`;
-}
-
-function histHTML(d) {
-  const total = d.reviewList.length;
-  return [5, 4, 3, 2, 1].map(n => {
-    const c = d.reviewList.filter(r => r.rating === n).length;
-    const pct = total ? (c / total * 100).toFixed(0) + '%' : '0%';
-    return `
-      <div class="hist-row">
-        <span class="h-label">${n}</span>
-        <div class="h-track"><div class="h-fill" style="width:${pct}"></div></div>
-        <span class="h-count">${c}</span>
-      </div>`;
-  }).join('');
-}
-
-function checklistHTML(d) {
-  const row = (label, value, color) =>
-    `<div class="checklist-row"><span class="c-label">${escHtml(label)}</span><span class="c-value" style="color:${color}">${escHtml(value)}</span></div>`;
-  const hasTag = n => d.tags.some(t => t.t === n);
-  const laundry = hasTag('In-hall Laundry');
-  const rows = [
-    row('A/C', d.ac ? '✓' : '✕', d.ac ? 'var(--green)' : 'var(--red)'),
-    row('In-hall laundry', laundry ? '✓' : '✕', laundry ? 'var(--green)' : 'var(--red)')
-  ];
-  d.tags.filter(t => t.t !== 'A/C' && t.t !== 'In-hall Laundry' && t.t !== 'No A/C' && t.t !== 'No In-hall Laundry')
-    .forEach(t => rows.push(row(t.t, '✓', 'var(--green)')));
-  rows.push(row('Rooms', d.roomTypes, 'var(--dim)'));
-  rows.push(row('Dining', (d.dining || '—').replace(' Dining Hall', ''), 'var(--dim)'));
-  rows.push(row('Built', String(d.built), 'var(--dim)'));
-  const rates = formatRates(d);
-  if (rates) {
-    rows.push(row(`Rate (${RATE_YEAR})`, rates, 'var(--ink)'));
-    rows.push(`<div class="checklist-note">Academic year, room only; dining billed separately. Exact price depends on room type and assignment. <a href="${RATE_SOURCE}" target="_blank" rel="noopener">UMD rates</a></div>`);
-  }
-  return rows.join('');
-}
-
-function reviewsListHTML(d) {
-  const sorted = [...d.reviewList].sort((a, b) => {
-    if (reviewSort === 'highest') return b.rating - a.rating;
-    if (reviewSort === 'lowest') return a.rating - b.rating;
-    return new Date(b.created_at) - new Date(a.created_at);
-  });
-  if (!sorted.length) return '<p class="no-reviews">No reviews yet :( — be the first to write one.</p>';
-  return sorted.map(r => {
-    const tc = tierClass(r.rating);
-    const initial = (r.name.trim()[0] || 'A').toUpperCase();
-    const avBg = r.name.toLowerCase().startsWith('anonymous') ? 'var(--dim)' : 'var(--red)';
-    const posted = r.created_at
-      ? new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-      : '';
-    return `
-      <div class="review-row">
-        <div class="avatar" style="background:${avBg}">${escHtml(initial)}</div>
-        <div class="rev-content">
-          <div class="rev-top">
-            <span class="rev-name">${escHtml(r.name)}</span>
-            <span class="rev-stars"><span class="${tc}">${'★'.repeat(r.rating)}</span><span class="stars-empty">${'☆'.repeat(5 - r.rating)}</span></span>
-            <span class="rev-date">${escHtml(r.date)}${posted ? ' · ' + posted : ''}</span>
-          </div>
-          <p class="rev-body">${escHtml(r.text)}</p>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function quickStarsHTML() {
-  const tc = tierClass(quickRating);
-  return [1, 2, 3, 4, 5].map(n =>
-    `<span class="${n <= quickRating ? tc : ''}" onclick="quickSetRating(${n})">★</span>`
-  ).join('');
-}
-
-function quickYearsHTML() {
-  return academicYears(4).map(y =>
-    `<button type="button" class="year-chip ${quickYear === y ? 'active' : ''}" onclick="quickSetYear('${y}')">${y}</button>`
-  ).join('');
-}
-
-// Hall pages now use the TerpDorms-style reviews page (dorm-reviews.html);
-// the in-SPA detail view below is retired but kept for reference.
 function showDetail(id) {
   location.href = `dorm-reviews.html?dorm=${encodeURIComponent(id)}`;
 }
 
-function showDetailLegacy(id) {
-  const d = dorms.find(x => x.id === id);
-  if (!d) return;
-  currentDorm = d;
-  // Reset quick-post + form state for a fresh dorm.
-  quickRating = 0; quickYear = '';
-  formRating = 0; formYear = ''; formCaptchaId = null;
-
-  document.getElementById('heroSection').style.display = 'none';
-  document.getElementById('section-' + currentSection).classList.remove('active');
-  const sec = document.getElementById('section-detail');
-  sec.classList.add('active');
-
-  const m = (d.imgs[0] || '').match(/\/([^/]+)-card\.[a-z]+/);
-  const umd = m ? `https://drf.umd.edu/facilities/residence-halls-communities/${m[1]}` : '';
-
-  document.getElementById('detailContent').innerHTML = `
-    <button class="detail-back" onclick="backToList()">All halls</button>
-    <div class="detail-grid">
-      <div class="detail-rail">
-        <div class="rail-photo" style="${d.imgs[0] ? `background-image:url('${d.imgs[0]}')` : ''}" onclick="openLightbox('${(d.imgs[0] || '').replace(/'/g, "\\'")}')"></div>
-        <h2 class="rail-name">${escHtml(d.name)}</h2>
-        <div class="rail-meta">${escHtml(d.type)} · Built ${escHtml(String(d.built))} · ${escHtml(areaLabel(d.area))}</div>
-        ${d.lat && d.lng ? '<div class="rail-map"><div id="detailMapFrame"></div></div>' : ''}
-        <div id="ratingBox" class="rating-box"></div>
-        <div id="histBox" class="hist"></div>
-        <div class="checklist">${checklistHTML(d)}</div>
-        <button class="write-review-btn" onclick="openForm()">Write a review</button>
-        ${umd ? `<div class="umd-link-wrap"><a class="umd-link" href="${umd}" target="_blank" rel="noopener">Official UMD page ↗</a></div>` : ''}
-      </div>
-      <div class="detail-main">
-        <div class="quick-strip">
-          <div class="quick-strip-row">
-            <div class="star-picker" id="quickStars">${quickStarsHTML()}</div>
-            <div class="year-chips" id="quickYears">${quickYearsHTML()}</div>
-            <input type="text" id="quickText" class="quick-input" maxlength="2000" placeholder="Quick review — what's the one thing to know?">
-            <button class="quick-post-btn" onclick="quickSubmit()">Post</button>
-          </div>
-          <div class="quick-caption">Posting as <strong>Anonymous Terp</strong> · for a named review use "Write a review"</div>
-        </div>
-        <div class="reviews-head">
-          <h3 id="reviewCountHead">${reviewWord(d.reviews)}</h3>
-          <div class="rev-sort">
-            <button class="${reviewSort === 'newest' ? 'active' : ''}" onclick="setReviewSort('newest')">Newest</button>
-            <button class="${reviewSort === 'highest' ? 'active' : ''}" onclick="setReviewSort('highest')">Highest</button>
-            <button class="${reviewSort === 'lowest' ? 'active' : ''}" onclick="setReviewSort('lowest')">Lowest</button>
-          </div>
-        </div>
-        <div id="reviewsList" class="reviews-list"></div>
-        <div id="fullFormWrap"></div>
-      </div>
-    </div>`;
-
-  renderDetailDynamic();
-  window.scrollTo(0, 0);
-
-  if (d.lat && d.lng) {
-    detailMap = createCampusMap('detailMapFrame', [d.lng, d.lat], 15.5);
-    detailMap.on('load', () => {
-      new maplibregl.Marker({ color: '#E21833' })
-        .setLngLat([d.lng, d.lat])
-        .addTo(detailMap);
-    });
-    setTimeout(() => detailMap.resize(), 120);
-  }
-}
-
-// Re-render only the parts that depend on the (live) review data.
-function renderDetailDynamic() {
-  if (!currentDorm) return;
-  const d = currentDorm;
-  const rb = document.getElementById('ratingBox');
-  const hb = document.getElementById('histBox');
-  const rc = document.getElementById('reviewCountHead');
-  const rl = document.getElementById('reviewsList');
-  if (rb) rb.innerHTML = ratingBoxHTML(d);
-  if (hb) hb.innerHTML = histHTML(d);
-  if (rc) rc.textContent = reviewWord(d.reviews);
-  if (rl) rl.innerHTML = reviewsListHTML(d);
-}
-
-function setReviewSort(val) {
-  reviewSort = val;
-  document.querySelectorAll('.rev-sort button').forEach(b =>
-    b.classList.toggle('active', b.textContent.toLowerCase() === val));
-  const rl = document.getElementById('reviewsList');
-  if (rl && currentDorm) rl.innerHTML = reviewsListHTML(currentDorm);
-}
-
-function backToList() {
-  if (detailMap) { detailMap.remove(); detailMap = null; }
-  document.getElementById('section-detail').classList.remove('active');
-  currentDorm = null;
-  if (currentSection === 'map') {
-    showSection('home');
-  } else {
-    document.getElementById('heroSection').style.display = '';
-    document.getElementById('section-' + currentSection).classList.add('active');
-  }
-}
-
-/* ------------------------------------------------------------------ *
- * Quick-post strip                                                   *
- * ------------------------------------------------------------------ */
-function quickSetRating(n) {
-  quickRating = n;
-  document.getElementById('quickStars').innerHTML = quickStarsHTML();
-}
-
-function quickSetYear(y) {
-  quickYear = y;
-  document.getElementById('quickYears').innerHTML = quickYearsHTML();
-}
-
-async function quickSubmit() {
-  const text = document.getElementById('quickText').value.trim();
-  if (quickRating === 0) return showToast('Please select a star rating.', 'error');
-  if (!quickYear) return showToast('Please select the year you lived there.', 'error');
-  if (!text) return showToast('Please write something before posting.', 'error');
-
-  let token;
-  try {
-    token = await getInvisibleCaptchaToken();
-  } catch (e) {
-    console.error('[quick-post] captcha error:', e);
-    return showToast('Could not verify you’re human. Please try again.', 'error');
-  }
-
-  const ok = await postReview({
-    dormId: currentDorm.id,
-    name: 'Anonymous Terp',
-    rating: quickRating,
-    text,
-    year: quickYear,
-    captchaToken: token
-  });
-
-  if (ok) {
-    quickRating = 0; quickYear = '';
-    document.getElementById('quickStars').innerHTML = quickStarsHTML();
-    document.getElementById('quickYears').innerHTML = quickYearsHTML();
-    document.getElementById('quickText').value = '';
-    showToast('Review posted! Thanks for contributing.', 'success');
-  }
-}
-
-/* ------------------------------------------------------------------ *
- * Full review form                                                   *
- * ------------------------------------------------------------------ */
-function formStarsHTML() {
-  const tc = tierClass(formRating);
-  return [1, 2, 3, 4, 5].map(n =>
-    `<span class="${n <= formRating ? tc : ''}" onclick="formSetRating(${n})">★</span>`
-  ).join('');
-}
-
-function formYearsHTML() {
-  return academicYears(11).map(y =>
-    `<button type="button" class="${formYear === y ? 'active' : ''}" onclick="formSetYear('${y}')">${y}</button>`
-  ).join('');
-}
-
-function openForm() {
-  formRating = 0; formYear = '';
-  const wrap = document.getElementById('fullFormWrap');
-  wrap.innerHTML = `
-    <div class="full-form">
-      <h3>Write a review</h3>
-      <label class="form-label" for="formName">Your name</label>
-      <input type="text" id="formName" placeholder="Anonymous Terp" maxlength="100">
-      <p class="form-label">Rating</p>
-      <div class="form-star-picker" id="formStars">${formStarsHTML()}</div>
-      <p class="form-label">Year lived there</p>
-      <div class="year-grid" id="formYears">${formYearsHTML()}</div>
-      <label class="form-label" for="formText">Your review</label>
-      <textarea id="formText" placeholder="What was your experience like?" maxlength="2000"></textarea>
-      <span class="char-count" id="charCount">0 / 2000</span>
-      <div class="captcha-wrap"><div id="formCaptcha"></div></div>
-      <div class="form-btn-row">
-        <button class="cancel-btn" onclick="closeForm()">Cancel</button>
-        <button class="submit-btn" onclick="submitReview()">Submit review</button>
-      </div>
-    </div>`;
-
-  document.getElementById('formText').addEventListener('input', function () {
-    document.getElementById('charCount').textContent = `${this.value.length} / 2000`;
-  });
-
-  if (typeof hcaptcha !== 'undefined') {
-    formCaptchaId = hcaptcha.render('formCaptcha', {
-      sitekey: SITEKEY,
-      theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
-    });
-  }
-
-  wrap.querySelector('.full-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function closeForm() {
-  formRating = 0; formYear = ''; formCaptchaId = null;
-  document.getElementById('fullFormWrap').innerHTML = '';
-}
-
-function formSetRating(n) {
-  formRating = n;
-  document.getElementById('formStars').innerHTML = formStarsHTML();
-}
-
-function formSetYear(y) {
-  formYear = y;
-  document.getElementById('formYears').innerHTML = formYearsHTML();
-}
-
-async function submitReview() {
-  const name = document.getElementById('formName').value.trim() || 'Anonymous Terp';
-  const text = document.getElementById('formText').value.trim();
-
-  if (!formYear) return showToast('Please select the year you lived there.', 'error');
-  if (formRating === 0) return showToast('Please select a star rating before submitting.', 'error');
-  if (!text) return showToast('Please write something before submitting.', 'error');
-  if (name.length > 100) return showToast('Name is too long (max 100 characters).', 'error');
-  if (text.length > 2000) return showToast('Review is too long (max 2000 characters).', 'error');
-
-  const captchaToken = (typeof hcaptcha !== 'undefined' && formCaptchaId !== null)
-    ? hcaptcha.getResponse(formCaptchaId) : '';
-  if (!captchaToken) return showToast('Please complete the captcha before submitting.', 'error');
-
-  const ok = await postReview({
-    dormId: currentDorm.id, name, rating: formRating, text, year: formYear, captchaToken
-  });
-
-  if (ok) {
-    closeForm();
-    showToast('Review submitted successfully! Thanks for contributing.', 'success');
-  }
-}
-
-// Shared POST to the Supabase edge function. Returns true on success.
-async function postReview(payload) {
-  let res;
-  try {
-    res = await fetch(SUBMIT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ANON_JWT}` },
-      body: JSON.stringify(payload)
-    });
-  } catch (err) {
-    console.error('[submit-review] Network error:', err);
-    showToast('Network error. Please try again.', 'error');
-    return false;
-  }
-  if (res.ok) return true;
-  const body = await res.json().catch(() => ({}));
-  console.error('[submit-review] Failed:', res.status, body);
-  showToast(body.error || 'Failed to submit review. Please try again later.', 'error');
-  return false;
-}
-
-/* ------------------------------------------------------------------ *
- * Invisible hCaptcha for the quick-post strip                        *
- * ------------------------------------------------------------------ */
-let _invisibleId = null;
-let _invisibleResolve = null;
-let _invisibleReject = null;
-
-function getInvisibleCaptchaToken() {
-  return new Promise((resolve, reject) => {
-    if (typeof hcaptcha === 'undefined') return reject(new Error('hcaptcha-unavailable'));
-    if (_invisibleId === null) {
-      _invisibleId = hcaptcha.render('quickCaptcha', {
-        sitekey: SITEKEY,
-        size: 'invisible',
-        callback: tok => { const r = _invisibleResolve; _invisibleResolve = _invisibleReject = null; r && r(tok); },
-        'error-callback': () => { const r = _invisibleReject; _invisibleResolve = _invisibleReject = null; r && r(new Error('captcha-error')); },
-        'expired-callback': () => { const r = _invisibleReject; _invisibleResolve = _invisibleReject = null; r && r(new Error('captcha-expired')); }
-      });
-    } else {
-      hcaptcha.reset(_invisibleId);
-    }
-    _invisibleResolve = resolve;
-    _invisibleReject = reject;
-    try { hcaptcha.execute(_invisibleId); } catch (e) { _invisibleResolve = _invisibleReject = null; reject(e); }
-  });
-}
 
 /* ------------------------------------------------------------------ *
  * Section routing                                                    *
@@ -763,9 +361,6 @@ function showSection(name) {
   document.querySelectorAll('.nav-links button[data-section]').forEach(b =>
     b.classList.toggle('active', b.dataset.section === name));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  if (detailMap) { detailMap.remove(); detailMap = null; }
-  currentDorm = null;
-
   currentSection = name;
   if (name === 'home') {
     document.getElementById('heroSection').style.display = '';
@@ -785,7 +380,6 @@ function showSection(name) {
  * Map (real MapLibre map)                                            *
  * ------------------------------------------------------------------ */
 let campusMap = null;
-let detailMap = null;
 let campusMarkerById = {};
 let dormRoofHeight = {}; // dormId -> roof height in meters, from the base map's buildings
 let mapDorms = [];
@@ -1129,7 +723,7 @@ window.refreshMapTheme = function () {
   // reuses the same style (same URL) and skips 'style.load'/'styledataloading',
   // so the dark recolor never re-applies on toggle. HTML markers are DOM overlays
   // and survive setStyle regardless.
-  [campusMap, detailMap].forEach(m => { if (m) m.setStyle(mapStyleUrl(), { diff: false }); });
+  if (campusMap) campusMap.setStyle(mapStyleUrl(), { diff: false });
 };
 
 function setMapActive(id, on) {
@@ -1610,28 +1204,6 @@ function initMap() {
 window.addEventListener('resize', () => { if (currentSection === 'map') fitMapHeight(); });
 
 /* ------------------------------------------------------------------ *
- * Lightbox (single image)                                            *
- * ------------------------------------------------------------------ */
-function openLightbox(src) {
-  if (!src) return;
-  document.getElementById('lightboxImg').src = src;
-  document.getElementById('lightbox').classList.add('active');
-}
-function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
-
-/* ------------------------------------------------------------------ *
- * Toast                                                              *
- * ------------------------------------------------------------------ */
-let _toastTimer = null;
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = `toast toast-${type} show`;
-  if (_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
-}
-
-/* ------------------------------------------------------------------ *
  * Misc                                                               *
  * ------------------------------------------------------------------ */
 function closeNav() {
@@ -1672,17 +1244,12 @@ function startPlaceholderTypewriter() {
 }
 
 // Expose handlers for inline onclick attributes (ES module scope isn't global).
+// Inline onclick attributes resolve against window, but this is a module.
 Object.assign(window, {
-  showSection, showDetail, backToList, toggleSaved,
+  showSection, showDetail, toggleSaved,
   filterDorms, toggleChip, setAllFilter, selectSort,
-  setReviewSort, openForm, closeForm, formSetRating, formSetYear, submitReview,
-  quickSetRating, quickSetYear, quickSubmit,
-  openLightbox, closeLightbox, closeNav,
-  filterMapSidebar, toggleMapSidebar, closeDirections
+  closeNav, filterMapSidebar, toggleMapSidebar, closeDirections
 });
-
-// Close the mobile menu with Escape / clicking a link handled inline.
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 document.addEventListener('DOMContentLoaded', () => {
   dorms.forEach(d => { d.reviewList = []; });
