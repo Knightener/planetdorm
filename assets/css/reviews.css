@@ -1,0 +1,842 @@
+/* Dorm reviews page ("Terp Classic").
+   Extracted from the inline <style> in dorm-reviews.html. This page runs its
+   own visual system and deliberately does NOT load styles.css -- see the
+   :root block below for its token set. */
+
+/* "Terp Classic" dorm reviews page — its own visual system per the design
+   handoff (design_handoff_dorm_reviews/dorm-reviews-1a.html), independent of
+   the PlanetDorm v2 tokens in styles.css. Light-only by design. */
+:root {
+  --td-red: #e21833;
+  --td-gold: #ffd200;
+  --td-red-tint: #fdeaec;
+  --td-gold-tint: #fdf6e0;
+  --td-ink: #1a1a1a;
+  --td-body: #3d3a34;
+  --td-secondary: #5c574e;
+  --td-muted: #8a857c;
+  --td-page: #faf9f7;
+  --td-card: #fff;
+  --td-border: #ece9e4;
+  --td-border2: #e5e1da;
+  --td-track: #f2f0ec;
+  --td-star: #ffb400;
+  --td-pos: #0b7a4b;
+  --td-pos-bg: #e7f4ee;
+  --td-neg: #b3540e;
+  --td-neg-bg: #fdf0e5;
+  --td-stripe: #f5f3ef;
+}
+
+/* Dark theme — mapped onto the site's dark palette (styles.css). */
+:root[data-theme="dark"] {
+  --td-red-tint: rgba(226, 24, 51, 0.16);
+  --td-gold-tint: rgba(255, 210, 0, 0.10);
+  --td-ink: #f2f0eb;
+  --td-body: #cfccc5;
+  --td-secondary: #aaa7b0;
+  --td-muted: #97949e;
+  --td-page: #131215;
+  --td-card: #1b1a1e;
+  --td-border: #2c2a30;
+  --td-border2: #35333b;
+  --td-track: rgba(255, 255, 255, 0.08);
+  --td-pos: #4cc492;
+  --td-pos-bg: rgba(76, 196, 146, 0.12);
+  --td-neg: #e59a4b;
+  --td-neg-bg: rgba(229, 154, 75, 0.14);
+  --td-stripe: #201f24;
+}
+
+
+body {
+  background: var(--td-page);
+  color: var(--td-ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbars come from chrome.css; point them at this page's palette. */
+:root { --scrollbar-thumb: var(--td-muted); --scrollbar-thumb-hover: var(--td-ink); }
+
+.td-page { width: 100%; }
+
+button { font: inherit; background: none; border: none; cursor: pointer; }
+a { color: var(--td-ink); text-decoration: none; }
+a:hover { color: var(--td-red); }
+
+/* NAV, theme toggles and the hamburger now live in chrome.css, shared with
+   styles.css. Only the font differs here -- this page runs Inter on body. */
+nav { font-family: 'Manrope', sans-serif; }
+
+/* ---------------- HALL SEARCH (in the nav bar) ---------------- */
+/* Desktop: a magnifier icon to the right of the logo opens a full-width
+   search bar under the nav. Mobile: the icon sits in nav-right and grows
+   an inline underline input (the input node is moved between the two
+   slots by JS on breakpoint changes). */
+.nav-left { display: flex; align-items: center; gap: 16px; }
+
+.nav-search { position: relative; display: none; align-items: center; }
+
+.nav-search-btn {
+  display: flex;
+  padding: 0;
+  color: var(--dim);
+  transition: color 0.15s;
+}
+
+.nav-search-btn:hover { color: var(--ink); }
+
+.nav-search-bar {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 40px 16px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+}
+
+.nav-search-bar[hidden] { display: none; }
+
+.nav-search-bar-inner { position: relative; }
+
+.nav-search-bar input {
+  width: 100%;
+  padding: 8px 0;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--line);
+  border-radius: 0;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.nav-search-bar input:focus { border-bottom-color: var(--red); }
+.nav-search-bar input::placeholder { color: var(--dim); }
+
+.nav-search input {
+  width: 0;
+  padding: 2px 0;
+  margin-left: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--ink);
+  outline: none;
+  opacity: 0;
+  transition: width 0.3s ease, margin-left 0.3s ease, opacity 0.2s, border-color 0.15s;
+}
+
+.nav-search.open input {
+  width: 180px;
+  margin-left: 10px;
+  opacity: 1;
+  border-bottom-color: var(--line);
+}
+
+.nav-search.open input:focus { border-bottom-color: var(--red); }
+.nav-search input::placeholder { color: var(--dim); }
+
+@media (max-width: 768px) {
+  /* Search collapses back into the nav-right icon with an inline input;
+     the desktop logo-side icon and under-nav bar go away. (Must come
+     after the base hall-search rules above so it wins the cascade.) */
+  .nav-search { display: flex; }
+  .nav-search.open input { width: 140px; }
+  .nav-search-btn-desktop { display: none; }
+  .nav-search-bar { display: none; }
+}
+
+/* Results dropdown hangs off the right edge of the nav search. */
+.nav-search .td-search-menu {
+  left: auto;
+  right: 0;
+  min-width: 280px;
+  top: calc(100% + 12px);
+}
+
+.td-search-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.td-search-menu::-webkit-scrollbar { width: 8px; }
+.td-search-menu::-webkit-scrollbar-thumb {
+  background: var(--td-border2);
+  border-radius: 999px;
+}
+
+.td-search-menu button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 22px 10px 14px;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--td-ink);
+}
+
+.td-search-menu button:hover { background: var(--td-track); }
+.td-search-menu .area { color: var(--td-muted); font-size: 12px; white-space: nowrap; }
+
+.td-gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 150px 150px;
+  gap: 8px;
+  padding: 20px 32px 0;
+}
+
+.td-gallery .cell {
+  border-radius: 14px;
+  background: repeating-linear-gradient(45deg, var(--td-border), var(--td-border) 10px, var(--td-stripe) 10px, var(--td-stripe) 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 12px 'Space Mono', ui-monospace, monospace;
+  color: var(--td-muted);
+  overflow: hidden;
+}
+
+.td-gallery .cell.hero { grid-row: span 2; }
+
+.td-gallery .cell.photo {
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+}
+
+/* Pull-quote from the most-helpful review, filling the empty gallery
+   cells beside the hero photo. */
+.td-gallery .cell.quote {
+  grid-column: 2 / -1;
+  grid-row: 1 / -1;
+  background: none;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 28px;
+  text-align: left;
+}
+
+.hq-text {
+  font: 500 16.5px/1.5 'DM Sans', system-ui, sans-serif;
+  color: var(--td-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hq-meta { font: 12.5px 'DM Sans', system-ui, sans-serif; color: var(--td-muted); }
+
+/* ---------------- DORM HEADER ---------------- */
+.td-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 24px 32px 8px;
+}
+
+.td-header-left { flex: 1; }
+
+.td-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.td-header h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; color: var(--td-ink); }
+
+:root[data-theme="dark"] .td-badge { color: #ff97a4; }
+
+.td-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--td-red);
+  background: var(--td-red-tint);
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+/* Save (heart) pill next to the title. */
+.td-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--td-border2);
+  border-radius: 999px;
+  padding: 4px 12px;
+  color: var(--td-secondary);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.td-save svg { fill: none; }
+.td-save:hover { color: var(--td-red); border-color: var(--td-red); }
+.td-save.saved { color: var(--td-red); border-color: var(--td-red); }
+.td-save.saved svg { fill: currentColor; }
+
+
+.td-amenities { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+.td-amenity {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+/* Color-coded features, same scheme as the v1 tags: green for perks,
+   red for drawbacks, orange for honors/LLPs. Neutral info stays gray. */
+.td-amenity.good { color: var(--td-pos); background: var(--td-pos-bg); border-color: transparent; }
+.td-amenity.bad { color: var(--td-red); background: var(--td-red-tint); border-color: transparent; }
+.td-amenity.honors { color: var(--td-neg); background: var(--td-neg-bg); border-color: transparent; }
+:root[data-theme="dark"] .td-amenity.bad { color: #f4657a; }
+
+.td-score { text-align: right; flex: none; }
+
+.td-score-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.td-score-num { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; color: var(--td-ink); }
+
+.td-score-stars { color: var(--td-star); font-size: 20px; letter-spacing: 2px; white-space: nowrap; }
+.star-empty { color: var(--td-border2); }
+
+.td-score-meta { font-size: 13px; color: var(--td-muted); margin-top: 2px; }
+.td-score-meta strong { font-weight: 700; color: var(--td-ink); }
+
+/* ---------------- BODY GRID ---------------- */
+.td-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  column-gap: 28px;
+  row-gap: 14px;
+  padding: 20px 32px 32px;
+  align-items: start;
+}
+
+/* The filter chips take their own grid row above the reviews, so the
+   sidebar (row 2) tops out level with the first review card. */
+.td-body > .td-filters,
+.td-body > .td-reviews { grid-column: 1; }
+.td-sidebar { grid-row: 2; grid-column: 2; }
+
+.td-reviews { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+/* Filter / sort chips. */
+.td-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.td-chip {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  padding: 7px 14px;
+  border-radius: 999px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.td-chip:hover { border-color: var(--td-muted); }
+
+.td-chip.active {
+  color: var(--td-page);
+  background: var(--td-ink);
+  border-color: var(--td-ink);
+  font-weight: 700;
+}
+
+.td-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  min-width: 150px;
+  background: var(--td-card);
+  border: 1px solid var(--td-border);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  display: none;
+  flex-direction: column;
+  text-align: left;
+}
+
+.td-menu.open { display: flex; }
+
+.td-menu button {
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  padding: 7px 10px;
+  border-radius: 8px;
+}
+
+.td-menu button:hover { background: var(--td-track); }
+.td-menu button.selected { color: var(--td-ink); background: var(--td-gold-tint); font-weight: 700; }
+
+/* Review cards. */
+.td-card {
+  background: var(--td-card);
+  border: 1px solid var(--td-border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  transition: box-shadow 0.15s;
+}
+
+.td-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+
+.rev-head { display: flex; align-items: center; gap: 12px; }
+
+.rev-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.rev-avatar.v0 { background: var(--td-gold); color: #1a1a1a; }
+.rev-avatar.v1 { background: var(--td-red); color: #fff; }
+.rev-avatar.v2 { background: #1a1a1a; color: var(--td-gold); }
+:root[data-theme="dark"] .rev-avatar.v2 { background: #2c2a30; }
+
+.rev-id { flex: 1; min-width: 0; }
+.rev-name { font-weight: 700; font-size: 14.5px; color: var(--td-ink); }
+.rev-name .sub { font-weight: 500; color: var(--td-muted); font-size: 12.5px; }
+.rev-meta { font-size: 12px; color: var(--td-muted); }
+.rev-stars { color: var(--td-star); font-size: 15px; letter-spacing: 1px; white-space: nowrap; }
+
+.rev-body { margin: 14px 0 0; font-size: 14px; line-height: 1.6; color: var(--td-body); text-wrap: pretty; }
+
+.rev-foot { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+
+.rev-posted { font-size: 12px; color: var(--td-muted); }
+
+.rev-tag { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+.rev-tag.pos { color: var(--td-pos); background: var(--td-pos-bg); }
+.rev-tag.neg { color: var(--td-neg); background: var(--td-neg-bg); }
+
+/* The poster's own not-yet-approved review (rendered from localStorage). */
+.td-card.pending { border-style: dashed; }
+.rev-tag.pend { color: var(--td-neg); background: var(--td-neg-bg); margin-left: auto; }
+
+.rev-helpful {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-muted);
+  transition: color 0.15s;
+}
+
+.rev-helpful:hover { color: var(--td-ink); }
+.rev-helpful.voted { color: var(--td-pos); }
+.rev-helpful.voted:hover { color: var(--td-neg); }
+
+.td-empty { color: var(--td-muted); font-size: 14px; padding: 8px 2px; }
+
+/* Loading spinner lives in chrome.css. */
+
+/* Show-all ghost button. */
+.td-show-all {
+  align-self: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--td-red);
+  padding: 10px 22px;
+  border: 1.5px solid var(--td-red);
+  border-radius: 999px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.td-show-all:hover { background: var(--td-red); color: #fff; }
+
+/* ---------------- SIDEBAR ---------------- */
+.td-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+/* Matches .glance-title / .td-walk-title. */
+.td-card-title {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--td-secondary);
+  margin-bottom: 14px;
+}
+
+.bd-rows { display: flex; flex-direction: column; gap: 11px; }
+
+.bd-row { display: flex; align-items: center; gap: 10px; }
+.bd-label { width: 92px; font-size: 13.5px; color: var(--td-secondary); flex-shrink: 0; }
+.bd-track { flex: 1; height: 8px; background: var(--td-track); border-radius: 999px; overflow: hidden; }
+.bd-fill { height: 100%; background: var(--td-red); border-radius: 999px; }
+.bd-score { width: 26px; text-align: right; font-size: 13.5px; font-weight: 700; color: var(--td-ink); }
+
+.bd-foot {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--td-track);
+  font-size: 12.5px;
+  color: var(--td-muted);
+  line-height: 1.5;
+}
+
+/* At-a-glance facts card. */
+.glance-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--td-secondary);
+  margin-bottom: 12px;
+}
+
+.glance-rows { display: flex; flex-direction: column; gap: 10px; }
+
+.glance-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.glance-label { font-size: 13.5px; color: var(--td-muted); flex-shrink: 0; }
+.glance-value { font-size: 13.5px; color: var(--td-ink); text-align: right; }
+
+.glance-foot {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--td-track);
+  font-size: 12.5px;
+  color: var(--td-muted);
+  line-height: 1.5;
+}
+
+.glance-foot a { color: inherit; text-decoration: underline; }
+
+/* A rate note plus an editorial subline: only the first gets the divider. */
+.glance-foot + .glance-foot { margin-top: 8px; padding-top: 0; border-top: none; }
+
+.td-write-btn {
+  width: 100%;
+  padding: 12px 22px;
+  background: var(--td-red);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+
+.td-write-btn:hover { background: #b01228; }
+
+/* ---------------- WRITE-A-REVIEW FORM ---------------- */
+.td-form-title { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; color: var(--td-ink); margin-bottom: 16px; }
+
+.td-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--td-secondary);
+  margin: 0 0 6px;
+}
+
+.td-input, .td-textarea {
+  width: 100%;
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  border-radius: 10px;
+  color: var(--td-ink);
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.td-input:focus, .td-textarea:focus { border-color: var(--td-red); }
+.td-input::placeholder, .td-textarea::placeholder { color: var(--td-muted); }
+.td-input { margin-bottom: 16px; }
+.td-textarea { height: 120px; resize: vertical; }
+
+.td-star-picker { display: flex; gap: 6px; margin-bottom: 16px; }
+.td-star-picker span {
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--td-border2);
+  transition: color 0.15s;
+}
+.td-star-picker span.filled { color: var(--td-star); }
+
+.td-years { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+.td-year {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--td-secondary);
+  background: var(--td-card);
+  border: 1px solid var(--td-border2);
+  padding: 7px 14px;
+  border-radius: 999px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.td-year:hover { border-color: var(--td-muted); }
+.td-year.active { color: var(--td-page); background: var(--td-ink); border-color: var(--td-ink); font-weight: 700; }
+
+.td-char { display: block; text-align: right; font-size: 12px; color: var(--td-muted); margin-top: 4px; }
+
+.td-form-btns { display: flex; gap: 10px; margin-top: 4px; }
+
+.td-cancel, .td-submit {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: 999px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.td-cancel { color: var(--td-secondary); border: 1.5px solid var(--td-border2); }
+.td-cancel:hover { color: var(--td-ink); border-color: var(--td-ink); }
+.td-submit { color: #fff; background: var(--td-red); border: 1.5px solid var(--td-red); }
+.td-submit:hover { background: #b01228; border-color: #b01228; }
+
+/* ---------------- TOAST ---------------- */
+.td-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--td-ink);
+  color: var(--td-page);
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  z-index: 9999;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.td-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.td-toast.error { color: #ff9aa6; }
+
+/* ---------------- LIGHTBOX ---------------- */
+.td-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 3000;
+  justify-content: center;
+  align-items: center;
+}
+
+.td-lightbox.active { display: flex; }
+
+/* Viewer column: rounded photo above a thumbnail selector. */
+.td-lightbox-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 92vw;
+}
+
+.td-lightbox-inner img {
+  max-width: 92vw;
+  max-height: 76vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.td-lightbox-strip {
+  display: flex;
+  gap: 10px;
+  max-width: 92vw;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: none;
+}
+.td-lightbox-strip::-webkit-scrollbar { display: none; }
+.td-lightbox-strip:empty { display: none; }
+
+.td-lightbox-thumb {
+  width: 84px;
+  height: 58px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  border: 2px solid transparent;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  opacity: 0.55;
+  padding: 0;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.td-lightbox-thumb:hover { opacity: 0.85; }
+.td-lightbox-thumb.active { opacity: 1; border-color: #fff; }
+
+.td-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  color: #fff;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Page must not scroll behind the viewer. */
+body.lightbox-open { overflow: hidden; }
+
+/* ---------------- LOCATION MAP PREVIEW ---------------- */
+.td-map-frame {
+  position: relative;
+  height: 180px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--td-track);
+}
+
+.td-map-frame .maplibregl-canvas { cursor: pointer; }
+
+/* MapLibre's stylesheet sets Helvetica on the map container; match the page font. */
+.td-map-frame .maplibregl-map { font-family: 'Inter', system-ui, sans-serif; }
+
+/* Rough dark-mode look for the light map tiles; the marker is a DOM
+   overlay, so filtering only the canvas leaves it red. */
+:root[data-theme="dark"] .td-map-frame canvas {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.7) brightness(0.95);
+}
+
+/* Walk times under the mini-map. Clicking a destination previews the
+   walking route on the map above. */
+.td-walks {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--td-track);
+}
+
+.td-walk-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--td-secondary);
+  margin-bottom: 6px;
+}
+
+.td-walk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* Bleed the hover surface past the card padding so the row text lines
+     up with the card title and the other sidebar cards. */
+  width: calc(100% + 20px);
+  margin-inline: -10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-align: left;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-optical-sizing: auto;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--td-secondary);
+  transition: background 0.15s, color 0.15s;
+}
+
+.td-walk-name { display: flex; flex-direction: column; gap: 2px; }
+
+.td-walk-kind {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--td-muted);
+}
+
+.td-walk-row:hover { background: var(--td-track); color: var(--td-ink); }
+.td-walk-row.active { background: var(--td-red-tint); color: var(--td-ink); }
+
+.td-walk-eta { font-weight: 700; color: var(--td-ink); white-space: nowrap; }
+.td-walk-row.active .td-walk-eta { color: var(--td-red); }
+:root[data-theme="dark"] .td-walk-row.active .td-walk-eta { color: #ff97a4; }
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 1024px) {
+  .td-body { grid-template-columns: 1fr; }
+  .td-sidebar { grid-row: auto; grid-column: auto; margin-top: 14px; }
+  /* Stacked layout: review CTA comes first in the sidebar, so it always
+     sits directly under the last review. */
+  .td-write-btn { order: 1; }
+  #breakdownCard { order: 2; }
+  #glanceCard { order: 3; }
+  #mapCard { order: 4; }
+}
+
+@media (max-width: 640px) {
+  /* Contained 2-col grid: full-width hero photo, tiles below — nothing
+     overflows the viewport. */
+  .td-gallery {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: 90px;
+    padding: 16px 20px 0;
+  }
+  .td-gallery .cell.hero { grid-column: 1 / -1; }
+  .td-gallery .cell.quote { display: none; }
+
+  .td-header { flex-direction: column; gap: 14px; padding: 20px 20px 8px; }
+  .td-score { text-align: left; }
+  .td-score-row { justify-content: flex-start; }
+  .td-body { padding: 16px 20px 28px; }
+}

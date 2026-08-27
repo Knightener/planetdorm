@@ -5,27 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PlanetDorm</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<script>
-// v2 theme model: light is the default (no attribute); dark is opt-in via
-// data-theme="dark". Persisted in localStorage under "pd2-theme".
-(function(){
-  var saved = localStorage.getItem('pd2-theme');
-  var dark = saved ? saved === 'dark'
-    : window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (dark) document.documentElement.dataset.theme = 'dark';
-})();
-function toggleTheme(){
-  var root = document.documentElement;
-  var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-  if (next === 'dark') root.dataset.theme = 'dark';
-  else delete root.dataset.theme;
-  localStorage.setItem('pd2-theme', next);
-  if (window.refreshMapTheme) window.refreshMapTheme();
-}
-</script>
+<script src="assets/js/theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/chrome.css">
 <link rel="stylesheet" href="assets/css/styles.css">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -73,7 +57,7 @@ function toggleTheme(){
   <div class="count-sort-row">
     <div class="filter-row-left">
       <button class="filter-toggle" id="filterToggle" onclick="document.getElementById('filterBand').classList.toggle('open');this.classList.toggle('open')">
-        Filter by...
+        Filter
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </button>
     </div>

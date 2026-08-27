@@ -3,3 +3,6 @@
 node_modules/
 dist/
 .DS_Store
+
+# Supabase CLI local state (link target, version cache) — not shared config.
+supabase/.temp/

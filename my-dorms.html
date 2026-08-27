@@ -5,22 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Dorms</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<script>
-// v2 theme model: light is the default; dark is opt-in via data-theme="dark".
-(function(){
-  var saved = localStorage.getItem('pd2-theme');
-  var dark = saved ? saved === 'dark'
-    : window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (dark) document.documentElement.dataset.theme = 'dark';
-})();
-function toggleTheme(){
-  var root = document.documentElement;
-  var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-  if (next === 'dark') root.dataset.theme = 'dark';
-  else delete root.dataset.theme;
-  localStorage.setItem('pd2-theme', next);
-}
-</script>
+<script src="assets/js/theme.js"></script>
+<link rel="stylesheet" href="assets/css/chrome.css">
 <link rel="stylesheet" href="assets/css/styles.css">
 <style>
   /* Sticky footer: the list area grows so the disclaimer stays pinned
