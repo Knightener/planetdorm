@@ -4,15 +4,15 @@
  * :root[data-theme="dark"].                                      *
  * ============================================================= */
 
-/* Load Manrope from the stylesheet so every page that links it
+/* Load DM Sans from the stylesheet so every page that links it
    (index + about/privacy/terms) gets the font, not just index. */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* --bg / --ink / --dim / --line / --red / --logo-gold come from chrome.css. */
   --red-dark: #B01228;
   --gold: #cc9b00;
-  --field: #ffffff;
+  --field: #fdf8f1;
   --hover: rgba(0, 0, 0, 0.04);
   --green: #0e7a52;
   --orange: #c05f00;
@@ -24,12 +24,12 @@
   --border: var(--line);
   --surface: var(--field);
   --surface2: var(--field);
-  --surface3: #eceae4;
+  --surface3: #e9e0d3;
   --nav-bg: var(--bg);
   --blue: #2563eb;
 
-  --font: 'Manrope', sans-serif;
-  --font-map: 'Inter', 'Manrope', sans-serif; /* map markers + key */
+  --font: 'DM Sans', sans-serif;
+  --font-map: 'DM Sans', sans-serif;  /* map markers + key */
   font-family: var(--font);
   color: var(--ink);
 }
@@ -68,7 +68,7 @@ input::placeholder, textarea::placeholder {
 @keyframes platShine { to { background-position: -200% center; } }
 
 /* NAV, theme toggles and the hamburger live in chrome.css (shared with the
-   dorm-reviews stylesheet). The nav inherits Manrope from :root here. */
+   dorm-reviews stylesheet). The nav inherits DM Sans from :root here. */
 
 /* ---------------- HERO ---------------- */
 .hero {
@@ -200,13 +200,23 @@ input::placeholder, textarea::placeholder {
 
 /* Once script.js has measured the words it locks the reel to the widest cell
    and adds .reel--sized. The cells then fill that fixed box and centre their
-   text, so the sentence around the reel never reflows mid-spin. */
+   text, so the sentence around the reel never reflows mid-spin.
+
+   That box is wider than "home.", though, so laying the line out around it
+   would leave the whole sentence off-centre for the length of the spin. The
+   surplus is bled back out through negative margins (--reel-bleed, set in px
+   by script.js) so the line takes up exactly the width of the settled
+   sentence while the reel still paints its full width, centred on the same
+   axis as every word inside it. */
+.reel--sized {
+  margin-left: calc(-1 * var(--reel-bleed, 0px));
+  margin-right: calc(-1 * var(--reel-bleed, 0px));
+}
+
 .reel--sized .reel__word {
   width: 100%;
   text-align: center;
 }
-
-.reel__word--final { font-weight: 700; }
 
 .sr-only {
   position: absolute;
@@ -293,22 +303,25 @@ input::placeholder, textarea::placeholder {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--field);
+  /* Same outlined pill as the sort dropdown it sits opposite: hairline ring,
+     no fill, ink label. */
+  background: transparent;
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 8px 16px;
   cursor: pointer;
-  color: var(--red);
+  color: var(--ink);
   font-size: 0.92rem;
   font-weight: 800;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s;
 }
 
 @media (hover: hover) {
-  .filter-toggle:hover { background: var(--hover); border-color: var(--red); }
+  .filter-toggle:hover { background: var(--hover); }
 }
 
-.filter-toggle.open { border-color: var(--red); }
+/* Open reads from the fill and the chevron flip; the ring stays neutral. */
+.filter-toggle.open { background: var(--hover); }
 
 .filter-row-left {
   display: flex;
@@ -572,6 +585,20 @@ input::placeholder, textarea::placeholder {
   .dorm-row .save-btn { grid-column: 3; grid-row: 1 / -1; }
 }
 
+/* Highlight colour for a hall's rating tier, used wherever hovering or
+   selecting a dorm outlines it — the map markers and the sidebar cards. Set
+   on the element itself so both read from one place. Diamond gets a flat
+   silver here for the halo; the ring itself is drawn as a gradient below.
+   Unrated halls highlight in --ink: black on the light theme, per the same
+   rule the buildings follow, and legible instead of invisible on the dark. */
+.tier-red { --tier-hi: var(--red); }
+.tier-orange { --tier-hi: var(--orange); }
+.tier-gold { --tier-hi: var(--gold); }
+.tier-plat { --tier-hi: #9fb6c9; }
+.tier-none { --tier-hi: var(--ink); }
+
+:root[data-theme="dark"] .tier-plat { --tier-hi: #cfe2ef; }
+
 /* Rating tier colours (shared everywhere). */
 .rating-red { color: var(--red); }
 .rating-orange { color: var(--orange); }
@@ -719,9 +746,21 @@ body.map-view-active { overflow: hidden; }
 
 .map-card.marker-active,
 .map-card.marker-selected {
-  border-color: var(--logo-gold);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--logo-gold) 55%, transparent);
+  border-color: var(--tier-hi, var(--logo-gold));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tier-hi, var(--logo-gold)) 55%, transparent);
   transform: translateY(-2px);
+}
+
+/* Diamond outlines in the real gradient: the border box carries --plat-grad
+   while a solid layer masks the padding box back to the card's own colour. */
+.map-card.tier-plat.marker-active,
+.map-card.tier-plat.marker-selected {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--field), var(--field)) padding-box,
+    var(--plat-grad) border-box;
+  background-size: auto, 200% auto;
+  animation: platShine 2.5s linear infinite;
 }
 
 /* Open button: only visible on the selected card. */
@@ -778,30 +817,29 @@ body.map-view-active { overflow: hidden; }
 
 #mapFrame { width: 100%; height: 100%; }
 
-/* Marker pills. touch-action keeps a swipe that starts on a pill from
-   turning into a page scroll on mobile. */
-.map-marker { cursor: pointer; touch-action: none; }
+/* Markers. touch-action keeps a swipe that starts on a marker from turning
+   into a page scroll on mobile. The element is a zero-size point that the
+   capsule hangs off (see .map-marker-plate); the capsule still takes clicks
+   and hovers, since hit-testing follows the painted child, not the parent. */
+.map-marker {
+  cursor: pointer;
+  touch-action: none;
+  width: 0;
+  height: 0;
+}
 .map-labels-hidden .map-marker { display: none; }
 /* Map key (bottom-left control): building colors + route line legend, with
    the labels toggle inside. Swatch colors mirror DORM_AREA_COLORS in
    script.js — keep the two in sync. */
-/* Map key and marker pills use Inter (loaded on index.html) instead of
-   the site font — see --font-map in :root. */
+/* Map key and markers set the font explicitly because MapLibre puts
+   Helvetica on the map container — see --font-map in :root. */
 .map-key {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--field);
+  border-radius: 14px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   padding: 9px 12px 10px;
   font-family: var(--font-map);
   color: var(--ink);
-}
-.map-key-title {
-  font-size: 0.66rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--dim);
-  margin-bottom: 4px;
 }
 .map-key-row {
   display: flex;
@@ -833,40 +871,93 @@ body.map-view-active { overflow: hidden; }
   transition: background 0.15s;
 }
 .map-key .map-labels-toggle:hover { background: rgba(0, 0, 0, 0.05); }
-.map-marker-pill {
-  background: var(--field);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 4px 9px;
-  font-family: var(--font-map); /* MapLibre sets Helvetica on the map container */
-  font-size: 0.72rem;
-  line-height: 1.25;
-  text-align: center;
-  white-space: nowrap;
-  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.18);
-  position: relative;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.map-marker-pill::after {
-  content: '';
+
+/* One capsule per location: the coloured disc and the name share a single
+   plate, so the icon reads as part of the label rather than a chip parked
+   next to it.
+
+   The marker element itself is a zero-size point and the capsule hangs off it
+   absolutely. MapLibre anchors on the element box, so a capsule in the flow
+   would centre the whole pill on the coordinate and push the disc off the
+   roof point liftMarkersToRoofs() picked; at 0x0 the anchor is the point and
+   the offsets below put the disc exactly on it. */
+.map-marker-plate {
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: var(--field);
-  margin-top: -1px;
+  bottom: 0;
+  left: -15.5px; /* 1.5px border + 3px padding + half the 22px disc, so the disc centres on the point */
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 11px 3px 3px;
+  /* A real border rather than a ring shadow, so the diamond tier can paint
+     the gradient into it (see below). */
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--field);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  font-family: var(--font-map); /* MapLibre sets Helvetica on the map container */
+  line-height: 1.25;
+  white-space: nowrap;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
-.map-marker-name { display: block; font-weight: 500; }
-.map-marker-sub { display: block; font-size: 0.68rem; color: var(--logo-gold); font-weight: 500; }
+
+/* Filled disc with a knocked-out glyph. The fill is set per marker from
+   DORM_AREA_COLORS so it matches the building underneath and the swatches
+   in the key. */
+.map-marker-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--marker-color, var(--dim));
+  color: #fff;
+}
+
+.map-marker-glyph { width: 13px; height: 13px; display: block; }
+
+.map-marker-name {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.map-marker-sub {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--dim);
+}
+
+.map-marker-star { color: var(--logo-gold); }
+
 .map-marker.marker-active, .map-marker.marker-selected { z-index: 10; }
-.map-marker.marker-active .map-marker-pill,
-.map-marker.marker-selected .map-marker-pill {
-  transform: scale(1.08);
-  border-color: var(--logo-gold);
-  box-shadow: 0 0 0 2px var(--logo-gold), 0 6px 16px rgba(0, 0, 0, 0.25);
+
+/* Grow from the disc, not the capsule's centre, so the marker stays pinned
+   to its building while it lifts. */
+.map-marker.marker-active .map-marker-plate,
+.map-marker.marker-selected .map-marker-plate {
+  transform: scale(1.06);
+  transform-origin: 15.5px center;
+  border-color: var(--tier-hi, var(--logo-gold));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
 }
+
+.map-marker.tier-plat.marker-active .map-marker-plate,
+.map-marker.tier-plat.marker-selected .map-marker-plate {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--field), var(--field)) padding-box,
+    var(--plat-grad) border-box;
+  background-size: auto, 200% auto;
+  animation: platShine 2.5s linear infinite;
+}
+
+.map-marker.marker-active .map-marker-name,
+.map-marker.marker-selected .map-marker-name { font-weight: 700; }
 
 /* Walk-times panel (map overlay, top-left). Shows precomputed walking
    ETAs from the selected dorm; clicking a row draws the route. */
@@ -997,16 +1088,31 @@ body.map-view-active { overflow: hidden; }
   color: var(--dim);
 }
 
-/* Destination pill: red accents instead of the dorm gold, and it stays
+/* Destination marker: red accents instead of the dorm gold, and it stays
    visible when the dorm labels are toggled off. */
-.route-dest-marker .map-marker-pill { border-color: var(--red); }
+.route-dest-marker .map-marker-icon { background: var(--red); }
 .route-dest-marker .map-marker-sub { color: var(--red); }
 .map-labels-hidden .route-dest-marker { display: block; }
 
 :root[data-theme="dark"] .map-directions-row.active { background: rgba(255, 84, 104, 0.14); }
 :root[data-theme="dark"] .map-directions-eta,
 :root[data-theme="dark"] .route-dest-marker .map-marker-sub { color: #ff5468; }
-:root[data-theme="dark"] .route-dest-marker .map-marker-pill { border-color: #ff5468; }
+:root[data-theme="dark"] .route-dest-marker .map-marker-icon { background: #ff5468; }
+
+/* Dark basemap: the capsule needs a ring that lifts off the dark ground
+   rather than sinking into it. */
+:root[data-theme="dark"] .map-marker-plate {
+  background: #14161c;
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+:root[data-theme="dark"] .map-marker.tier-plat.marker-active .map-marker-plate,
+:root[data-theme="dark"] .map-marker.tier-plat.marker-selected .map-marker-plate {
+  background:
+    linear-gradient(#14161c, #14161c) padding-box,
+    var(--plat-grad) border-box;
+  background-size: auto, 200% auto;
+}
 
 /* Dark-map recolouring of the sidebar + MapLibre chrome. */
 :root[data-theme="dark"] .map-key {

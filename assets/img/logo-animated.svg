@@ -7,8 +7,8 @@
     .p { animation: pulse 1.4s ease-in-out infinite; }
     .d { animation: pulse 1.4s ease-in-out infinite; animation-delay: 0.7s; }
   </style>
-  <!-- SVGs loaded via <img> can't fetch web fonts, so Manrope only applies
+  <!-- SVGs loaded via <img> can't fetch web fonts, so DM Sans only applies
        where it's installed; the fallbacks keep the same bold sans look. -->
-  <text class="p" x="2"  y="26" font-family="Manrope, 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800" fill="#E21833">P</text>
-  <text class="d" x="16" y="26" font-family="Manrope, 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800" fill="#ffd200">D</text>
+  <text class="p" x="2"  y="26" font-family="'DM Sans', 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800" fill="#E21833">P</text>
+  <text class="d" x="16" y="26" font-family="'DM Sans', 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800" fill="#ffd200">D</text>
 </svg>

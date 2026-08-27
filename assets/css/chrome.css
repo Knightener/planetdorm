@@ -5,7 +5,7 @@
  * These rules were byte-identical in styles.css and the dorm-   *
  * reviews stylesheet. Both now link this file FIRST, then their *
  * own sheet on top -- so a page-specific override (e.g. the     *
- * reviews page setting Manrope on the nav) still wins.          *
+ * reviews page setting DM Sans on the nav) still wins.           *
  *                                                               *
  * The two pages run different palettes, so the scrollbar reads  *
  * its colours from --scrollbar-thumb / --scrollbar-thumb-hover; *
@@ -16,10 +16,11 @@
 /* Tokens the chrome needs. Owned here so neither stylesheet has to
    redeclare them; page palettes live in styles.css / reviews.css. */
 :root {
-  --bg: #faf9f7;
+  /* Warm cream ground; --field stays white so cards lift off it. */
+  --bg: #f2e8dc;
   --ink: #17161a;
   --dim: #6e6c75;
-  --line: #e2e0da;
+  --line: #e0d6c8;
   --red: #E21833;
   --logo-gold: #d9a300;
 
@@ -60,8 +61,8 @@
 ::-webkit-scrollbar-corner { background: transparent; }
 
 /* ---------------- NAV ---------------- */
-/* No font-family here: styles.css pages inherit Manrope from :root, and
-   reviews.css sets it on nav explicitly (its body font is Inter). */
+/* No font-family here: styles.css pages inherit DM Sans from :root, and
+   reviews.css sets it on nav explicitly, so its own rule wins. */
 nav {
   position: sticky;
   top: 0;

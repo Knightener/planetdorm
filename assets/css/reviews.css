@@ -15,17 +15,17 @@
   --td-body: #3d3a34;
   --td-secondary: #5c574e;
   --td-muted: #8a857c;
-  --td-page: #faf9f7;
-  --td-card: #fff;
-  --td-border: #ece9e4;
-  --td-border2: #e5e1da;
-  --td-track: #f2f0ec;
+  --td-page: #f2e8dc;
+  --td-card: #fdf8f1;
+  --td-border: #e6ded1;
+  --td-border2: #ded5c6;
+  --td-track: #ece3d6;
   --td-star: #ffb400;
   --td-pos: #0b7a4b;
   --td-pos-bg: #e7f4ee;
   --td-neg: #b3540e;
   --td-neg-bg: #fdf0e5;
-  --td-stripe: #f5f3ef;
+  --td-stripe: #f7f1e7;
 }
 
 /* Dark theme — mapped onto the site's dark palette (styles.css). */
@@ -52,7 +52,7 @@
 body {
   background: var(--td-page);
   color: var(--td-ink);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
 }
@@ -67,8 +67,8 @@ a { color: var(--td-ink); text-decoration: none; }
 a:hover { color: var(--td-red); }
 
 /* NAV, theme toggles and the hamburger now live in chrome.css, shared with
-   styles.css. Only the font differs here -- this page runs Inter on body. */
-nav { font-family: 'Manrope', sans-serif; }
+   styles.css. The nav is set explicitly so it wins over the body rule. */
+nav { font-family: 'DM Sans', sans-serif; }
 
 /* ---------------- HALL SEARCH (in the nav bar) ---------------- */
 /* Desktop: a magnifier icon to the right of the logo opens a full-width
@@ -750,7 +750,7 @@ body.lightbox-open { overflow: hidden; }
 .td-map-frame .maplibregl-canvas { cursor: pointer; }
 
 /* MapLibre's stylesheet sets Helvetica on the map container; match the page font. */
-.td-map-frame .maplibregl-map { font-family: 'Inter', system-ui, sans-serif; }
+.td-map-frame .maplibregl-map { font-family: 'DM Sans', system-ui, sans-serif; }
 
 /* Rough dark-mode look for the light map tiles; the marker is a DOM
    overlay, so filtering only the canvas leaves it red. */
@@ -786,7 +786,7 @@ body.lightbox-open { overflow: hidden; }
   padding: 8px 10px;
   border-radius: 8px;
   text-align: left;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-optical-sizing: auto;
   font-size: 13.5px;
   font-weight: 600;

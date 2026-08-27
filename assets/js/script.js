@@ -64,6 +64,7 @@ async function loadAllReviews() {
   });
 
   hideReviewsLoading();
+  refreshDormTierColors();
   if (currentSection === 'home') renderDorms();
 }
 
@@ -435,11 +436,45 @@ const DORM_SRC = 'dorm-buildings';
 const DORM_LAYER = 'dorm-buildings-3d';
 
 const DORM_AREA_COLORS = {
-  light: { north: '#e21833', south: '#e8a000', commons: '#2f6fd0',
-           northHi: '#ff4d61', southHi: '#ffc233', commonsHi: '#5b96f0' },
-  dark:  { north: '#ff5468', south: '#ffc233', commons: '#5b96f0',
-           northHi: '#ff8b99', southHi: '#ffd876', commonsHi: '#8fb8f7' }
+  light: { north: '#e21833', south: '#e8a000', commons: '#2f6fd0' },
+  dark:  { north: '#ff5468', south: '#ffc233', commons: '#5b96f0' }
 };
+
+/* Hover/selected highlight for a dorm's roof cap: the hall's rating tier, so
+ * pointing at a building tells you how it scores. Brighter than the .rating-*
+ * text tokens because these are read as a large lit surface, not as type.
+ * Diamond is the platinum silver the gradient runs through — an extrusion
+ * fill takes one flat colour, so it gets the gradient's brightest note.
+ * Unrated halls highlight black, per the same rule the map markers follow. */
+const DORM_TIER_COLORS = {
+  light: { red: '#ff4d61', orange: '#ff9d2e', gold: '#ffc233', plat: '#dbe6ef', none: '#000000' },
+  dark:  { red: '#ff8b99', orange: '#ffb870', gold: '#ffd876', plat: '#ffffff', none: '#000000' }
+};
+
+// match on dormId rather than a feature property: ratings arrive after the
+// geometry does, and re-applying paint is cheaper than re-pushing the source.
+function dormTierColorExpr() {
+  const c = DORM_TIER_COLORS[isDarkTheme() ? 'dark' : 'light'];
+  const pairs = [];
+  dorms.forEach(d => pairs.push(d.id, c[markerTier(d).slice(5)] || c.none));
+  return pairs.length ? ['match', ['get', 'dormId'], ...pairs, c.none] : c.none;
+}
+
+/* Marker glyphs: a building for halls, a flag for a walk destination. Drawn
+ * inline so the disc's fill shows through the knocked-out windows. */
+const GLYPH_BUILDING = `<svg class="map-marker-glyph" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M4 3h16v18H4z M7 6.5h3.5v3.5H7z M13.5 6.5h3.5v3.5h-3.5z M7 11.5h3.5v3.5H7z M13.5 11.5h3.5v3.5h-3.5z M10 16.5h4v4.5h-4z"/></svg>`;
+const GLYPH_FLAG = `<svg class="map-marker-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4"/><path d="M6 4.5h11l-2.4 3.75L17 12H6z"/></svg>`;
+
+// Marker tint for a dorm's campus area, matching the key swatches.
+function areaMarkerColor(area) {
+  const c = DORM_AREA_COLORS[isDarkTheme() ? 'dark' : 'light'];
+  return c[area] || c.north;
+}
+
+// Rating tier for a dorm, as a 'tier-*' name; unrated halls get 'tier-none'.
+function markerTier(d) {
+  return d.reviews > 0 ? tierClass(d.rating).replace('rating-', 'tier-') : 'tier-none';
+}
 
 let dormGeojsonPromise = null;
 function loadDormGeojson() {
@@ -495,11 +530,12 @@ async function loadDormShapes() {
 function dormBuildingPaint() {
   const c = DORM_AREA_COLORS[isDarkTheme() ? 'dark' : 'light'];
   const byArea = (n, s, co) => ['match', ['get', 'area'], 'south', s, 'commons', co, n];
+  const hi = dormTierColorExpr();
   return {
     'fill-extrusion-color': [
       'case',
-      ['boolean', ['feature-state', 'selected'], false], byArea(c.northHi, c.southHi, c.commonsHi),
-      ['boolean', ['feature-state', 'hover'], false], byArea(c.northHi, c.southHi, c.commonsHi),
+      ['boolean', ['feature-state', 'selected'], false], hi,
+      ['boolean', ['feature-state', 'hover'], false], hi,
       byArea(c.north, c.south, c.commons)
     ],
     'fill-extrusion-height': ['get', 'render_height'],
@@ -641,6 +677,14 @@ async function addDormBuildings(map) {
   }
 }
 
+/* Reviews load asynchronously; the highlight colours are baked into the paint
+ * expression, so re-apply it once the ratings that decide them exist. */
+function refreshDormTierColors() {
+  if (campusMap?.getLayer?.(DORM_LAYER)) {
+    campusMap.setPaintProperty(DORM_LAYER, 'fill-extrusion-color', dormBuildingPaint()['fill-extrusion-color']);
+  }
+}
+
 function setDormBuildingState(map, id, state) {
   if (map && map.getSource(DORM_SRC)) map.setFeatureState({ source: DORM_SRC, id }, state);
 }
@@ -724,6 +768,12 @@ window.refreshMapTheme = function () {
   // so the dark recolor never re-applies on toggle. HTML markers are DOM overlays
   // and survive setStyle regardless.
   if (campusMap) campusMap.setStyle(mapStyleUrl(), { diff: false });
+  // Markers survive the style swap, so their inline tint is still the old
+  // theme's — repaint it by hand.
+  Object.entries(campusMarkerById).forEach(([id, { el }]) => {
+    const d = dorms.find(x => x.id === id);
+    if (d) el.style.setProperty('--marker-color', areaMarkerColor(d.area));
+  });
 };
 
 function setMapActive(id, on) {
@@ -950,9 +1000,12 @@ function drawWalkRoute(d, lm, r) {
   const el = document.createElement('div');
   el.className = 'map-marker route-dest-marker';
   el.innerHTML = `
-    <div class="map-marker-pill">
-      <span class="map-marker-name">${escHtml(lm.short)}</span>
-      <span class="map-marker-sub">${walkMinutes(r)} min walk</span>
+    <div class="map-marker-plate">
+      <div class="map-marker-icon">${GLYPH_FLAG}</div>
+      <div class="map-marker-label">
+        <span class="map-marker-name">${escHtml(lm.short)}</span>
+        <span class="map-marker-sub">${walkMinutes(r)} min walk</span>
+      </div>
     </div>`;
   routeDestMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
     .setLngLat([lm.lng, lm.lat]).addTo(campusMap);
@@ -986,7 +1039,6 @@ function addMapKey(map) {
   const container = document.createElement('div');
   container.className = 'maplibregl-ctrl map-key';
   container.innerHTML = `
-    <div class="map-key-title">Key</div>
     <div class="map-key-row"><span class="map-key-swatch north"></span>North Campus</div>
     <div class="map-key-row"><span class="map-key-swatch south"></span>South Campus</div>
     <div class="map-key-row"><span class="map-key-swatch commons"></span>The Commons</div>
@@ -1004,11 +1056,17 @@ function addMapKey(map) {
 function addCampusMarkers(dormList) {
   dormList.forEach(d => {
     const el = document.createElement('div');
-    el.className = 'map-marker';
+    // Tier class drives the hover/selected outline colour (see .tier-* in CSS).
+    el.className = 'map-marker ' + markerTier(d);
+    // Tint the disc to match the building beneath it and the key swatches.
+    el.style.setProperty('--marker-color', areaMarkerColor(d.area));
     el.innerHTML = `
-      <div class="map-marker-pill">
-        <span class="map-marker-name">${escHtml(d.name)}</span>
-        ${d.reviews > 0 ? `<span class="map-marker-sub">${d.rating.toFixed(1)} ★</span>` : ''}
+      <div class="map-marker-plate">
+        <div class="map-marker-icon">${GLYPH_BUILDING}</div>
+        <div class="map-marker-label">
+          <span class="map-marker-name">${escHtml(d.name)}</span>
+          ${d.reviews > 0 ? `<span class="map-marker-sub">${d.rating.toFixed(1)} <span class="map-marker-star">★</span></span>` : ''}
+        </div>
       </div>`;
     el.addEventListener('mouseenter', () => setMapActive(d.id, true));
     el.addEventListener('mouseleave', () => setMapActive(d.id, false));
@@ -1051,7 +1109,7 @@ function mapCardHTML(d) {
     ? '<span class="rating-dim">No reviews</span>'
     : `<span class="${tierClass(d.rating)}">${d.rating.toFixed(1)} ★</span> · ${reviewWord(d.reviews)}`;
   return `
-    <div class="map-card" data-id="${d.id}">
+    <div class="map-card ${markerTier(d)}" data-id="${d.id}">
       <div class="map-card-img" style="${d.imgs[0] ? `background-image:url('${d.imgs[0]}')` : ''}"></div>
       <div>
         <h3>${escHtml(d.name)}</h3>
@@ -1224,7 +1282,7 @@ function startWordReel() {
   const last = words.length - 1;
   if (last < 1) return;
 
-  // Measure after the webfont resolves: Manrope loads async, and widths taken
+  // Measure after the webfont resolves: DM Sans loads async, and widths taken
   // against the fallback face would leave the reel the wrong size.
   const spin = () => {
     const step = words[0].getBoundingClientRect().height;
@@ -1236,18 +1294,19 @@ function startWordReel() {
     // re-centre on every step the way a self-sizing reel would.
     reel.style.height = step + 'px';
     reel.style.width = widest + 'px';
+    // Half the surplus over "home." goes back out through the margins, so the
+    // line is laid out at the width of the settled sentence from the first
+    // frame. Without it the sentence would sit off-centre for the whole spin
+    // and only snap into place once the reel landed.
+    reel.style.setProperty('--reel-bleed', ((widest - widths[last]) / 2) + 'px');
     reel.classList.add('reel--sized');
 
-    // Once it lands, close the box down to the final word so "home." sits
-    // tight in the sentence instead of floating in a slot cut for "single.".
-    const settle = (glide) => {
+    const settle = () => {
       track.style.transform = 'translateY(' + (-last * step) + 'px)';
-      if (glide) reel.style.transition = 'width 420ms cubic-bezier(0.22, 0.61, 0.36, 1)';
-      reel.style.width = widths[last] + 'px';
     };
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      settle(false);
+      settle();
       return;
     }
 
@@ -1265,7 +1324,7 @@ function startWordReel() {
 
     // Hand the final state back to inline styles so it survives the
     // animation being garbage-collected.
-    spinning.finished.then(() => settle(true)).catch(() => {});
+    spinning.finished.then(settle).catch(() => {});
   };
 
   if (document.fonts && document.fonts.ready) {
