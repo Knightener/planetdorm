@@ -73,38 +73,92 @@ input::placeholder, textarea::placeholder {
 /* ---------------- HERO ---------------- */
 .hero {
   width: 100%;
-  padding: 88px 48px 56px;
+  padding: 56px 48px;
   border-bottom: 1px solid var(--line);
   position: relative;
   overflow: hidden;
+  /* Image-forward hero: tall enough for the photograph to read, capped so
+     it never pushes the hall list entirely below the fold. */
+  min-height: clamp(360px, 46vh, 540px);
+  display: flex;
+  align-items: center;
 }
 
-.hero::before {
+/* Full-bleed campus photograph behind the hero copy. This is a real <img>
+   rather than a background-image so the browser can pick a srcset candidate
+   for the viewport and treat it as the LCP element. */
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Blurred flag fallback, carried over from the original hero. It lives on its
+   own layer rather than on .hero-media so the blur cannot bleed onto the
+   photograph or the scrim. Visible while the photo decodes, and whenever no
+   photo has been added yet. scale() hides the soft edge blur() leaves behind. */
+.hero-media::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url("../img/flag-800.png");
-  background-size: cover;
-  background-position: center;
-  filter: blur(6px);
-  opacity: 0.28;
-  transform: scale(1.05);
   z-index: 0;
+  background: url("../img/flag-800.png") center / cover no-repeat;
+  filter: blur(3px);
+  transform: scale(1.05);
+  opacity: 0.28;
 }
 
-:root[data-theme="dark"] .hero::before { opacity: 0.45; }
+:root[data-theme="dark"] .hero-media::before { opacity: 0.45; }
 
-.hero > * {
+.hero-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Biased below centre: campus shots put sky in the top third. */
+  object-position: center 58%;
+  /* Positioned so it paints above the absolutely-placed flag layer. */
   position: relative;
   z-index: 1;
 }
+
+/* A missing photo falls back to the flag above rather than a broken-image
+   glyph (data-error is set by the img onerror handler). */
+.hero-media img[data-error] { display: none; }
+
+/* Scrim. The hero copy is themed (var(--ink)), not hard-coded white, so the
+   wash runs toward --bg on both themes and the text keeps its contrast
+   whatever photograph gets dropped in. */
+.hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 85% 75% at 50% 50%, var(--bg) 25%, rgba(0, 0, 0, 0) 75%),
+    linear-gradient(to top, var(--bg) 0%, rgba(0, 0, 0, 0) 45%);
+  opacity: 0.93;
+}
+
+:root[data-theme="dark"] .hero-media::after { opacity: 0.88; }
+
+/* Every child except the photo layer sits above it. */
+.hero > *:not(.hero-media) {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* Hero copy is centred over the photograph. */
+.hero-main { text-align: center; }
 
 .hero h1 {
   font-weight: 800;
   font-size: clamp(2.4rem, 4.5vw, 3.8rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
-  margin: 0 0 14px;
+  margin: 0 auto 14px;
   max-width: 16em;
 }
 
@@ -113,73 +167,109 @@ input::placeholder, textarea::placeholder {
 .hero p {
   color: var(--dim);
   font-size: 1.02rem;
-  margin: 0 0 40px;
+  margin: 0 auto 40px;
   max-width: 34em;
 }
 
-/* Collapsed to the width of the text at rest; grows to fill the hero
-   on focus (like the dorm-page search). */
-.hero-search {
-  width: 400px;
-  max-width: 100%;
-  background: none;
-  border: none;
-  border-bottom: 2px solid var(--ink);
-  color: var(--ink);
-  padding: 10px 0;
-  font-size: 1.15rem;
-  font-weight: 500;
-  outline: none;
-  transition: width 0.35s ease, border-color 0.15s;
+/* Slot-machine reel on the hero subhead: the last word whirls through a
+   handful of candidates and decelerates onto "home". The visible reel is
+   aria-hidden and paired with an .sr-only "home", so assistive tech reads the
+   settled sentence rather than thirteen stray nouns. */
+.reel {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* Height and width are pinned in px by script.js once the webfont has
+     loaded; these are the pre-script fallbacks. */
+  height: 1.25em;
+  line-height: 1.25em;
 }
 
-.hero-search:focus { border-bottom-color: var(--red); }
-/* Stay expanded while typing and whenever text remains in the field
-   (.has-text is toggled in script.js). */
-.hero-search:focus, .hero-search.has-text { width: 100%; }
+.reel__track { display: block; }
 
-/* Animated stand-in for the native placeholder: script.js types the
-   phrases into it character by character; the caret is the ::after. */
-.hero-search-wrap { position: relative; }
+.reel__word {
+  display: block;
+  height: 1.25em;
+  line-height: 1.25em;
+  /* max-content keeps each word at its natural width so the script can
+     measure it — as plain blocks they would all inherit the reel width and
+     every measurement would come back identical. */
+  width: max-content;
+  white-space: nowrap;
+}
 
-.hero-search-hint {
+/* Once script.js has measured the words it locks the reel to the widest cell
+   and adds .reel--sized. The cells then fill that fixed box and centre their
+   text, so the sentence around the reel never reflows mid-spin. */
+.reel--sized .reel__word {
+  width: 100%;
+  text-align: center;
+}
+
+.reel__word--final { font-weight: 700; }
+
+.sr-only {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Search field, styled after resider.ca's hero combobox: a solid rounded
+   card floating over the photograph with a leading magnifier, a hairline
+   ring at rest and an accent ring on focus. Replaces the old underline
+   field, so the grow-on-focus transition is gone — the bar spans the full
+   hero width. */
+.hero-search-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.hero-search-icon {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
   color: var(--dim);
-  font-size: 1.15rem;
-  font-weight: 500;
   pointer-events: none;
 }
 
-.hero-search-hint::after {
-  content: '';
-  width: 2px;
-  height: 1.15em;
-  margin-left: 3px;
-  background: var(--dim);
-  animation: caret-blink 1.1s steps(1) infinite;
+.hero-search {
+  width: 100%;
+  /* Left padding clears the magnifier. */
+  padding: 14px 16px 14px 48px;
+  border: none;
+  border-radius: 12px;
+  /* Slightly translucent so the photograph reads through the card. */
+  background: var(--field); /* fallback where color-mix is unsupported */
+  background: color-mix(in srgb, var(--field) 94%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
-@keyframes caret-blink {
-  0%, 55%   { opacity: 1; }
-  56%, 100% { opacity: 0; }
-}
-
-.hero-search:focus ~ .hero-search-hint,
-.hero-search.has-text ~ .hero-search-hint {
-  visibility: hidden;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-search-hint::after { animation: none; }
-}
-
-@media (max-width: 768px) {
-  .hero-search { width: 100%; }
+.hero-search:focus {
+  background: var(--field);
+  box-shadow:
+    0 0 0 2px var(--red),
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* ---------------- SECTIONS ---------------- */
@@ -981,7 +1071,7 @@ body.map-view-active { overflow: hidden; }
 .maplibregl-ctrl-group button:hover { background: var(--hover); }
 
 @media (max-width: 768px) {
-  .hero { padding: 56px 20px 40px; }
+  .hero { padding: 40px 20px; min-height: clamp(300px, 42vh, 420px); }
   .section { padding: 0 20px; }
 
   .filter-label { width: 100%; }

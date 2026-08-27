@@ -1212,35 +1212,67 @@ function closeNav() {
   document.body.classList.remove('nav-open');
 }
 
-// Types the phrases into the hint overlay character by character (the
-// blinking caret is CSS, .hero-search-hint::after). The hint hides via CSS
-// while the field is focused or holds text, so the loop just idles then.
-function startPlaceholderTypewriter() {
-  const hint = document.getElementById('searchHint');
-  const input = document.getElementById('searchInput');
-  const phrases = ['Search halls...', 'Find the perfect dorm...', 'Search by area...', 'Find your next home...'];
-  // Reduced motion: leave the first phrase static, caret already unblinking.
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  // The HTML ships with the first phrase pre-rendered: hold it, then erase.
-  let i = 0, j = phrases[0].length, del = true;
-  function tick() {
-    if (document.activeElement === input || input.value) { setTimeout(tick, 500); return; }
-    let delay;
-    if (del) {
-      j--;
-      // Accelerate as more is erased so deletion reads as one smooth motion.
-      delay = Math.max(16, 42 - (phrases[i].length - j) * 2);
-      if (j === 0) { del = false; i = (i + 1) % phrases.length; delay = 600; }
-    } else {
-      j++;
-      delay = 65 + Math.random() * 25;
-      if (phrases[i][j - 1] === ' ') delay += 70; // brief beat between words
-      if (j === phrases[i].length) { del = true; delay = 2200; }
+// Slot-machine reel on the hero subhead. The track steps through every word
+// at a constant pixel pitch while the easing does the deceleration, so the
+// spin whirls fast and coasts onto the final word ("home").
+function startWordReel() {
+  const reel = document.getElementById('wordReel');
+  const track = document.getElementById('wordReelTrack');
+  if (!reel || !track) return;
+
+  const words = Array.from(track.children);
+  const last = words.length - 1;
+  if (last < 1) return;
+
+  // Measure after the webfont resolves: Manrope loads async, and widths taken
+  // against the fallback face would leave the reel the wrong size.
+  const spin = () => {
+    const step = words[0].getBoundingClientRect().height;
+    const widths = words.map(w => w.getBoundingClientRect().width);
+    const widest = Math.max.apply(null, widths);
+
+    // Hold the box at the widest word for the whole spin and let
+    // .reel--sized centre each cell inside it, so the sentence cannot
+    // re-centre on every step the way a self-sizing reel would.
+    reel.style.height = step + 'px';
+    reel.style.width = widest + 'px';
+    reel.classList.add('reel--sized');
+
+    // Once it lands, close the box down to the final word so "home." sits
+    // tight in the sentence instead of floating in a slot cut for "single.".
+    const settle = (glide) => {
+      track.style.transform = 'translateY(' + (-last * step) + 'px)';
+      if (glide) reel.style.transition = 'width 420ms cubic-bezier(0.22, 0.61, 0.36, 1)';
+      reel.style.width = widths[last] + 'px';
+    };
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      settle(false);
+      return;
     }
-    hint.textContent = phrases[i].slice(0, j);
-    setTimeout(tick, delay);
+
+    const spinning = track.animate(
+      [{ transform: 'translateY(0)' },
+       { transform: 'translateY(' + (-last * step) + 'px)' }],
+      {
+        duration: 2800,
+        delay: 350,
+        // Fast off the line, long coast into the stop.
+        easing: 'cubic-bezier(0.11, 0.78, 0.18, 1)',
+        fill: 'forwards'
+      }
+    );
+
+    // Hand the final state back to inline styles so it survives the
+    // animation being garbage-collected.
+    spinning.finished.then(() => settle(true)).catch(() => {});
+  };
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(spin);
+  } else {
+    spin();
   }
-  setTimeout(tick, 2200);
 }
 
 // Expose handlers for inline onclick attributes (ES module scope isn't global).
@@ -1260,8 +1292,5 @@ document.addEventListener('DOMContentLoaded', () => {
   showReviewsLoading();
   loadAllReviews();
   setupReviewsListener();
-  startPlaceholderTypewriter();
-  // Keep the hero search expanded while it holds text (see .has-text CSS).
-  const heroSearch = document.getElementById('searchInput');
-  heroSearch.addEventListener('input', () => heroSearch.classList.toggle('has-text', !!heroSearch.value));
+  startWordReel();
 });
