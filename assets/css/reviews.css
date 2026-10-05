@@ -5,7 +5,7 @@
 
 /* "Terp Classic" dorm reviews page — its own visual system per the design
    handoff (design_handoff_dorm_reviews/dorm-reviews-1a.html), independent of
-   the PlanetDorm v2 tokens in styles.css. Light-only by design. */
+   the PlazaDorm v2 tokens in styles.css. Light-only by design. */
 :root {
   --td-red: #e21833;
   --td-gold: #ffd200;
